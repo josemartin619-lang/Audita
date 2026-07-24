@@ -33,6 +33,7 @@ export interface IssueInvoiceInput {
   issueTime?: string;
   reteIcaBps?: number;   // ReteICA on the base (e.g. 69 bps = 0.69%). Default 0.
   reteIvaBps?: number;   // ReteIVA on the IVA amount (e.g. 1500 bps = 15%). Default 0.
+  vatBps?: number;       // VAT rate in bps for the client's country. Default 1500 (KSA 15%).
 }
 
 export interface IssuedInvoice {
@@ -68,7 +69,7 @@ export class InvoiceService {
   }
 
   async issue(input: IssueInvoiceInput): Promise<IssuedInvoice> {
-    const iva = applyRateBps(input.base, IVA_BPS);
+    const iva = applyRateBps(input.base, input.vatBps ?? IVA_BPS);
     const rete = 0n; // KSA has no buyer withholding on standard B2B sales
     const reteIca = input.reteIcaBps ? applyRateBps(input.base, input.reteIcaBps) : 0n;
     const reteIva = input.reteIvaBps ? applyRateBps(iva, input.reteIvaBps) : 0n;

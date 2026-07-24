@@ -108,6 +108,9 @@
   .linerow{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;margin-bottom:7px;align-items:center;}
   .linerow input,.linerow select{padding:7px 9px;font-size:13px;border:1px solid var(--line);border-radius:7px;}
   .x{background:none;border:0;color:var(--faint);cursor:pointer;font-size:16px;}
+  .ccard{border:1px solid var(--line);border-radius:11px;padding:16px 12px;text-align:center;cursor:pointer;background:#fff;transition:all .12s;}
+  .ccard:hover{border-color:var(--green);}
+  .ccard.on{border-color:var(--green);box-shadow:0 0 0 3px rgba(18,133,90,.16);}
 
   /* ---------- RTL ---------- */
   [dir="rtl"] #app.on{grid-template-columns:1fr 236px;}
@@ -152,8 +155,10 @@
 
 <script>
 let TOKEN=localStorage.getItem('aud_tok')||''; let USER=null; let LANG='en';
-let CLIENTS=[]; let CUR=null; let PAGE='dashboard'; let ACCOUNTS=[];
-const money=n=>'SAR '+Math.round(Number(n||0)).toLocaleString('en-US');
+let CLIENTS=[]; let CUR=null; let PAGE='dashboard'; let ACCOUNTS=[]; let GCCMAP={}; let CURCUR={code:'SAR',decimals:2};
+function money(n){const c=CURCUR||{code:'SAR',decimals:2};return c.code+' '+Number(n||0).toLocaleString('en-US',{minimumFractionDigits:c.decimals,maximumFractionDigits:c.decimals});}
+function ccOf(id){return GCCMAP[id]||GCCMAP.SA||{flag:'🏳️',name:id,nameAr:id,currency:{code:'SAR',decimals:2},vatBps:1500,eInvoicing:{regime:'',status:''}};}
+function setCur(){const c=CLIENTS.find(x=>x.clientId===CUR);CURCUR=ccOf(c?c.country:'SA').currency;}
 const $=id=>document.getElementById(id);
 
 const NAV=[
@@ -165,7 +170,8 @@ const NAV=[
   {id:'inventory',en:'Inventory',ar:'المخزون',ic:'▦'},
   {id:'banking',en:'Banking',ar:'البنوك',ic:'⑃'},
   {id:'reports',en:'Reports',ar:'التقارير',ic:'◪'},
-  {id:'tax',en:'Tax — ZATCA',ar:'الضريبة — ZATCA',ic:'٪'},
+  {id:'tax',en:'Tax / VAT',ar:'الضريبة',ic:'٪'},
+  {id:'compliance',en:'Compliance',ar:'الامتثال',ic:'⚖'},
   {id:'controls',en:'Controls',ar:'الرقابة',ic:'◈'},
   {id:'close',en:'Close',ar:'الإقفال',ic:'✓'},
 ];
@@ -199,14 +205,15 @@ async function boot(){
   $('login').classList.remove('on');$('app').classList.add('on');
   $('uName').textContent=USER.name;$('uRole').textContent=USER.role;
   CLIENTS=await api('/clients');
-  CUR=CUR||(CLIENTS[0]&&CLIENTS[0].clientId);
+  try{const g=await api('/gcc');GCCMAP={};g.forEach(x=>GCCMAP[x.id]=x);}catch(e){}
+  CUR=CUR||(CLIENTS[0]&&CLIENTS[0].clientId);setCur();
   ACCOUNTS=await api('/accounts');
   renderSidebar();go(CUR?'dashboard':'clients');
 }
 
 function renderSidebar(){
   const c=CLIENTS.find(x=>x.clientId===CUR);
-  $('clientBox').innerHTML=`<div class="lbl">${t('clients')}</div><div class="nm">${c?c.name:'—'} ▾</div>`;
+  $('clientBox').innerHTML=`<div class="lbl">${t('clients')}</div><div class="nm">${c?ccOf(c.country).flag+' '+c.name:'—'} ▾</div>`;
   $('navMain').innerHTML=NAV.map(n=>`<div class="nav ${PAGE===n.id?'on':''}" onclick="go('${n.id}')"><span class="ic">${n.ic}</span> ${navLabel(n)}</div>`).join('');
   document.querySelectorAll('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));
 }
@@ -219,7 +226,7 @@ async function route(){
     if(PAGE==='clients')return viewClients();
     if(!CUR){v.innerHTML='<div class="empty">No client selected</div>';return;}
     await ({dashboard:viewDashboard,journal:viewJournal,invoices:viewInvoices,bills:viewBills,contacts:viewContacts,
-      inventory:viewInventory,banking:viewBanking,reports:viewReports,tax:viewTax,controls:viewControls,close:viewClose}[PAGE]||viewDashboard)();
+      inventory:viewInventory,banking:viewBanking,reports:viewReports,tax:viewTax,compliance:viewCompliance,controls:viewControls,close:viewClose}[PAGE]||viewDashboard)();
   }catch(e){v.innerHTML=`<div class="empty">${e.message}</div>`;}
 }
 const cur=()=>CLIENTS.find(c=>c.clientId===CUR)||{name:CUR,clientId:CUR};
@@ -230,15 +237,53 @@ async function viewClients(){
   setHead('Firm','The firm’s clients','<button class="btn sm" onclick="newClient()">+ New client</button>');
   CLIENTS=await api('/clients');
   $('view').innerHTML=`<div class="panel"><table><thead><tr><th>Client</th><th>Risk</th><th class="num">Score</th><th class="num">Open findings</th><th class="num">Entries</th></tr></thead>
-    <tbody class="click">${CLIENTS.map(r=>`<tr onclick="openClient('${r.clientId}')"><td><b style="font-family:var(--disp)">${r.name}</b><div class="mono" style="font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.1em">${r.clientId}</div></td>
+    <tbody class="click">${CLIENTS.map(r=>`<tr onclick="openClient('${r.clientId}')"><td><b style="font-family:var(--disp)">${ccOf(r.country).flag} ${r.name}</b><div class="mono" style="font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.1em">${r.clientId} · ${ccOf(r.country).currency.code}</div></td>
       <td><span class="pill ${bandCls(r.risk.band)}">${bandTxt(r.risk.band)}</span></td><td class="num">${r.risk.score}</td><td class="num">${r.openFindings}</td><td class="num">${r.entryCount}</td></tr>`).join('')}</tbody></table></div>`;
 }
-function openClient(id){CUR=id;renderSidebar();go('dashboard');}
-async function newClient(){
-  const name=prompt('Client name');if(!name)return;
-  const clientId=name.toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,24);
-  const ofeNit=prompt('VAT / Tax ID')||'300000000000000';
-  try{await api('/clients',{method:'POST',body:JSON.stringify({clientId,name,ofeNit})});CLIENTS=await api('/clients');CUR=clientId;renderSidebar();toast('Client created');go('dashboard');}catch(e){toast(e.message);}
+function openClient(id){CUR=id;setCur();renderSidebar();go('dashboard');}
+let PICKCC='SA';
+function newClient(){
+  PAGE='clients';renderSidebar();setHead('Firm','New client','');
+  const cards=Object.values(GCCMAP).map(c=>`<div class="ccard" data-id="${c.id}" onclick="pickCC('${c.id}')">
+    <div style="font-size:30px;line-height:1">${c.flag}</div>
+    <div style="font-family:var(--disp);font-weight:600;margin-top:6px;font-size:14px">${LANG==='ar'?c.nameAr:c.name}</div>
+    <div class="mono muted" style="font-size:9.5px;margin-top:4px">${c.currency.code} · VAT ${(c.vatBps/100)||0}%</div></div>`).join('');
+  $('view').innerHTML=`<div class="panel"><div class="cap">Where is this client based? <span class="note">choose your country</span></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:18px 20px">${cards}</div>
+    <div class="form" style="border-top:1px solid var(--line2)">
+      <div class="field"><label>Client name</label><input id="nc_name" placeholder="Company name"></div>
+      <div class="field"><label>Tax ID / VAT no.</label><input id="nc_nit" placeholder="Optional"></div>
+      <div class="full row"><button class="btn" onclick="createClient()">Create client</button><button class="btn ghost" onclick="go('clients')">Cancel</button></div>
+    </div></div>`;
+  pickCC('SA');
+}
+function pickCC(id){PICKCC=id;document.querySelectorAll('.ccard').forEach(e=>e.classList.toggle('on',e.dataset.id===id));}
+async function createClient(){
+  const name=$('nc_name').value;if(!name)return toast('Name required');
+  const clientId=name.toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,24)+'-'+Math.random().toString(36).slice(2,5);
+  try{await api('/clients',{method:'POST',body:JSON.stringify({clientId,name,ofeNit:$('nc_nit').value||'300000000000000',country:PICKCC})});
+    CLIENTS=await api('/clients');CUR=clientId;setCur();renderSidebar();toast('Client created');go('dashboard');}catch(e){toast(e.message);}
+}
+async function viewCompliance(){
+  const c=cur();setHead(c.name,LANG==='ar'?'الامتثال':'Compliance','');
+  const d=await api(`/clients/${CUR}/compliance`);const co=d.country;
+  $('view').innerHTML=`
+    <div class="panel"><div class="cap">${co.flag} ${LANG==='ar'?co.nameAr:co.name} <span class="note">${co.currency.code} · ${co.currency.decimals}-decimal</span></div>
+      <div style="padding:13px 20px;color:var(--umber);font-size:13.5px;line-height:1.55">${co.note}</div></div>
+    <div class="kpis">
+      <div class="kpi"><div class="k">VAT rate</div><div class="v">${(co.vatBps/100)||0}<span style="font-size:16px">%</span></div></div>
+      <div class="kpi"><div class="k">Corporate tax</div><div class="v">${co.corpTaxPct}<span style="font-size:16px">%</span></div></div>
+      <div class="kpi"><div class="k">Zakat</div><div class="v">${co.zakatPct!=null?co.zakatPct+'%':'—'}</div></div>
+      <div class="kpi"><div class="k">E-invoicing</div><div class="v" style="font-size:14px;letter-spacing:0">${co.eInvoicing.status}</div></div>
+    </div>
+    <div class="panel"><div class="cap">Estimated liabilities <span class="note">from current books</span></div><table class="fin"><tbody>
+      <tr><td>VAT payable — ${(d.vat.rateBps/100)||0}%</td><td class="num">${money(d.vat.payable)}</td></tr>
+      <tr><td>Corporate tax — ${d.corpTax.pct}% of profit</td><td class="num">${money(d.corpTax.estimate)}</td></tr>
+      ${d.zakat?`<tr><td>Zakat — ${d.zakat.pct}% of equity (${money(d.zakat.base)})</td><td class="num">${money(d.zakat.amount)}</td></tr>`:'<tr><td class="muted">Zakat</td><td class="num muted">not applicable</td></tr>'}
+    </tbody></table></div>
+    <div class="panel"><div class="cap">E-invoicing regime</div><table><tbody>
+      <tr><td style="width:40%">Regime</td><td><b>${co.eInvoicing.regime}</b></td></tr>
+      <tr><td>Status</td><td>${co.eInvoicing.status}</td></tr></tbody></table></div>`;
 }
 
 async function viewDashboard(){
@@ -427,7 +472,7 @@ async function dl(path,name){try{const r=await fetch('/api'+path,{headers:{autho
 async function viewTax(){
   const c=cur();setHead(c.name,navLabel(NAV[8]),'');
   const tax=(await api(`/clients/${CUR}/reports`)).taxPosition;
-  $('view').innerHTML=`<div class="panel"><div class="cap">Tax position — ZATCA</div><table class="fin"><tbody>
+  $('view').innerHTML=`<div class="panel"><div class="cap">Tax position <span class="note">${ccOf(c.country).eInvoicing.regime}</span></div><table class="fin"><tbody>
     <tr><td>Output VAT (on sales)</td><td class="num">${money(tax.ivaGenerado)}</td></tr>
     <tr><td>Input VAT (on purchases)</td><td class="num">${money(tax.ivaDescontable)}</td></tr>
     <tr class="tot"><td>VAT payable</td><td class="num">${money(tax.ivaAPagar)}</td></tr>

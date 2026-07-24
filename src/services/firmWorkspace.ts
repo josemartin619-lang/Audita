@@ -23,6 +23,7 @@ export interface ClientMeta {
   clientId: string;
   name: string;
   ofeNit: string;
+  country?: string; // GCC country id (ISO-2): 'SA','AE','BH','OM','QA','KW'. Default 'SA'.
 }
 
 export interface ClientLedger {
@@ -46,6 +47,7 @@ export interface FirmOptions {
 export interface ConsoleRow {
   clientId: string;
   name: string;
+  country: string;
   risk: RiskScore;
   openFindings: number;
   entryCount: number;
@@ -92,6 +94,7 @@ export class FirmWorkspace {
       rows.push({
         clientId: c.meta.clientId,
         name: c.meta.name,
+        country: c.meta.country ?? 'SA',
         risk: scoreRisk({ findings, entries }),
         openFindings: findings.filter(isOpen).length,
         entryCount: entries.length,

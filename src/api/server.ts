@@ -34,6 +34,7 @@ import {
 } from './auth.js';
 import { Collection } from '../persistence/store.js';
 import type { ClientMeta } from '../services/firmWorkspace.js';
+import { GCC, gccCountry } from '../domain/gcc.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -75,20 +76,24 @@ export function createApp(firm: FirmWorkspace, users: UserStore, clientStore?: C
     res.json(CHART_OF_ACCOUNTS.map((a) => ({ code: a.code, name: a.name, nameAr: a.nameAr, type: a.type, normal: a.normal })));
   });
 
+  // GCC country catalogue — drives the "choose your country" picker and per-country config.
+  app.get('/api/gcc', (_req, res) => res.json(GCC));
+
   // --- Firm console: all clients ranked by risk ---
   app.get('/api/clients', async (_req, res) => {
     res.json(await firm.console());
   });
 
   app.post('/api/clients', requireRole('accountant'), (req, res) => {
-    const { clientId, name, ofeNit } = req.body ?? {};
+    const { clientId, name, ofeNit, country } = req.body ?? {};
     if (!clientId || !name || !ofeNit) {
-      return res.status(400).json({ error: 'clientId, name y ofeNit son obligatorios.' });
+      return res.status(400).json({ error: 'clientId, name and tax ID are required.' });
     }
     try {
-      firm.addClient({ clientId, name, ofeNit });
-      clientStore?.set(String(clientId), { clientId, name, ofeNit });
-      res.status(201).json({ clientId, name, ofeNit });
+      const meta: ClientMeta = { clientId, name, ofeNit, country: gccCountry(country).id };
+      firm.addClient(meta);
+      clientStore?.set(String(clientId), meta);
+      res.status(201).json(meta);
     } catch (e) {
       res.status(409).json({ error: (e as Error).message });
     }
@@ -132,8 +137,9 @@ export function createApp(firm: FirmWorkspace, users: UserStore, clientStore?: C
     if (!client || !base) return res.status(400).json({ error: 'client y base son obligatorios.' });
     try {
       const inv = await c.invoices.issue({
-        client, acquirerId: acquirerId ?? '222222', date, concept: concept ?? 'Venta',
+        client, acquirerId: acquirerId ?? '222222', date, concept: concept ?? 'Sale',
         base: pesos(Number(base)), ofeNit: c.meta.ofeNit,
+        vatBps: gccCountry(c.meta.country).vatBps,
         reteIcaBps: Number(reteIcaBps) || 0, reteIvaBps: Number(reteIvaBps) || 0,
       });
       // open a receivable so the customer's balance is tracked and ages
@@ -502,6 +508,23 @@ export function createApp(firm: FirmWorkspace, users: UserStore, clientStore?: C
     }
   });
 
+  // ---- GCC compliance profile (country tax posture + Zakat / corporate-tax estimates) ----
+  app.get('/api/clients/:id/compliance', async (req, res) => {
+    const c = withClient(req, res); if (!c) return;
+    const country = gccCountry(c.meta.country);
+    const rep = serializeReports(await c.repo.listEntries());
+    const equity = rep.balanceSheet.patrimonio;
+    const profit = rep.incomeStatement.utilidad;
+    const zakatBase = Math.max(0, equity);
+    res.json({
+      country,
+      vat: { rateBps: country.vatBps, payable: rep.taxPosition.ivaAPagar },
+      corpTax: { pct: country.corpTaxPct, profit, estimate: Math.max(0, Math.round(profit * country.corpTaxPct / 100)) },
+      zakat: country.zakatPct === null ? null
+        : { pct: country.zakatPct, base: zakatBase, amount: Math.round(zakatBase * country.zakatPct / 100) },
+    });
+  });
+
   // ---- Financial statements as NIIF PDF (integrity-stamped) ----
   app.get('/api/clients/:id/statements.pdf', async (req, res) => {
     const c = withClient(req, res); if (!c) return;
@@ -635,7 +658,7 @@ export function createApp(firm: FirmWorkspace, users: UserStore, clientStore?: C
     const baseM = pesos(Number(base) || 0);
     if (!vendorName || baseM <= 0n) return res.status(400).json({ error: 'vendorName y base (>0) requeridos.' });
     const acct = String(expenseAccount || '6000');
-    const iva = applyRateBps(baseM, 1500); // KSA VAT 15%
+    const iva = applyRateBps(baseM, gccCountry(c.meta.country).vatBps); // VAT at the client's country rate
     const rete = 0n; // no domestic buyer withholding in KSA (applyRete kept for API compat)
     void applyRete;
     const payable = baseM + iva - rete;
