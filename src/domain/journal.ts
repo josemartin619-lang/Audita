@@ -4,8 +4,7 @@
  */
 
 import { Money, ZERO, abs } from './money.js';
-import { Jurisdiction } from './jurisdiction.js';
-import { COLOMBIA } from './jurisdictions/colombia.js';
+import { accountExists } from './accounts.js';
 
 export interface JournalLine {
   accountCode: string;
@@ -67,19 +66,18 @@ export class UnbalancedEntryError extends Error {
 
 /**
  * Validate and normalize a draft into JournalLines. Throws if:
- *  - a line references an account unknown to the active jurisdiction's chart,
+ *  - a line references an unknown account,
  *  - a line has both debit and credit, or negative values,
  *  - the entry does not balance to zero.
  */
-export function normalizeLines(draft: DraftLine[], jurisdiction: Jurisdiction = COLOMBIA): JournalLine[] {
+export function normalizeLines(draft: DraftLine[]): JournalLine[] {
   if (draft.length < 2) {
     throw new Error('Un asiento de partida doble requiere al menos 2 líneas.');
   }
-  const knownCodes = new Set(jurisdiction.chart.map((a) => a.code));
   const lines: JournalLine[] = draft.map((l) => {
     const debit = l.debit ?? ZERO;
     const credit = l.credit ?? ZERO;
-    if (!knownCodes.has(l.accountCode)) {
+    if (!accountExists(l.accountCode)) {
       throw new Error(`Cuenta desconocida: ${l.accountCode}`);
     }
     if (debit < ZERO || credit < ZERO) {

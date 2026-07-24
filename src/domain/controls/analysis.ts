@@ -79,10 +79,10 @@ export function velocityAnalysis(
     if (count > maxPerDay) {
       const [source, date] = key.split('|');
       hits.push({
-        rule: 'Velocidad de registro inusual',
+        rule: 'Unusual posting velocity',
         severity: 'medium',
         entryId: '—',
-        message: `${count} asientos de "${source}" el mismo día (${date}). Posible agrupamiento o error de automatización.`,
+        message: `${count} entries from "${source}" on the same day (${date}). Possible bunching or automation error.`,
       });
     }
   }

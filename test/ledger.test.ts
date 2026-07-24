@@ -24,7 +24,7 @@ describe('ledger core — invariants', () => {
     await expect(
       ledger.post({
         date: '2026-06-10', memo: 'bad', source: 'x', user: 't',
-        lines: [{ accountCode: '111005', debit: pesos(100) }, { accountCode: '413505', credit: pesos(90) }],
+        lines: [{ accountCode: '1010', debit: pesos(100) }, { accountCode: '4000', credit: pesos(90) }],
       }),
     ).rejects.toBeInstanceOf(UnbalancedEntryError);
     expect((await repo.listEntries()).length).toBe(0);
@@ -72,7 +72,7 @@ describe('ledger core — invariants', () => {
     const e = {
       id: 'AS-0001', date: '2026-06-01', memo: 'm', source: 's', user: 'u',
       reversed: false, recordedAt: fixedClock(),
-      lines: [{ accountCode: '111005', debit: pesos(10), credit: 0n }, { accountCode: '310505', debit: 0n, credit: pesos(10) }],
+      lines: [{ accountCode: '1010', debit: pesos(10), credit: 0n }, { accountCode: '3000', debit: 0n, credit: pesos(10) }],
     };
     await repo.saveEntry(e);
     await expect(repo.saveEntry(e)).rejects.toThrow(/inmutable/);
@@ -83,7 +83,7 @@ describe('ledger core — invariants', () => {
     const ledger = new LedgerService(repo, { user: 't', approvalThreshold: pesos(1_000_000), clock: fixedClock });
     const { entry } = await ledger.post({
       date: '2026-06-10', memo: 'venta', source: 'ACME', user: 't',
-      lines: [{ accountCode: '111005', debit: pesos(500) }, { accountCode: '413505', credit: pesos(500) }],
+      lines: [{ accountCode: '1010', debit: pesos(500) }, { accountCode: '4000', credit: pesos(500) }],
     });
     await ledger.reverse(entry.id, 'error de digitación');
     const entries = await repo.listEntries();
@@ -93,6 +93,6 @@ describe('ledger core — invariants', () => {
     // net effect on the books is zero after reversal
     const tb = trialBalance(entries);
     expect(tb.balanced).toBe(true);
-    expect(rawBalances(entries).get('413505')).toBe(0n);
+    expect(rawBalances(entries).get('4000')).toBe(0n);
   });
 });

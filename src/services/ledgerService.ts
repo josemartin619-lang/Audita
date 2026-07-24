@@ -22,8 +22,6 @@ import { AuditTrail } from '../domain/auditTrail.js';
 import { Finding, FindingStatus } from '../domain/findings.js';
 import { runPerEntryRules, RuleHit } from '../domain/controls/rules.js';
 import { Repository } from '../persistence/repository.js';
-import { Jurisdiction } from '../domain/jurisdiction.js';
-import { COLOMBIA } from '../domain/jurisdictions/colombia.js';
 
 export interface LedgerOptions {
   user: string;
@@ -32,8 +30,6 @@ export interface LedgerOptions {
   relatedParties?: readonly string[];
   /** Injectable clock for deterministic tests. */
   clock?: () => string;
-  /** Defaults to Colombia — the original, fully-tested jurisdiction. */
-  jurisdiction?: Jurisdiction;
 }
 
 export interface PostResult {
@@ -46,11 +42,16 @@ export class LedgerService {
   private entrySeq = 0;
   private findSeq = 0;
   private readonly clock: () => string;
-  private readonly jurisdiction: Jurisdiction;
+  /** Closed periods (YYYY-MM). No entry dated in one may be posted. */
+  private readonly locked = new Set<string>();
+
+  lockPeriod(period: string): void { this.locked.add(period); }
+  unlockPeriod(period: string): void { this.locked.delete(period); }
+  isPeriodLocked(period: string): boolean { return this.locked.has(period); }
+  lockedPeriods(): string[] { return [...this.locked]; }
 
   constructor(private readonly repo: Repository, private readonly opts: LedgerOptions) {
     this.clock = opts.clock ?? (() => new Date().toISOString());
-    this.jurisdiction = opts.jurisdiction ?? COLOMBIA;
   }
 
   auditTrail(): AuditTrail {
@@ -66,9 +67,13 @@ export class LedgerService {
     return `H-${String(this.findSeq).padStart(3, '0')}`;
   }
 
-  /** Post a draft. Throws (nothing persisted) if it does not balance. */
+  /** Post a draft. Throws (nothing persisted) if it does not balance or the period is locked. */
   async post(draft: DraftEntry): Promise<PostResult> {
-    const lines = normalizeLines(draft.lines, this.jurisdiction); // throws UnbalancedEntryError / unknown-account
+    const period = draft.date.slice(0, 7);
+    if (this.locked.has(period)) {
+      throw new Error(`Periodo ${period} cerrado: no se pueden registrar asientos en un periodo bloqueado.`);
+    }
+    const lines = normalizeLines(draft.lines); // throws UnbalancedEntryError
     const ts = this.clock();
     const entry: JournalEntry = {
       id: this.nextEntryId(),
@@ -107,7 +112,6 @@ export class LedgerService {
       priorEntries,
       approvalThreshold: this.opts.approvalThreshold,
       relatedParties: this.opts.relatedParties,
-      jurisdiction: this.jurisdiction,
     });
     const findings: Finding[] = [];
     for (const hit of hits) {

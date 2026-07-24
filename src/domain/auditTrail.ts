@@ -14,7 +14,9 @@ export type AuditAction =
   | 'RAISE_FINDING'
   | 'FINDING_STATUS'
   | 'WORKING_PAPER'
-  | 'PERIOD_CLOSE';
+  | 'PERIOD_CLOSE'
+  | 'ENTRY_REVIEWED'
+  | 'CHECKLIST_SIGNOFF';
 
 export interface AuditEvent {
   seq: number;

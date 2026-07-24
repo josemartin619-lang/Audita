@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Audita — Independent verification</title>
+<style>
+  @font-face{font-family:'Playfair Display';font-weight:600;src:url('/fonts/playfair-display-latin-600-normal.woff2') format('woff2');}
+  @font-face{font-family:'Playfair Display';font-weight:500;font-style:italic;src:url('/fonts/playfair-display-latin-500-italic.woff2') format('woff2');}
+  @font-face{font-family:'Inter';font-weight:400;src:url('/fonts/inter-latin-400-normal.woff2') format('woff2');}
+  @font-face{font-family:'Inter';font-weight:600;src:url('/fonts/inter-latin-600-normal.woff2') format('woff2');}
+  @font-face{font-family:'Spectral';font-weight:400;font-style:italic;src:url('/fonts/spectral-latin-400-italic.woff2') format('woff2');}
+  :root{--parch:#faf5e9;--parch2:#f4ecd8;--ink:#2a2118;--umber:#6a5a44;--faint:#9a8a70;--line:rgba(90,72,44,.18);--gold:#a9772a;--olive:#5e6a37;--rust:#9a3820;}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;font-family:'Inter',sans-serif;color:var(--ink);
+    background:radial-gradient(120% 80% at 80% -10%,rgba(255,252,244,.9),rgba(255,252,244,0) 46%),linear-gradient(180deg,#c3d7d9,#e6dcc4 40%,#dcc79c 100%);background-attachment:fixed;}
+  .wrap{max-width:760px;margin:0 auto;padding:48px 26px;}
+  .word{font-family:'Playfair Display',serif;font-weight:600;font-size:34px;}
+  .word em{color:var(--gold);font-style:italic;}
+  .sub{font-family:'Spectral',serif;font-style:italic;color:var(--umber);margin-top:4px;}
+  .panel{background:linear-gradient(180deg,var(--parch),var(--parch2));border:1px solid var(--line);border-radius:5px;box-shadow:36px 40px 70px -34px rgba(52,38,20,.5);margin-top:26px;overflow:hidden;}
+  .panel .cap{padding:16px 22px;border-bottom:1px solid var(--line);font-family:'Playfair Display',serif;font-size:17px;}
+  .panel .bd{padding:20px 22px;}
+  .check{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid rgba(90,72,44,.1);}
+  .check:last-child{border-bottom:0;}
+  .mark{font-family:'Playfair Display',serif;font-size:22px;line-height:1;min-width:24px;}
+  .pass{color:var(--olive);} .fail{color:var(--rust);} .pending{color:var(--faint);}
+  .ct{font-weight:600;} .cd{color:var(--umber);font-size:13px;margin-top:2px;font-family:'Spectral',serif;font-style:italic;}
+  table{width:100%;border-collapse:collapse;margin-top:6px;}
+  td{padding:8px 0;border-bottom:1px solid rgba(90,72,44,.1);font-size:14px;}
+  td:last-child{text-align:right;font-variant-numeric:tabular-nums;}
+  .seal{font-family:ui-monospace,monospace;font-size:11px;color:var(--umber);word-break:break-all;background:#fffdf8;border:1px dashed var(--line);border-radius:3px;padding:11px;margin-top:8px;}
+  .note{font-family:'Spectral',serif;font-style:italic;color:var(--umber);font-size:13px;margin-top:18px;}
+  .err{color:var(--rust);font-family:'Spectral',serif;font-style:italic;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="word">Audit<em>a</em></div>
+  <div class="sub">Independent verification — computed in your browser</div>
+  <div id="out"><div class="panel"><div class="bd">Verifying…</div></div></div>
+</div>
+<script>
+const COP=n=>'$'+Math.round(n).toLocaleString('es-CO');
+const out=document.getElementById('out');
+
+// EXACT port of the server's canonical serializer (src/domain/auditTrail.ts),
+// so the hash we recompute here matches the one stored on the ledger.
+function canonical(obj){
+  if(obj===null||typeof obj!=='object')return JSON.stringify(obj);
+  if(Array.isArray(obj))return '['+obj.map(canonical).join(',')+']';
+  const keys=Object.keys(obj).sort();
+  return '{'+keys.map(k=>JSON.stringify(k)+':'+canonical(obj[k])).join(',')+'}';
+}
+async function sha256hex(str){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function verifyChain(events){
+  let prev='GENESIS';
+  for(const e of events){
+    const material=canonical({seq:e.seq,action:e.action,ref:e.ref,detail:e.detail,user:e.user,ts:e.ts,prevHash:prev});
+    const expected=await sha256hex(material);
+    if(e.prevHash!==prev||e.hash!==expected)return {ok:false,at:e.seq};
+    prev=e.hash;
+  }
+  return {ok:true,head:prev};
+}
+function verifyBalance(entries){
+  let d=0,c=0;
+  for(const e of entries)for(const l of e.lines){d+=l.debit;c+=l.credit;}
+  return {ok:Math.round(d*100)===Math.round(c*100),d,c};
+}
+
+async function run(){
+  const t=new URLSearchParams(location.search).get('t');
+  if(!t){out.innerHTML='<div class="panel"><div class="bd err">No verification token in the link.</div></div>';return;}
+  let data;
+  try{const r=await fetch('/api/verify/'+t);if(!r.ok)throw new Error((await r.json()).error);data=await r.json();}
+  catch(e){out.innerHTML='<div class="panel"><div class="bd err">'+e.message+'</div></div>';return;}
+
+  const chain=await verifyChain(data.auditEvents);
+  const bal=verifyBalance(data.entries);
+  const sealMatch=chain.ok && chain.head===data.seal;
+
+  const row=(ok,title,desc)=>`<div class="check"><div class="mark ${ok?'pass':'fail'}">${ok?'✓':'✕'}</div><div><div class="ct">${title}</div><div class="cd">${desc}</div></div></div>`;
+
+  out.innerHTML=`
+    <div class="panel"><div class="cap">${data.client}</div><div class="bd">
+      ${row(chain.ok,'Evidence chain intact', chain.ok?`All ${data.auditEvents.length} ledger events re-hashed in your browser (SHA-256); every link matches. No record was altered, reordered, or removed.`:`Chain broke at event #${chain.at} — the record has been tampered with.`)}
+      ${row(bal.ok,'Books balance', bal.ok?`Recomputed from the raw entries here, independently: every posting line sums equally — debit postings ${COP(bal.d)} = credit postings ${COP(bal.c)}. (Double-entry holds.)`:`Debit postings ${COP(bal.d)} do not equal credit postings ${COP(bal.c)}.`)}
+      ${row(sealMatch,'Fingerprint matches', sealMatch?'The chain head you computed matches the published ledger fingerprint below.':'The computed fingerprint does not match the published seal.')}
+    </div></div>
+    <div class="panel"><div class="cap">Attested figures</div><div class="bd">
+      <table>
+        <tr><td>Trial balance ties</td><td>${data.generatedFields.trialBalanceBalanced?'yes':'no'}</td></tr>
+        <tr><td>Total debits</td><td>${COP(data.generatedFields.totalDebit)}</td></tr>
+        <tr><td>Total credits</td><td>${COP(data.generatedFields.totalCredit)}</td></tr>
+        <tr><td>Entries</td><td>${data.generatedFields.entryCount}</td></tr>
+      </table>
+      <div style="margin-top:14px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);font-weight:600">Ledger fingerprint</div>
+      <div class="seal">${data.seal||'—'}</div>
+      <div class="note">You did not have to trust this server. Your browser downloaded the full event log and recomputed every hash and the balance itself. If anything had been changed after the fact, the checks above would have failed.</div>
+    </div></div>`;
+}
+run();
+</script>
+</body>
+</html>

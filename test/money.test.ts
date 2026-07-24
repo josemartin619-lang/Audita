@@ -20,10 +20,10 @@ describe('money — exact integer arithmetic', () => {
     expect(applyRateBps(3n, 1900)).toBe(1n);
   });
 
-  it('formatCOP renders Colombian thousands separators', () => {
-    expect(formatCOP(pesos(60_000_000))).toBe('$60.000.000');
-    expect(formatCOP(pesos(1_234.5), true)).toBe('$1.234,50');
-    expect(formatCOP(-pesos(500))).toBe('-$500');
+  it('formatCOP renders Saudi Riyal with thousands separators', () => {
+    expect(formatCOP(pesos(60_000_000))).toBe('SAR 60,000,000');
+    expect(formatCOP(pesos(1_234.5), true)).toBe('SAR 1,234.50');
+    expect(formatCOP(-pesos(500))).toBe('-SAR 500');
   });
 
   it('addAll is associative and exact over many values', () => {

@@ -1,0 +1,34 @@
+# Local/prod-like stack: the app plus a Postgres instance.
+#
+# NOTE: the app currently boots with seeded in-memory data (multi-tenant
+# Postgres persistence is the next data-layer task). The db service is here so
+# the verified pg layer (`npm run test:pg`) and the schema can run against a real
+# database, and so persistence is a drop-in once wired.
+#
+# Provide a strong secret:  AUDITA_JWT_SECRET=$(openssl rand -hex 32) docker compose up
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      AUDITA_JWT_SECRET: ${AUDITA_JWT_SECRET:?set AUDITA_JWT_SECRET to a strong random value}
+      DATABASE_URL: postgres://audita:audita@db:5432/audita
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: audita
+      POSTGRES_PASSWORD: audita
+      POSTGRES_DB: audita
+    volumes:
+      - audita-db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  audita-db:

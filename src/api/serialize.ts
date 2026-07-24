@@ -6,7 +6,7 @@
 
 import { toPesosNumber } from '../domain/money.js';
 import { JournalEntry } from '../domain/journal.js';
-import { trialBalance, incomeStatement, balanceSheet } from '../domain/reports.js';
+import { trialBalance, incomeStatement, balanceSheet, cashFlowStatement } from '../domain/reports.js';
 import { taxPosition } from '../domain/taxReport.js';
 
 export function serializeEntry(e: JournalEntry) {
@@ -32,7 +32,17 @@ export function serializeReports(entries: readonly JournalEntry[]) {
   const is = incomeStatement(entries);
   const bs = balanceSheet(entries);
   const tax = taxPosition(entries);
+  const cf = cashFlowStatement(entries);
   return {
+    cashFlow: {
+      operating: toPesosNumber(cf.operating),
+      investing: toPesosNumber(cf.investing),
+      financing: toPesosNumber(cf.financing),
+      netChange: toPesosNumber(cf.netChange),
+      openingCash: toPesosNumber(cf.openingCash),
+      closingCash: toPesosNumber(cf.closingCash),
+      reconciles: cf.reconciles,
+    },
     trialBalance: {
       balanced: tb.balanced,
       totalDebit: toPesosNumber(tb.totalDebit),
@@ -61,7 +71,8 @@ export function serializeReports(entries: readonly JournalEntry[]) {
       ivaDescontable: toPesosNumber(tax.ivaDescontable),
       ivaAPagar: toPesosNumber(tax.ivaAPagar),
       saldoAFavor: toPesosNumber(tax.saldoAFavor),
-      retencionPracticada: toPesosNumber(tax.retencionPracticada),
+      retencionesAFavor: toPesosNumber(tax.retencionesAFavor),
+      retencionesPorPagar: toPesosNumber(tax.retencionesPorPagar),
     },
   };
 }

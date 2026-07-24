@@ -5,159 +5,198 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Audita</title>
 <style>
-  /* Self-contained: fonts served locally from /fonts, no external CDN. */
-  @font-face{font-family:'Playfair Display';font-weight:500;font-style:normal;font-display:swap;src:url('/fonts/playfair-display-latin-500-normal.woff2') format('woff2');}
-  @font-face{font-family:'Playfair Display';font-weight:600;font-style:normal;font-display:swap;src:url('/fonts/playfair-display-latin-600-normal.woff2') format('woff2');}
-  @font-face{font-family:'Playfair Display';font-weight:500;font-style:italic;font-display:swap;src:url('/fonts/playfair-display-latin-500-italic.woff2') format('woff2');}
+  /* Local fonts, no CDN. Display: Space Grotesk · Text: Inter · Figures/labels: JetBrains Mono · Arabic: Cairo */
   @font-face{font-family:'Inter';font-weight:400;font-style:normal;font-display:swap;src:url('/fonts/inter-latin-400-normal.woff2') format('woff2');}
   @font-face{font-family:'Inter';font-weight:500;font-style:normal;font-display:swap;src:url('/fonts/inter-latin-500-normal.woff2') format('woff2');}
   @font-face{font-family:'Inter';font-weight:600;font-style:normal;font-display:swap;src:url('/fonts/inter-latin-600-normal.woff2') format('woff2');}
-  @font-face{font-family:'Spectral';font-weight:400;font-style:normal;font-display:swap;src:url('/fonts/spectral-latin-400-normal.woff2') format('woff2');}
-  @font-face{font-family:'Spectral';font-weight:400;font-style:italic;font-display:swap;src:url('/fonts/spectral-latin-400-italic.woff2') format('woff2');}
-  @font-face{font-family:'Spectral';font-weight:500;font-style:normal;font-display:swap;src:url('/fonts/spectral-latin-500-normal.woff2') format('woff2');}
+  @font-face{font-family:'Space Grotesk';font-weight:500;font-style:normal;font-display:swap;src:url('/fonts/space-grotesk-latin-500-normal.woff2') format('woff2');}
+  @font-face{font-family:'Space Grotesk';font-weight:600;font-style:normal;font-display:swap;src:url('/fonts/space-grotesk-latin-600-normal.woff2') format('woff2');}
+  @font-face{font-family:'Space Grotesk';font-weight:700;font-style:normal;font-display:swap;src:url('/fonts/space-grotesk-latin-700-normal.woff2') format('woff2');}
+  @font-face{font-family:'JetBrains Mono';font-weight:400;font-style:normal;font-display:swap;src:url('/fonts/jetbrains-mono-latin-400-normal.woff2') format('woff2');}
+  @font-face{font-family:'JetBrains Mono';font-weight:500;font-style:normal;font-display:swap;src:url('/fonts/jetbrains-mono-latin-500-normal.woff2') format('woff2');}
+  @font-face{font-family:'Cairo';font-weight:400;font-style:normal;font-display:swap;src:url('/fonts/cairo-arabic-400-normal.woff2') format('woff2');}
+  @font-face{font-family:'Cairo';font-weight:600;font-style:normal;font-display:swap;src:url('/fonts/cairo-arabic-600-normal.woff2') format('woff2');}
+
   :root{
-    /* Dalí desert-and-sky palette */
-    --sky:#c3d7d9; --haze:#e6dcc4; --sand:#dcc79c; --dune:#cbab73;
-    --parch:#faf5e9; --parch2:#f4ecd8;
-    --ink:#2a2118; --umber:#6a5a44; --faint:#9a8a70;
-    --gold:#a9772a; --gold-soft:#c79a4e;
-    --cerulean:#356b83;
-    --rust:#9a3820; --ochre:#a9741b; --olive:#5e6a37;
-    --line:rgba(90,72,44,.18); --line2:rgba(90,72,44,.10);
-    --shadow:36px 40px 70px -34px rgba(52,38,20,.55);
+    --bg:#f2f2ee; --ink:#181a1f; --umber:#5c5f66; --faint:#9a9ba1;
+    --gold:#12855a; --gold-soft:#1eb668;        /* accent green (deep) + positive green (bright) */
+    --cerulean:#3f6076;
+    --rust:#c0392b; --ochre:#bd8420; --olive:#12855a;
+    --line:#e2e2da; --line2:#ececE4;
+    --parch:#fbfbf8; --parch2:#fbfbf8;
+    --shadow:0 1px 2px rgba(20,18,12,.03), 0 20px 44px -28px rgba(20,18,12,.20);
+    --radius:15px;
+    --disp:'Space Grotesk','Inter',sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
   }
   *{box-sizing:border-box}
   html,body{margin:0}
   body{
-    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
-    color:var(--ink); font-size:14px; line-height:1.5;
-    min-height:100vh;
-    background:
-      radial-gradient(120% 80% at 78% -10%, rgba(255,252,244,.9), rgba(255,252,244,0) 46%),
-      linear-gradient(180deg, var(--sky) 0%, var(--haze) 34%, var(--sand) 68%, var(--dune) 100%);
-    background-attachment:fixed;
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    color:var(--ink); font-size:14px; line-height:1.5; letter-spacing:-.006em;
+    min-height:100vh; background:var(--bg);
+    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
   }
-  /* faint film-grain so the surface reads like aged paper, not flat CSS */
-  body::before{
-    content:""; position:fixed; inset:0; pointer-events:none; opacity:.05; z-index:0;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-  /* a long horizon line, Dalí's vast empty plain */
-  body::after{
-    content:""; position:fixed; left:0; right:0; top:62%; height:1px; z-index:0;
-    background:linear-gradient(90deg,transparent, rgba(90,72,44,.28) 20%, rgba(90,72,44,.28) 80%, transparent);
-  }
-  .stage{position:relative; z-index:1; max-width:1120px; margin:0 auto; padding:34px 30px 90px;}
+  .stage{position:relative; z-index:1; max-width:1080px; margin:0 auto; padding:34px 32px 120px;}
+  .clock{display:none;}
+  .num,td.num,th.num,.score,.ref,.emono,.cufe,.verifybox,.cid,.note{font-family:var(--mono); font-variant-numeric:tabular-nums;}
 
-  /* faint melting-clock watermark, upper right */
-  .clock{position:absolute; top:8px; right:-6px; width:230px; height:190px; opacity:.11; z-index:0; pointer-events:none;}
+  /* ---- Masthead ---- */
+  .mast{display:flex; align-items:center; justify-content:space-between; padding:2px 0 24px; border-bottom:1px solid var(--line); position:relative;}
+  .word{font-family:var(--disp); font-weight:700; font-size:27px; letter-spacing:-.03em; line-height:1; color:var(--ink);}
+  .word em{font-style:normal; color:var(--gold);}
+  .tag{font-family:var(--mono); font-weight:400; color:var(--faint); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; margin-top:9px;}
+  .lang{display:inline-flex; align-items:center; border:1px solid var(--line); border-radius:999px; padding:2px; background:var(--parch);}
+  .lang button{background:none; border:0; cursor:pointer; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); padding:5px 13px; font-weight:600; border-radius:999px; font-family:var(--mono); line-height:1.4;}
+  .lang button.on{color:var(--parch); background:var(--ink);}
+  .lang .sep{display:none;}
+  .mastright{display:flex; flex-direction:column; align-items:flex-end; gap:11px;}
+  .userchip{display:flex; align-items:center; gap:11px; font-size:12.5px; color:var(--umber);}
+  .userchip .who{font-family:var(--disp); font-weight:500; font-size:13.5px; color:var(--ink);}
+  .userchip .role{font-family:var(--mono); font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); background:none; border:1px solid var(--gold); padding:2px 8px; border-radius:999px; font-weight:500;}
+  .userchip a{font-family:var(--mono); color:var(--faint); cursor:pointer; text-decoration:none; font-size:10px; letter-spacing:.14em; text-transform:uppercase;}
+  .userchip a:hover{color:var(--rust);}
 
-  /* ---- Masthead (no bar, no icons) ---- */
-  .mast{display:flex; align-items:flex-end; justify-content:space-between; padding-bottom:16px; border-bottom:1px solid var(--line); position:relative;}
-  .word{font-family:'Playfair Display',serif; font-weight:600; font-size:44px; letter-spacing:.5px; line-height:.9; color:var(--ink); position:relative;}
-  .word em{font-style:italic; color:var(--gold);}
-  .word::after{ /* long soft cast shadow under the wordmark */
-    content:"Audita"; position:absolute; left:6px; top:8px; z-index:-1;
-    color:rgba(52,38,20,.16); font-style:normal; filter:blur(1px);
-  }
-  .tag{font-family:'Spectral',serif; font-style:italic; color:var(--umber); font-size:14.5px; margin-top:8px; letter-spacing:.2px;}
-  .lang{display:flex; align-items:center; gap:2px; font-family:'Inter'; }
-  .lang button{background:none; border:0; cursor:pointer; font-size:12.5px; letter-spacing:.14em; color:var(--faint); padding:6px 8px; font-weight:600;}
-  .lang button.on{color:var(--ink); border-bottom:1.5px solid var(--gold);}
-  .lang .sep{color:var(--line); }
+  /* ---- Login ---- */
+  .login{max-width:400px; margin:13vh auto 0;}
+  .login .word2{font-family:var(--disp); font-weight:700; font-size:40px; letter-spacing:-.03em; text-align:center; color:var(--ink);}
+  .login .word2 em{color:var(--gold); font-style:normal;}
+  .login .sub2{font-family:var(--mono); color:var(--faint); text-align:center; margin:10px 0 30px; font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;}
+  .login input{width:100%; font-family:inherit; font-size:15px; padding:12px 14px; border:1px solid var(--line); border-radius:11px; background:var(--parch); color:var(--ink); margin-bottom:10px;}
+  .login input:focus{outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(18,133,90,.14);}
+  .quick{display:flex; flex-direction:column; gap:8px; margin-top:16px;}
+  .quick button{display:flex; align-items:center; justify-content:space-between; border:1px solid var(--line); background:var(--parch); border-radius:11px; padding:13px 15px; cursor:pointer; font-family:inherit; font-size:14px; color:var(--ink);}
+  .quick button:hover{border-color:var(--gold);}
+  .quick .r{font-family:var(--mono); font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); font-weight:500;}
+  .loginerr{color:var(--rust); font-family:var(--mono); font-size:11px; letter-spacing:.06em; margin-top:12px; min-height:18px; text-transform:uppercase;}
 
-  h2.section{font-family:'Playfair Display',serif; font-weight:500; font-size:20px; letter-spacing:.3px; margin:30px 0 14px; color:var(--ink);}
-  .lead{font-family:'Spectral',serif; font-style:italic; color:var(--umber); margin:2px 0 20px; font-size:15px;}
+  /* view title — the big confident statement */
+  h2.section{font-family:var(--disp); font-weight:600; font-size:34px; letter-spacing:-.03em; line-height:1.04; margin:38px 0 8px; color:var(--ink);}
+  .lead{font-family:var(--mono); color:var(--faint); margin:0 0 30px; font-size:11px; letter-spacing:.1em; text-transform:uppercase; line-height:1.7;}
 
-  /* ---- Panels ---- */
-  .panel{background:linear-gradient(180deg,var(--parch),var(--parch2)); border:1px solid var(--line); border-radius:4px; box-shadow:var(--shadow); margin-bottom:22px; overflow:hidden;}
-  .panel .cap{padding:15px 20px 12px; border-bottom:1px solid var(--line2); font-family:'Playfair Display',serif; font-size:15px; letter-spacing:.3px; color:var(--ink); display:flex; align-items:center; justify-content:space-between;}
-  .cap .note{font-family:'Inter'; font-size:10.5px; letter-spacing:.18em; text-transform:uppercase; color:var(--faint); font-weight:600;}
+  /* ---- Panels: numbered, editorial, light ---- */
+  #view{counter-reset:panelnum;}
+  .panel{counter-increment:panelnum; background:var(--parch); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:22px; overflow:hidden;}
+  .panel .cap{padding:17px 24px 15px; border-bottom:1px solid var(--line2); font-family:var(--disp); font-weight:600; font-size:18px; letter-spacing:-.02em; color:var(--ink); display:flex; align-items:center; justify-content:flex-start; gap:13px;}
+  .panel .cap::before{content:counter(panelnum,decimal-leading-zero); font-family:var(--mono); font-weight:500; font-size:12px; letter-spacing:.02em; color:var(--gold); align-self:center;}
+  .cap .note{font-family:var(--mono); font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); font-weight:400; margin-left:auto;}
 
   table{width:100%; border-collapse:collapse;}
-  th,td{text-align:left; padding:13px 20px; border-bottom:1px solid var(--line2);}
+  th,td{text-align:left; padding:13px 24px; border-bottom:1px solid var(--line2);}
   tbody tr:last-child td{border-bottom:0;}
-  th{font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--umber); font-weight:600;}
-  td{font-size:13.5px;}
-  td.num,th.num{text-align:right; font-variant-numeric:tabular-nums; font-family:'Inter';}
-  tbody.rows tr{cursor:pointer; transition:background .15s;}
-  tbody.rows tr:hover{background:rgba(169,119,42,.06);}
-  .cname{font-family:'Spectral',serif; font-size:16px; color:var(--ink);}
-  .cid{font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); margin-top:2px;}
+  th{font-family:var(--mono); font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); font-weight:500;}
+  td{font-size:14px; color:var(--ink);}
+  td.num,th.num{text-align:right; font-size:13px;}
+  tbody.rows tr{cursor:pointer; transition:background .12s;}
+  tbody.rows tr:hover{background:#f4f4ee;}
+  .cname{font-family:var(--disp); font-weight:600; font-size:16px; letter-spacing:-.01em; color:var(--ink);}
+  .cid{font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); margin-top:3px;}
 
-  /* refined risk indicator — a thin plain with a marker, not a chunky bar */
-  .risk{display:flex; align-items:center; gap:12px;}
-  .track{position:relative; width:150px; height:1.5px; background:rgba(90,72,44,.22);}
-  .track i{position:absolute; left:0; top:-1px; height:3.5px;}
-  .track b{position:absolute; top:-4px; width:2px; height:9px; background:var(--ink);}
-  .score{font-family:'Playfair Display',serif; font-size:17px; min-width:34px;}
+  .risk{display:flex; align-items:center; gap:14px;}
+  .track{position:relative; width:120px; height:4px; background:#e4e4dc; border-radius:999px; overflow:hidden;}
+  .track i{position:absolute; left:0; top:0; height:4px; border-radius:999px;}
+  .track b{display:none;}
+  .score{font-family:var(--disp); font-weight:600; font-size:22px; min-width:34px; color:var(--ink); letter-spacing:-.02em;}
 
-  .band{font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; font-weight:600;}
+  /* pill status — the atuin/cofactr signature */
+  .band{font-family:var(--mono); font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:500; border:1px solid currentColor; border-radius:999px; padding:3px 10px;}
   .band.alto,.band.high{color:var(--rust);}
   .band.medio,.band.medium{color:var(--ochre);}
-  .band.bajo,.band.low{color:var(--olive);}
-
-  .drivers{margin:6px 0 0; padding:0; list-style:none;}
-  .drivers li{font-size:12px; color:var(--umber); font-family:'Spectral',serif; font-style:italic;}
+  .band.bajo,.band.low{color:var(--gold);}
+  .drivers{margin:9px 0 0; padding:0; list-style:none;}
+  .drivers li{font-family:var(--mono); font-size:10.5px; letter-spacing:.02em; color:var(--umber); text-transform:uppercase; line-height:1.7;}
 
   .grid{display:grid; grid-template-columns:1fr 1fr; gap:22px;}
   .fin td:first-child{color:var(--umber);}
-  .fin tr.tot td{font-weight:600; color:var(--ink); border-top:1px solid var(--line);}
-  .stamp{padding:14px 20px; font-family:'Spectral',serif; font-style:italic; color:var(--umber); font-size:13px; border-top:1px solid var(--line2);}
-  .valid{color:var(--olive); font-weight:600; font-style:normal;}
-  .broken{color:var(--rust); font-weight:600; font-style:normal;}
+  .fin tr.tot td{font-weight:600; color:var(--ink); border-top:1.5px solid var(--ink);}
+  .stamp{padding:15px 24px; font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--faint); border-top:1px solid var(--line2);}
+  .valid{color:var(--gold); font-weight:500;} .broken{color:var(--rust); font-weight:500;}
 
-  .sev{font-size:10px; letter-spacing:.14em; text-transform:uppercase; font-weight:600; border:1px solid; border-radius:2px; padding:2px 7px;}
-  .sev.high{color:var(--rust); border-color:rgba(154,56,32,.4); background:rgba(154,56,32,.05);}
-  .sev.medium{color:var(--ochre); border-color:rgba(169,116,27,.4); background:rgba(169,116,27,.05);}
-  .sev.low{color:var(--cerulean); border-color:rgba(53,107,131,.4); background:rgba(53,107,131,.05);}
+  .sev{font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; font-weight:500; border:1px solid currentColor; border-radius:999px; padding:3px 9px; background:none;}
+  .sev.high{color:var(--rust);} .sev.medium{color:var(--ochre);} .sev.low{color:var(--cerulean);}
 
-  .status{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--umber);}
-  .ref{font-family:'Inter'; font-size:11px; letter-spacing:.06em; color:var(--faint);}
-  .msg{max-width:340px; color:var(--ink); font-size:13px;}
+  .status{font-family:var(--mono); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--umber);}
+  .ref{font-size:11px; color:var(--faint);}
+  .msg{max-width:360px; color:var(--umber); font-size:13px; line-height:1.5;}
 
-  .act{border:1px solid var(--line); background:var(--parch); color:var(--ink); border-radius:3px; padding:5px 11px; font-size:11px; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; font-weight:600; margin-left:6px; font-family:'Inter';}
+  .act{font-family:var(--mono); border:1px solid var(--line); background:var(--parch); color:var(--umber); border-radius:999px; padding:5px 12px; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; font-weight:500; margin-left:6px;}
   .act:hover{border-color:var(--gold); color:var(--gold);}
-  .act.esc{color:var(--rust); border-color:rgba(154,56,32,.35);}
+  .act.esc{color:var(--rust); border-color:rgba(192,57,43,.35);}
   .act.esc:hover{background:var(--rust); color:var(--parch); border-color:var(--rust);}
 
-  .back{background:none; border:0; color:var(--gold); cursor:pointer; font-family:'Spectral',serif; font-style:italic; font-size:15px; padding:0; margin:6px 0 18px;}
-  .back:hover{color:var(--ink);}
-  .foot{font-family:'Spectral',serif; font-style:italic; color:var(--umber); font-size:12.5px; margin-top:6px;}
-  .none{padding:30px; text-align:center; color:var(--faint); font-family:'Spectral',serif; font-style:italic;}
+  .back{font-family:var(--mono); background:none; border:0; color:var(--umber); cursor:pointer; font-size:10px; letter-spacing:.12em; text-transform:uppercase; padding:0; margin:4px 0 22px;}
+  .back:hover{color:var(--gold);}
+  .foot{font-family:var(--mono); color:var(--faint); font-size:10px; letter-spacing:.08em; text-transform:uppercase; margin-top:10px;}
+  .none{padding:36px; text-align:center; color:var(--faint); font-family:var(--mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase;}
 
-  /* toolbar */
-  .toolbar{display:flex; gap:10px; align-items:center; margin:2px 0 20px;}
-  .btn{border:1px solid var(--gold); background:var(--parch); color:var(--gold); border-radius:3px; padding:8px 15px; font-size:11px; letter-spacing:.14em; text-transform:uppercase; cursor:pointer; font-weight:600; font-family:'Inter';}
-  .btn:hover{background:var(--gold); color:var(--parch);}
-  .btn.ink{border-color:var(--ink); color:var(--ink);}
-  .btn.ink:hover{background:var(--ink); color:var(--parch);}
+  /* toolbar — pills, one green primary, rest ghost */
+  .toolbar{display:flex; gap:8px; align-items:center; margin:4px 0 26px; flex-wrap:wrap;}
+  .btn{font-family:var(--mono); border:1px solid var(--gold); background:var(--gold); color:var(--parch); border-radius:999px; padding:9px 17px; font-size:10px; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; font-weight:500; transition:all .12s;}
+  .btn:hover{background:#0e6e49; border-color:#0e6e49;}
+  .btn.ink{background:none; border-color:var(--line); color:var(--ink);}
+  .btn.ink:hover{border-color:var(--ink); background:none;}
 
   /* modal */
-  .scrim{position:fixed; inset:0; background:rgba(42,33,24,.44); backdrop-filter:blur(2px); display:none; align-items:center; justify-content:center; z-index:50; padding:24px;}
+  .scrim{position:fixed; inset:0; background:rgba(24,26,20,.4); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; z-index:50; padding:24px;}
   .scrim.on{display:flex;}
-  .modal{background:linear-gradient(180deg,var(--parch),var(--parch2)); border:1px solid var(--line); border-radius:5px; box-shadow:var(--shadow); width:620px; max-width:100%; max-height:90vh; overflow:auto;}
-  .modal .mh{padding:18px 22px 14px; border-bottom:1px solid var(--line2); font-family:'Playfair Display',serif; font-size:19px; display:flex; align-items:center; justify-content:space-between;}
+  .modal{background:var(--parch); border:1px solid var(--line); border-radius:18px; box-shadow:0 34px 90px -34px rgba(20,18,12,.44); width:620px; max-width:100%; max-height:90vh; overflow:auto;}
+  .modal .mh{padding:20px 26px 16px; border-bottom:1px solid var(--line2); font-family:var(--disp); font-weight:600; font-size:21px; letter-spacing:-.02em; display:flex; align-items:center; justify-content:space-between;}
   .modal .mh .x{background:none; border:0; font-size:22px; color:var(--faint); cursor:pointer; line-height:1;}
-  .modal .mb{padding:20px 22px;}
-  .modal .mf{padding:14px 22px; border-top:1px solid var(--line2); display:flex; gap:10px; justify-content:flex-end;}
-  .field{margin-bottom:14px;}
-  .field label{display:block; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--umber); font-weight:600; margin-bottom:6px;}
-  .field input,.field select{width:100%; font-family:'Inter'; font-size:13.5px; padding:9px 11px; border:1px solid var(--line); border-radius:3px; background:#fffdf8; color:var(--ink);}
+  .modal .mb{padding:24px 26px;}
+  .modal .mf{padding:16px 26px; border-top:1px solid var(--line2); display:flex; gap:10px; justify-content:flex-end;}
+  .field{margin-bottom:15px;}
+  .field label{font-family:var(--mono); display:block; font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--umber); font-weight:500; margin-bottom:7px;}
+  .field input,.field select{width:100%; font-family:inherit; font-size:14px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--parch); color:var(--ink);}
+  .field input:focus,.field select:focus{outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(18,133,90,.14);}
   .two{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
   .lines{width:100%; border-collapse:collapse; margin-top:4px;}
-  .lines th{padding:4px 6px; font-size:10px;}
+  .lines th{padding:4px 6px; font-size:9px;}
   .lines td{padding:4px 6px; border:0;}
-  .lines input,.lines select{width:100%; padding:6px 8px; font-size:12.5px; border:1px solid var(--line); border-radius:3px; background:#fffdf8; font-family:'Inter';}
-  .addln{background:none; border:0; color:var(--gold); cursor:pointer; font-family:'Spectral',serif; font-style:italic; font-size:13.5px; padding:6px 0;}
-  .bal{display:flex; gap:18px; align-items:center; padding:10px 0 2px; font-size:13px; font-family:'Inter';}
-  .bal .ok{color:var(--olive); font-weight:600;} .bal .no{color:var(--rust); font-weight:600;}
-  .cufe{background:#fffdf8; border:1px dashed var(--line); border-radius:3px; padding:11px; font-family:'Inter'; font-size:11px; letter-spacing:.02em; color:var(--umber); word-break:break-all; line-height:1.6;}
-  .emono{font-family:'Inter'; font-size:11px; letter-spacing:.04em; color:var(--faint);}
-  .imm{margin-top:14px; padding:11px 13px; background:rgba(169,119,42,.06); border-radius:3px; font-family:'Spectral',serif; font-style:italic; font-size:12.5px; color:var(--umber);}
-  .toast{position:fixed; left:50%; bottom:28px; transform:translateX(-50%); background:var(--ink); color:var(--parch); padding:12px 20px; border-radius:4px; font-size:13px; font-family:'Spectral',serif; font-style:italic; box-shadow:var(--shadow); z-index:80;}
+  .lines input,.lines select{width:100%; padding:7px 9px; font-size:13px; border:1px solid var(--line); border-radius:8px; background:var(--parch); font-family:inherit;}
+  .addln{font-family:var(--mono); background:none; border:0; color:var(--gold); cursor:pointer; font-size:10px; letter-spacing:.1em; text-transform:uppercase; padding:8px 0;}
+  .bal{display:flex; gap:18px; align-items:center; padding:11px 0 2px; font-size:13px;}
+  .bal .ok{color:var(--gold); font-weight:600;} .bal .no{color:var(--rust); font-weight:600;}
+  .cufe{background:#eef0ea; border:0; border-radius:10px; padding:13px 15px; font-size:11px; color:var(--umber); word-break:break-all; line-height:1.7;}
+  .emono{font-size:11px; color:var(--faint);}
+  .imm{margin-top:15px; padding:13px 15px; background:#eef0ea; border-radius:10px; font-family:var(--mono); font-size:11px; letter-spacing:.02em; color:var(--umber); line-height:1.7;}
+  .toast{position:fixed; left:50%; bottom:30px; transform:translateX(-50%); background:var(--ink); color:var(--parch); padding:13px 22px; border-radius:999px; font-family:var(--mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; box-shadow:0 16px 40px -14px rgba(20,18,12,.5); z-index:80;}
 
-  @media(max-width:820px){.grid{grid-template-columns:1fr}.clock{display:none}.word{font-size:34px}.two{grid-template-columns:1fr}}
+  tr.trace{cursor:pointer;}
+  tr.trace td:first-child{color:var(--gold);}
+  tr.trace:hover{background:#f4f4ee;}
+  .closebar{padding:13px 24px; font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; border-bottom:1px solid var(--line2);}
+  .closebar.ok{color:var(--gold);} .closebar.no{color:var(--rust);}
+  .verifybox{background:#eef0ea; border:0; border-radius:10px; padding:13px 15px; font-size:11px; color:var(--umber); word-break:break-all; margin-top:8px;}
+  .checklist{padding:16px 24px; border-bottom:1px solid var(--line2);}
+  .ckhead{font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); margin-bottom:12px;}
+  .ckrow{display:flex; align-items:center; gap:12px; padding:8px 0; font-size:14px;}
+  .ckrow.clk{cursor:pointer;} .ckrow.clk:hover .cklabel{color:var(--gold);}
+  .ckmark{width:20px; height:20px; border:1.5px solid var(--line); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px; color:transparent;}
+  .ckmark.on{background:var(--gold); border-color:var(--gold); color:var(--parch);}
+  .autotag{font-family:var(--mono); font-size:8.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); border:1px solid var(--line); border-radius:999px; padding:2px 8px;}
+  .cby{font-family:var(--mono); color:var(--faint); font-size:10px; letter-spacing:.04em; text-transform:uppercase;}
+  .tplrow{display:flex; align-items:center; gap:11px; padding:11px 0; border-bottom:1px solid var(--line2);}
+  .tplrow .nm{font-family:var(--disp); font-weight:500; font-size:14.5px;}
+  @media(max-width:820px){.grid{grid-template-columns:1fr}.clock{display:none}.word{font-size:23px}.two{grid-template-columns:1fr}.stage{padding:26px 18px 90px}h2.section{font-size:27px}}
+
+  /* ---- Arabic / RTL ---- */
+  [dir="rtl"] body, [dir="rtl"] .msg, [dir="rtl"] td, [dir="rtl"] .ckrow, [dir="rtl"] .quick button, [dir="rtl"] input, [dir="rtl"] textarea, [dir="rtl"] select{
+    font-family:'Cairo','Inter','Segoe UI',Tahoma,sans-serif;
+  }
+  [dir="rtl"] h2.section, [dir="rtl"] .panel .cap, [dir="rtl"] .cname, [dir="rtl"] .word2, [dir="rtl"] .tplrow .nm, [dir="rtl"] .modal .mh{
+    font-family:'Cairo','Space Grotesk',sans-serif; font-weight:600; letter-spacing:0;
+  }
+  [dir="rtl"] .tag, [dir="rtl"] .lead, [dir="rtl"] .th, [dir="rtl"] th, [dir="rtl"] .cid, [dir="rtl"] .band, [dir="rtl"] .sev,
+  [dir="rtl"] .note, [dir="rtl"] .role, [dir="rtl"] .autotag, [dir="rtl"] .userchip a, [dir="rtl"] .status, [dir="rtl"] .field label,
+  [dir="rtl"] .drivers li, [dir="rtl"] .foot, [dir="rtl"] .back, [dir="rtl"] .none, [dir="rtl"] .ckhead, [dir="rtl"] .btn, [dir="rtl"] .act, [dir="rtl"] .sub2, [dir="rtl"] .cby, [dir="rtl"] .lang button{
+    font-family:'Cairo',var(--mono); letter-spacing:0; text-transform:none;
+  }
+  [dir="rtl"] th, [dir="rtl"] td{text-align:right;}
+  [dir="rtl"] td.num, [dir="rtl"] th.num{text-align:left; font-family:var(--mono);}
+  [dir="rtl"] .panel .cap{justify-content:flex-start;}
+  [dir="rtl"] .track i{left:auto; right:0;}
+  [dir="rtl"] .word, [dir="rtl"] .login .word2, [dir="rtl"] .word em, [dir="rtl"] .login .word2 em{font-family:var(--disp);}
+
 </style>
 </head>
 <body>
@@ -175,11 +214,14 @@
       <div class="word">Audit<em>a</em></div>
       <div class="tag" data-i="tagline"></div>
     </div>
-    <nav class="lang">
-      <button id="en" onclick="setLang('en')">EN</button>
-      <span class="sep">/</span>
-      <button id="es" onclick="setLang('es')">ES</button>
-    </nav>
+    <div class="mastright">
+      <div id="userchip" class="userchip"></div>
+      <nav class="lang">
+        <button id="en" onclick="setLang('en')">EN</button>
+        <span class="sep">/</span>
+        <button id="ar" onclick="setLang('ar')">العربية</button>
+      </nav>
+    </div>
   </header>
 
   <main id="view"></main>
@@ -188,11 +230,19 @@
 <div class="scrim" id="scrim"><div class="modal" id="modal"></div></div>
 
 <script>
-const KEY='dev-key';
 let LANG='en';
-let ENTRY_CACHE=[], AUDIT_CACHE=[], ACCOUNTS=[];
-const api=async(p,o={})=>{const r=await fetch('/api'+p,{...o,headers:{'content-type':'application/json','x-api-key':KEY,...(o.headers||{})}});if(!r.ok)throw new Error((await r.json().catch(()=>({error:r.statusText}))).error);return r.json();};
-const COP=n=>'$'+Math.round(n).toLocaleString('es-CO');
+let TOKEN=localStorage.getItem('audita_token')||'';
+let USER=null;
+let ENTRY_CACHE=[], AUDIT_CACHE=[], REVIEWS=new Set(), ACCOUNTS=[];
+const RANK={viewer:0,staff:1,accountant:2,partner:3};
+const can=min=>!!USER&&RANK[USER.role]>=RANK[min];
+const api=async(p,o={})=>{
+  const r=await fetch('/api'+p,{...o,headers:{'content-type':'application/json',...(TOKEN?{authorization:'Bearer '+TOKEN}:{}),...(o.headers||{})}});
+  if(r.status===401){logout();throw new Error('401');}
+  if(!r.ok)throw new Error((await r.json().catch(()=>({error:r.statusText}))).error);
+  return r.json();
+};
+const COP=n=>'SAR '+Math.round(n).toLocaleString('en-US');
 
 /* ---------- i18n ---------- */
 const T={
@@ -203,9 +253,9 @@ const T={
     cClient:'Client', cRisk:'Risk', cScore:'Score', cOpen:'Open findings', cEntries:'Entries',
     footConsole:'Served live from the firm ledger. Each book is structurally isolated.',
     back:'All clients',
-    financials:'Financial statements', tax:'Tax position — DIAN', findingsCap:'Continuous controls',
+    financials:'Financial statements', tax:'Tax position — ZATCA', findingsCap:'Continuous controls',
     revenue:'Revenue', expenses:'Expenses', profit:'Profit', assets:'Assets', liabilities:'Liabilities', equity:'Equity', balances:'Trial balance ties',
-    ivaOut:'Output VAT (generado)', ivaIn:'Input VAT (descontable)', ivaPay:'VAT payable', ivaCredit:'Credit balance', withhold:'Withholding at source',
+    ivaOut:'Output VAT', ivaIn:'Input VAT', ivaPay:'VAT payable', ivaCredit:'Credit balance', retFavor:'Withholdings in our favor', retPayable:'Withholdings we owe',
     trail:'Evidence trail', events:'events', chainValid:'chain intact', chainBroken:'chain broken',
     fId:'ID', fSev:'Severity', fRule:'Rule', fEntry:'Entry', fDesc:'Description', fStatus:'Status', fAct:'Action',
     clear:'Clear', escalate:'Escalate', none:'No findings.',
@@ -215,24 +265,24 @@ const T={
     st:{open:'Open',reviewed:'Reviewed',cleared:'Cleared',escalated:'Escalated'},
     yes:'yes', dash:'—',
   },
-  es:{
-    tagline:'Contabilidad que nace auditada.',
-    consoleTitle:'Los clientes de la firma',
-    consoleLead:'Cada cliente conserva un libro aislado. Ordenados por riesgo. Seleccione un nombre para abrirlo.',
-    cClient:'Cliente', cRisk:'Riesgo', cScore:'Puntaje', cOpen:'Hallazgos abiertos', cEntries:'Asientos',
-    footConsole:'Servido en vivo desde el libro de la firma. Cada contabilidad está aislada estructuralmente.',
-    back:'Todos los clientes',
-    financials:'Estados financieros', tax:'Posición tributaria — DIAN', findingsCap:'Control continuo',
-    revenue:'Ingresos', expenses:'Gastos', profit:'Utilidad', assets:'Activos', liabilities:'Pasivos', equity:'Patrimonio', balances:'La balanza cuadra',
-    ivaOut:'IVA generado', ivaIn:'IVA descontable', ivaPay:'IVA a pagar', ivaCredit:'Saldo a favor', withhold:'Retención en la fuente',
-    trail:'Rastro de evidencia', events:'eventos', chainValid:'cadena íntegra', chainBroken:'cadena rota',
-    fId:'ID', fSev:'Severidad', fRule:'Regla', fEntry:'Asiento', fDesc:'Descripción', fStatus:'Estado', fAct:'Acción',
-    clear:'Aclarar', escalate:'Escalar', none:'Sin hallazgos.',
-    footClient:'Cambiar el estado de un hallazgo queda registrado en el rastro inmutable.',
-    openF:n=>`${n} hallazgo${n===1?'':'s'} abierto${n===1?'':'s'}`, high:n=>`${n} de severidad alta`, manual:p=>`${p}% de asientos manuales / ajustes`, weekend:n=>`${n} asiento${n===1?'':'s'} en fin de semana`, quiet:'Sin señales de riesgo relevantes',
-    band:{alto:'Alto',medio:'Medio',bajo:'Bajo'}, sev:{high:'Alto',medium:'Medio',low:'Bajo'},
-    st:{open:'Abierto',reviewed:'Revisado',cleared:'Aclarado',escalated:'Escalado'},
-    yes:'sí', dash:'—',
+  ar:{
+    tagline:'دفاتر تُولد مُدقَّقة.',
+    consoleTitle:'عملاء المكتب',
+    consoleLead:'لكل عميل دفتر مستقل. مُرتّبون حسب المخاطر. اختر اسمًا لفتحه.',
+    cClient:'العميل', cRisk:'المخاطر', cScore:'الدرجة', cOpen:'ملاحظات مفتوحة', cEntries:'القيود',
+    footConsole:'يُعرض مباشرةً من دفتر المكتب. كل دفتر معزول هيكليًا.',
+    back:'كل العملاء',
+    financials:'القوائم المالية', tax:'الوضع الضريبي — هيئة الزكاة والضريبة (ZATCA)', findingsCap:'الرقابة المستمرة',
+    revenue:'الإيرادات', expenses:'المصروفات', profit:'صافي الربح', assets:'الأصول', liabilities:'الالتزامات', equity:'حقوق الملكية', balances:'ميزان المراجعة متوازن',
+    ivaOut:'ضريبة المخرجات', ivaIn:'ضريبة المدخلات', ivaPay:'ضريبة مستحقة الدفع', ivaCredit:'رصيد دائن', retFavor:'استقطاعات لصالحنا', retPayable:'استقطاعات علينا',
+    trail:'سجل الأدلة', events:'أحداث', chainValid:'السلسلة سليمة', chainBroken:'السلسلة مكسورة',
+    fId:'المعرّف', fSev:'الخطورة', fRule:'القاعدة', fEntry:'القيد', fDesc:'الوصف', fStatus:'الحالة', fAct:'الإجراء',
+    clear:'إغلاق', escalate:'تصعيد', none:'لا توجد ملاحظات.',
+    footClient:'تغيير حالة أي ملاحظة يُسجَّل في السجل غير القابل للتعديل.',
+    openF:n=>`${n} ملاحظة مفتوحة`, high:n=>`${n} عالية الخطورة`, manual:p=>`${p}٪ قيود يدوية / تسويات`, weekend:n=>`${n} قيد في نهاية الأسبوع`, quiet:'لا توجد مؤشرات مخاطر جوهرية',
+    band:{alto:'مرتفع',medio:'متوسط',bajo:'منخفض'}, sev:{high:'مرتفع',medium:'متوسط',low:'منخفض'},
+    st:{open:'مفتوح',reviewed:'مُراجَع',cleared:'مُغلق',escalated:'مُصعَّد'},
+    yes:'نعم', dash:'—',
   }
 };
 Object.assign(T.en,{
@@ -241,56 +291,104 @@ Object.assign(T.en,{
   posted:'Posted', reversed:'Reversed',
   account:'Account', debit:'Debit', credit:'Credit', addLine:'+ Add line',
   memo:'Concept', source:'Counterparty', date:'Date', balanced:'Balanced', unbalanced:'Out by',
-  post:'Post entry', cancel:'Cancel', customer:'Customer', taxId:'Tax ID', base:'Taxable base (COP)', concept:'Concept', issue:'Issue & post',
-  previewInv:'VAT 19% and withholding will be computed, the CUFE generated, and the double-entry posted.',
+  post:'Post entry', cancel:'Cancel', customer:'Customer', taxId:'Tax ID', base:'Taxable base (SAR)', concept:'Concept', issue:'Issue & post',
+  previewInv:'VAT 15% will be computed, the ZATCA invoice hash generated, and the double-entry posted.',
   entry:'Entry', lines:'Lines', evHash:'Evidence hash', prev:'prev',
   immutable:'This entry is immutable. To correct it, post a reversing entry — the original stays in the evidence trail.',
-  okEntry:'Entry posted and added to the evidence trail.', okInv:'Invoice issued, CUFE generated, entry posted.',
+  okEntry:'Entry posted and added to the evidence trail.', okInv:'Invoice issued, ZATCA hash generated, entry posted.',
   raised:'raised', close:'Close', none2:'No entries yet.',
+  proveTitle:'Provenance —', contribution:'Contribution', runningBal:'Running', tracedBy:'Traced entries contributing to this balance. Each links to its evidence hash.',
+  assurance:'Assurance & close', papers:'Working papers', addPaper:'New working paper', tied:'Tied', untied:'Untied',
+  support:'Support balance (SAR)', booked:'Booked', diff:'Difference', period:'Period', account:'Account', create:'Create',
+  closeReady:'Evidence-ready — cleared to close', closeBlocked:'Close blocked',
+  analytics:'Population analytics', benford:'Benford deviation', velocity:'Velocity flags',
+  within:'within expectation', anomalous:'anomalous', noPapers:'No working papers yet.',
+  share:'Share verified view', shareTitle:'Verifiable link', shareDesc:'Anyone with this link re-verifies these books in their own browser — no login, no trusting this server. The recipient’s browser recomputes the hash chain and the trial balance.',
+  copy:'Copy link', copied:'Link copied', seal:'Ledger fingerprint',
+  signin:'Sign in', email:'Email', password:'Password', quick:'Or sign in as a demo user', logout:'Sign out', badLogin:'Incorrect email or password.',
+  reconcile:'Reconcile', reconTitle:'Bank reconciliation', reconDesc:'Paste the statement — one line per row: date, description, amount. Positive for deposits, negative for withdrawals.',
+  run:'Reconcile', matchedC:'Matched', unmatchedS:'Unmatched — statement', unmatchedL:'Unmatched — ledger', createFrom:'Create entry', of:'of', reconciled:'reconciled',
+  exportT:'Export', exportTB:'Trial balance (CSV)', exportJ:'Journal (CSV)',
+  review:'Review', reviewedBy:'Reviewed', pending:'Pending review',
+  templates:'Templates', newTemplate:'New template', templateName:'Template name', saveTpl:'Save template',
+  tplHint:'Save a recurring entry — rent, depreciation, accruals — and post it each month in one click.',
+  noTemplates:'No templates yet.', del:'Delete', postTpl:'Post', checklist:'Close checklist', complete:'complete', autoTag:'auto', by:'by',
+  arap:'Receivables & Payables', receivables:'Receivables — customers owe', payables:'Payables — we owe', newBill:'New bill',
+  agCurrent:'Current', ag1:'1–30', ag2:'31–60', ag3:'61–90', ag4:'90+', outCol:'Outstanding', dueCol:'Due', payBtn:'Pay',
+  payTitle:'Record payment', payAmount:'Amount (SAR)', vendor:'Vendor', createBill:'Create bill', noOpen:'Nothing outstanding.',
+  okPay:'Payment recorded.', okBill:'Bill created.', expenseAcct:'Expense/asset account', overdueTag:'overdue',
+  cashFlow:'Cash flow', cfOperating:'Operating', cfInvesting:'Investing', cfFinancing:'Financing', cfNet:'Net change in cash', cfOpen:'Opening cash', cfClose:'Closing cash',
+  lockPeriod:'Lock period', unlockPeriod:'Reopen', lockedTag:'Locked', openTag:'Open', period:'Period', okLock:'Period locked.', okUnlock:'Period reopened.',
+  statementsPdf:'Statements (PDF)',
+  openingBal:'Opening balances', obHint:'Paste a migrated trial balance — one line per row: account,debit,credit.', importBtn:'Import', okOpening:'Opening balances imported.',
+  reteicaLbl:'ReteICA (bps, e.g. 69)', reteivaLbl:'ReteIVA (bps, e.g. 1500)',
 });
-Object.assign(T.es,{
-  newEntry:'Nuevo asiento', newInvoice:'Emitir factura', journal:'Libro diario',
-  jDate:'Fecha', jRef:'Ref', jMemo:'Concepto', jSource:'Contraparte', jAmount:'Valor', jStatus:'Estado',
-  posted:'Contabilizado', reversed:'Reversado',
-  account:'Cuenta', debit:'Débito', credit:'Crédito', addLine:'+ Agregar línea',
-  memo:'Concepto', source:'Contraparte', date:'Fecha', balanced:'Cuadra', unbalanced:'Descuadre',
-  post:'Contabilizar', cancel:'Cancelar', customer:'Cliente', taxId:'NIT / CC', base:'Base gravable (COP)', concept:'Concepto', issue:'Emitir y contabilizar',
-  previewInv:'Se calculará IVA 19% y retefuente, se generará el CUFE y se contabilizará la partida doble.',
-  entry:'Asiento', lines:'Líneas', evHash:'Hash de evidencia', prev:'prev',
-  immutable:'Este asiento es inmutable. Para corregirlo se registra un asiento de reversión; el original permanece en el rastro de evidencia.',
-  okEntry:'Asiento contabilizado e incorporado al rastro de evidencia.', okInv:'Factura emitida, CUFE generado y asiento contabilizado.',
-  raised:'generó', close:'Cerrar', none2:'Aún no hay asientos.',
+Object.assign(T.ar,{
+  newEntry:'قيد جديد', newInvoice:'إصدار فاتورة', journal:'دفتر اليومية',
+  jDate:'التاريخ', jRef:'المرجع', jMemo:'البيان', jSource:'الطرف المقابل', jAmount:'المبلغ', jStatus:'الحالة',
+  posted:'مُرحَّل', reversed:'معكوس',
+  account:'الحساب', debit:'مدين', credit:'دائن', addLine:'+ إضافة سطر',
+  memo:'البيان', source:'الطرف المقابل', date:'التاريخ', balanced:'متوازن', unbalanced:'فرق قدره',
+  post:'ترحيل القيد', cancel:'إلغاء', customer:'العميل', taxId:'الرقم الضريبي', base:'الوعاء الخاضع للضريبة (SAR)', concept:'البيان', issue:'إصدار وترحيل',
+  previewInv:'ستُحتسب ضريبة القيمة المضافة 15٪، ويُولَّد رقم تجزئة فاتورة ZATCA، ويُرحَّل القيد المزدوج.',
+  entry:'قيد', lines:'السطور', evHash:'تجزئة الدليل', prev:'السابق',
+  immutable:'هذا القيد غير قابل للتعديل. لتصحيحه، رحِّل قيدًا عكسيًا — يبقى الأصل في سجل الأدلة.',
+  okEntry:'تم ترحيل القيد وإضافته إلى سجل الأدلة.', okInv:'تم إصدار الفاتورة وتوليد تجزئة ZATCA وترحيل القيد.',
+  raised:'أثار', close:'إغلاق', none2:'لا توجد قيود بعد.',
+  proveTitle:'مصدر الرقم —', contribution:'المساهمة', runningBal:'الرصيد الجاري', tracedBy:'القيود المتتبَّعة المساهمة في هذا الرصيد. كل منها يرتبط بتجزئة دليله.',
+  assurance:'التأكيد والإقفال', papers:'أوراق العمل', addPaper:'ورقة عمل جديدة', tied:'مطابق', untied:'غير مطابق',
+  support:'رصيد المستند (SAR)', booked:'بالدفاتر', diff:'الفرق', period:'الفترة', account:'الحساب', create:'إنشاء',
+  closeReady:'جاهز للإقفال — الأدلة مكتملة', closeBlocked:'الإقفال محجوب',
+  analytics:'تحليلات المجتمع الكلي', benford:'انحراف بنفورد', velocity:'تنبيهات السرعة',
+  within:'ضمن المتوقع', anomalous:'شاذ', noPapers:'لا توجد أوراق عمل بعد.',
+  share:'مشاركة عرض قابل للتحقق', shareTitle:'رابط قابل للتحقق', shareDesc:'أي شخص لديه هذا الرابط يتحقق من هذه الدفاتر في متصفحه — دون تسجيل دخول ودون الوثوق بهذا الخادم. يعيد متصفح المستلم حساب سلسلة التجزئة وميزان المراجعة.',
+  copy:'نسخ الرابط', copied:'تم نسخ الرابط', seal:'بصمة الدفتر',
+  signin:'تسجيل الدخول', email:'البريد الإلكتروني', password:'كلمة المرور', quick:'أو ادخل كمستخدم تجريبي', logout:'خروج', badLogin:'بريد إلكتروني أو كلمة مرور غير صحيحة.',
+  reconcile:'تسوية', reconTitle:'التسوية البنكية', reconDesc:'الصق كشف الحساب — سطر لكل صف: التاريخ، الوصف، المبلغ. موجب للإيداعات، سالب للسحوبات.',
+  run:'تسوية', matchedC:'مطابَقة', unmatchedS:'غير مطابَق — الكشف', unmatchedL:'غير مطابَق — الدفتر', createFrom:'إنشاء قيد', of:'من', reconciled:'مُسوّاة',
+  exportT:'تصدير', exportTB:'ميزان المراجعة (CSV)', exportJ:'دفتر اليومية (CSV)',
+  review:'مراجعة', reviewedBy:'روجع', pending:'بانتظار المراجعة',
+  templates:'القوالب', newTemplate:'قالب جديد', templateName:'اسم القالب', saveTpl:'حفظ القالب',
+  tplHint:'احفظ قيدًا متكررًا — إيجار، إهلاك، استحقاقات — ورحِّله كل شهر بنقرة واحدة.',
+  noTemplates:'لا توجد قوالب بعد.', del:'حذف', postTpl:'ترحيل', checklist:'قائمة الإقفال', complete:'مكتمل', autoTag:'تلقائي', by:'بواسطة',
+  arap:'الذمم المدينة والدائنة', receivables:'مدينة — العملاء مدينون', payables:'دائنة — نحن مدينون', newBill:'فاتورة مشتريات جديدة',
+  agCurrent:'جاري', ag1:'1–30', ag2:'31–60', ag3:'61–90', ag4:'+90', outCol:'المتبقي', dueCol:'الاستحقاق', payBtn:'دفع',
+  payTitle:'تسجيل دفعة', payAmount:'المبلغ (SAR)', vendor:'المورّد', createBill:'إنشاء فاتورة', noOpen:'لا شيء مستحق.',
+  okPay:'تم تسجيل الدفعة.', okBill:'تم إنشاء الفاتورة.', expenseAcct:'حساب مصروف/أصل', overdueTag:'متأخر',
+  cashFlow:'التدفق النقدي', cfOperating:'تشغيلي', cfInvesting:'استثماري', cfFinancing:'تمويلي', cfNet:'صافي التغير في النقد', cfOpen:'النقد الافتتاحي', cfClose:'النقد الختامي',
+  lockPeriod:'إقفال الفترة', unlockPeriod:'إعادة فتح', lockedTag:'مُقفلة', openTag:'مفتوحة', period:'الفترة', okLock:'تم إقفال الفترة.', okUnlock:'تمت إعادة فتح الفترة.',
+  statementsPdf:'القوائم (PDF)',
+  openingBal:'الأرصدة الافتتاحية', obHint:'الصق ميزان مراجعة مُرحّلًا — سطر لكل صف: الحساب، مدين، دائن.', importBtn:'استيراد', okOpening:'تم استيراد الأرصدة الافتتاحية.',
+  reteicaLbl:'استقطاع أ (نقطة أساس، مثال 69)', reteivaLbl:'استقطاع ب (نقطة أساس، مثال 1500)',
 });
+const CLABEL={
+  trial_balance:{en:'Trial balance reviewed and ties',ar:'مراجعة ميزان المراجعة ومطابقته'},
+  bank_recs:{en:'Bank reconciliations complete',ar:'إتمام التسويات البنكية'},
+  invoicing:{en:'All sales invoiced (ZATCA)',ar:'فوترة كل المبيعات (ZATCA)'},
+  accruals:{en:'Accruals & depreciation posted',ar:'ترحيل الاستحقاقات والإهلاك'},
+  working_papers:{en:'Working papers tied out',ar:'مطابقة أوراق العمل'},
+  findings:{en:'Control findings cleared',ar:'معالجة ملاحظات الرقابة'},
+  taxes:{en:'VAT position (ZATCA) reviewed',ar:'مراجعة الوضع الضريبي (ZATCA)'},
+  statements:{en:'Financial statements reviewed',ar:'مراجعة القوائم المالية'},
+};
 const t=()=>T[LANG];
 
-/* rule name translation */
-const RULE={
-  'Registro en fin de semana':'Weekend posting',
-  'Monto redondo inusual':'Unusual round amount',
-  'Monto bajo umbral de control':'Amount below control threshold',
-  'Posible duplicado':'Possible duplicate',
-  'Dígito inicial atípico (Benford)':'Atypical leading digit (Benford)',
-  'Ajuste manual a caja/bancos':'Manual cash / bank adjustment',
-  'Transacción con parte relacionada':'Related-party transaction',
-  'Salto en consecutivo':'Numbering gap',
-  'Velocidad de registro inusual':'Unusual posting velocity',
+/* rule-name translation — the domain emits English rule names; map to Arabic in AR mode */
+const RULE_AR={
+  'Weekend posting':'قيد في نهاية الأسبوع',
+  'Unusual round amount':'مبلغ مستدير غير معتاد',
+  'Amount just under approval threshold':'مبلغ أقل بقليل من حد الاعتماد',
+  'Possible duplicate':'ازدواج محتمل',
+  'Atypical leading digit (Benford)':'رقم استهلالي غير معتاد (بنفورد)',
+  'Manual cash/bank adjustment':'تسوية يدوية للنقد/البنك',
+  'Related-party transaction':'معاملة مع طرف ذي علاقة',
+  'Numbering gap':'فجوة في الترقيم',
+  'Unusual posting velocity':'سرعة ترحيل غير معتادة',
 };
-const ruleName=r=>LANG==='es'?r:(RULE[r]||r);
+const ruleName=r=>LANG==='ar'?(RULE_AR[r]||r):r;
 
-/* finding message translation — reconstruct English from the known templates */
-function msgEN(rule,m){
-  let x;
-  if((x=m.match(/Asiento fechado (\S+) \(([^)]+)\)/))){const d={'sábado':'Saturday','domingo':'Sunday'}[x[2]]||x[2];return `Entry dated ${x[1]} (${d}). Review supporting document.`;}
-  if((x=m.match(/Valor exacto (\S+) sin decimales/)))return `Exact value ${x[1]}, no cents. Possible estimate or manual adjustment.`;
-  if((x=m.match(/Valor (\S+) justo por debajo del umbral de aprobación (\S+)\./)))return `Value ${x[1]} just below the ${x[2]} approval threshold. Possible structuring.`;
-  if((x=m.match(/Mismo valor (\S+), misma fecha y contraparte que (\S+)\./)))return `Same value ${x[1]}, same date and counterparty as ${x[2]}. Check for a double posting.`;
-  if((x=m.match(/El valor (\S+) inicia en 9/)))return `Value ${x[1]} starts with 9; low frequency under Benford’s law. Weak signal — correlate across the period.`;
-  if((x=m.match(/Movimiento manual sobre caja\/bancos: "(.*)"\./)))return `Manual movement on cash / bank: “${x[1]}”. Requires support and approval.`;
-  if((x=m.match(/Contraparte "(.*)" figura/)))return `Counterparty “${x[1]}” is on the related-party list. Verify arm’s-length value and disclosure (IFRS / transfer pricing).`;
-  if((x=m.match(/Falta el consecutivo (\S+) en/)))return `Missing consecutive number ${x[1]} in issued invoices. DIAN requires continuous numbering.`;
-  return m;
-}
-const message=(rule,m)=>LANG==='es'?m:msgEN(rule,m);
+/* finding messages come from the server already in English; render as-is */
+const message=(rule,m)=>m;
 
 function driverLines(factors){
   const T=t(); const out=[];
@@ -300,7 +398,7 @@ function driverLines(factors){
   if(!out.length)out.push(T.quiet);
   return out;
 }
-const bandColor=b=>({alto:'#9a3820',medio:'#a9741b',bajo:'#5e6a37'})[b];
+const bandColor=b=>({alto:'#c0392b',medio:'#bd8420',bajo:'#1eb668'})[b];
 
 /* ---------- views ---------- */
 const view=document.getElementById('view');
@@ -323,15 +421,24 @@ async function consoleView(){
 async function clientView(id){
   CURRENT={page:'client',id};
   await ensureAccounts();
-  const [reports,findings,audit,entries]=await Promise.all([api('/clients/'+id+'/reports'),api('/clients/'+id+'/findings'),api('/clients/'+id+'/audit'),api('/clients/'+id+'/entries')]);
+  const [reports,findings,audit,entries,wps,close,analytics,checklist,arAging,apAging,periods]=await Promise.all([api('/clients/'+id+'/reports'),api('/clients/'+id+'/findings'),api('/clients/'+id+'/audit'),api('/clients/'+id+'/entries'),api('/clients/'+id+'/working-papers'),api('/clients/'+id+'/close?period=2026-06'),api('/clients/'+id+'/analytics'),api('/clients/'+id+'/checklist?period=2026-06'),api('/clients/'+id+'/aging?kind=receivable&asOf=2026-06-30'),api('/clients/'+id+'/aging?kind=payable&asOf=2026-06-30'),api('/clients/'+id+'/periods')]);
+  const periodLocked=(periods.locked||[]).includes('2026-06');
   ENTRY_CACHE=entries; AUDIT_CACHE=audit.events;
+  REVIEWS=new Set(audit.events.filter(e=>e.action==='ENTRY_REVIEWED').map(e=>e.ref));
   const T=t(); const r=reports, v=audit.verification;
   view.innerHTML=`<button class="back" onclick="consoleView()">← ${T.back}</button>
-  <div class="toolbar"><button class="btn" onclick="modalEntry('${id}')">${T.newEntry}</button><button class="btn ink" onclick="modalInvoice('${id}')">${T.newInvoice}</button></div>
+  <div class="toolbar">
+    ${can('staff')?`<button class="btn" onclick="modalEntry('${id}')">${T.newEntry}</button><button class="btn ink" onclick="modalInvoice('${id}')">${T.newInvoice}</button><button class="btn ink" onclick="billModal('${id}')">${T.newBill}</button><button class="btn ink" onclick="reconcile('${id}')">${T.reconcile}</button><button class="btn ink" onclick="templatesModal('${id}')">${T.templates}</button>`:''}${can('accountant')?`<button class="btn ink" onclick="openingModal('${id}')">${T.openingBal}</button>`:''}
+    <span style="flex:1"></span>
+    <button class="btn ink" onclick="exportPDF('${id}')">${T.statementsPdf}</button>
+    <button class="btn ink" onclick="exportCSV('${id}','trial-balance')">${T.exportTB}</button>
+    <button class="btn ink" onclick="exportCSV('${id}','journal')">${T.exportJ}</button>
+    ${can('accountant')?`<button class="btn" onclick="share('${id}')">${T.share}</button>`:''}
+  </div>
   <div class="grid">
     <div class="panel"><div class="cap">${T.financials}</div>
       <table class="fin"><tbody>
-        <tr><td>${T.revenue}</td><td class="num">${COP(r.incomeStatement.ingresos)}</td></tr>
+        <tr class="trace" onclick="prov('${id}','4000')"><td>${T.revenue} ›</td><td class="num">${COP(r.incomeStatement.ingresos)}</td></tr>
         <tr><td>${T.expenses}</td><td class="num">-${COP(r.incomeStatement.gastos)}</td></tr>
         <tr class="tot"><td>${T.profit}</td><td class="num">${COP(r.incomeStatement.utilidad)}</td></tr>
         <tr><td>${T.assets}</td><td class="num">${COP(r.balanceSheet.activos)}</td></tr>
@@ -341,15 +448,39 @@ async function clientView(id){
       </tbody></table></div>
     <div class="panel"><div class="cap">${T.tax}</div>
       <table class="fin"><tbody>
-        <tr><td>${T.ivaOut}</td><td class="num">${COP(r.taxPosition.ivaGenerado)}</td></tr>
-        <tr><td>${T.ivaIn}</td><td class="num">${COP(r.taxPosition.ivaDescontable)}</td></tr>
+        <tr class="trace" onclick="prov('${id}','2100')"><td>${T.ivaOut} ›</td><td class="num">${COP(r.taxPosition.ivaGenerado)}</td></tr>
+        <tr class="trace" onclick="prov('${id}','1150')"><td>${T.ivaIn} ›</td><td class="num">${COP(r.taxPosition.ivaDescontable)}</td></tr>
         <tr class="tot"><td>${T.ivaPay}</td><td class="num">${COP(r.taxPosition.ivaAPagar)}</td></tr>
         <tr><td>${T.ivaCredit}</td><td class="num">${COP(r.taxPosition.saldoAFavor)}</td></tr>
-        <tr><td>${T.withhold}</td><td class="num">${COP(r.taxPosition.retencionPracticada)}</td></tr>
+        <tr class="trace" onclick="prov('${id}','1160')"><td>${T.retFavor} ›</td><td class="num">${COP(r.taxPosition.retencionesAFavor)}</td></tr>
+        <tr><td>${T.retPayable}</td><td class="num">${COP(r.taxPosition.retencionesPorPagar)}</td></tr>
       </tbody></table>
       <div class="stamp">${T.trail}: ${audit.events.length} ${T.events} — <span class="${v.valid?'valid':'broken'}">${v.valid?T.chainValid:T.chainBroken}</span></div>
     </div>
   </div>
+  <div class="panel"><div class="cap">${T.cashFlow}</div>
+    <table class="fin"><tbody>
+      <tr><td>${T.cfOperating}</td><td class="num">${COP(r.cashFlow.operating)}</td></tr>
+      <tr><td>${T.cfInvesting}</td><td class="num">${COP(r.cashFlow.investing)}</td></tr>
+      <tr><td>${T.cfFinancing}</td><td class="num">${COP(r.cashFlow.financing)}</td></tr>
+      <tr class="tot"><td>${T.cfNet}</td><td class="num">${COP(r.cashFlow.netChange)}</td></tr>
+      <tr><td>${T.cfOpen}</td><td class="num">${COP(r.cashFlow.openingCash)}</td></tr>
+      <tr class="tot"><td>${T.cfClose}</td><td class="num">${COP(r.cashFlow.closingCash)}</td></tr>
+    </tbody></table></div>
+  <div class="panel"><div class="cap">${T.assurance}${can('staff')?`<button class="btn" style="padding:5px 11px" onclick="newWP('${id}')">${T.addPaper}</button>`:''}</div>
+    <div class="closebar ${close.readyToClose?'ok':'no'}">${close.readyToClose?T.closeReady:T.closeBlocked+': '+close.blockers.join(' · ')}</div>
+    <div class="checklist" style="display:flex;align-items:center;gap:12px">
+      <span class="cklabel">${T.period} 2026-06: <b style="color:${periodLocked?'var(--rust)':'var(--olive)'}">${periodLocked?T.lockedTag:T.openTag}</b></span>
+      <span style="flex:1"></span>
+      ${can('partner')?`<button class="btn ${periodLocked?'ink':''}" style="padding:5px 11px" onclick="togglePeriod('${id}','${periodLocked?'unlock':'lock'}')">${periodLocked?T.unlockPeriod:T.lockPeriod}</button>`:''}
+    </div>
+    <div class="checklist"><div class="ckhead">${T.checklist} — ${checklist.done}/${checklist.total} ${T.complete}</div>
+      ${checklist.items.map(it=>checkRow(id,it)).join('')}</div>
+    <table><thead><tr><th>${T.account}</th><th>${T.period}</th><th class="num">${T.booked}</th><th class="num">${T.support}</th><th class="num">${T.diff}</th><th>${T.jStatus}</th></tr></thead>
+    <tbody>${wps.length?wps.map(w=>`<tr><td>${w.accountCode}</td><td>${w.period}</td><td class="num">${COP(w.bookedBalance)}</td><td class="num">${COP(w.supportBalance)}</td><td class="num">${COP(w.difference)}</td><td><span class="band ${w.difference===0?'bajo':'alto'}">${w.difference===0?T.tied:T.untied}</span></td></tr>`).join(''):`<tr><td colspan="6" class="none">${T.noPapers}</td></tr>`}</tbody></table>
+    <div class="stamp">${T.analytics}: ${T.benford} χ²=${analytics.benford.chiSquare.toFixed(1)} (${analytics.benford.anomalous?T.anomalous:T.within}) · ${T.velocity}: ${analytics.velocity.length}</div>
+  </div>
+  ${arapPanel(id,arAging,apAging)}
   <div class="panel"><div class="cap">${T.findingsCap}<span class="note">${findings.length}</span></div>
    <table><thead><tr><th>${T.fId}</th><th>${T.fSev}</th><th>${T.fRule}</th><th>${T.fEntry}</th><th>${T.fDesc}</th><th>${T.fStatus}</th><th>${T.fAct}</th></tr></thead>
    <tbody>${findings.length?findings.map(f=>`<tr>
@@ -359,15 +490,16 @@ async function clientView(id){
      <td class="ref">${f.entryId}</td>
      <td class="msg">${message(f.rule,f.message)}</td>
      <td><span class="status">${T.st[f.status]}</span></td>
-     <td style="white-space:nowrap">${(f.status==='open'||f.status==='escalated')?`<button class="act" onclick="setStatus('${id}','${f.id}','cleared')">${T.clear}</button><button class="act esc" onclick="setStatus('${id}','${f.id}','escalated')">${T.escalate}</button>`:'—'}</td>
+     <td style="white-space:nowrap">${can('accountant')&&(f.status==='open'||f.status==='escalated')?`<button class="act" onclick="setStatus('${id}','${f.id}','cleared')">${T.clear}</button><button class="act esc" onclick="setStatus('${id}','${f.id}','escalated')">${T.escalate}</button>`:'—'}</td>
    </tr>`).join(''):`<tr><td colspan="7" class="none">${T.none}</td></tr>`}</tbody></table></div>
   <div class="panel"><div class="cap">${T.journal}<span class="note">${entries.length}</span></div>
-   <table><thead><tr><th>${T.jRef}</th><th>${T.jDate}</th><th>${T.jMemo}</th><th>${T.jSource}</th><th class="num">${T.jAmount}</th><th>${T.jStatus}</th></tr></thead>
+   <table><thead><tr><th>${T.jRef}</th><th>${T.jDate}</th><th>${T.jMemo}</th><th>${T.jSource}</th><th class="num">${T.jAmount}</th><th>${T.jStatus}</th><th>${T.reviewedBy}</th></tr></thead>
    <tbody class="rows">${entries.length?entries.slice().reverse().map(e=>`<tr onclick="showEntry('${id}','${e.id}')">
      <td class="ref">${e.id}</td><td>${e.date}</td><td>${e.memo}</td><td style="color:var(--umber)">${e.source}</td>
      <td class="num">${COP(e.amount)}</td>
      <td><span class="status">${e.reversed?T.reversed:T.posted}</span></td>
-   </tr>`).join(''):`<tr><td colspan="6" class="none">${T.none2}</td></tr>`}</tbody></table></div>
+     <td>${reviewCell(id,e)}</td>
+   </tr>`).join(''):`<tr><td colspan="7" class="none">${T.none2}</td></tr>`}</tbody></table></div>
   <p class="foot">${T.footClient}</p>`;
 }
 
@@ -380,7 +512,8 @@ function closeModal(){scrim.classList.remove('on');modal.innerHTML='';}
 scrim.addEventListener('click',e=>{if(e.target===scrim)closeModal();});
 function toast(msg){const el=document.createElement('div');el.className='toast';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),3400);}
 async function ensureAccounts(){if(!ACCOUNTS.length)ACCOUNTS=await api('/accounts');return ACCOUNTS;}
-const acctOptions=()=>ACCOUNTS.map(a=>`<option value="${a.code}">${a.code} · ${a.name}</option>`).join('');
+const acctLbl=a=>LANG==='ar'&&a.nameAr?a.nameAr:a.name;
+const acctOptions=()=>ACCOUNTS.map(a=>`<option value="${a.code}">${a.code} · ${acctLbl(a)}</option>`).join('');
 
 async function modalEntry(id){
   await ensureAccounts(); const T=t();
@@ -416,6 +549,8 @@ async function modalInvoice(id){
       <div class="two"><div class="field"><label>${T.date}</label><input id="i_date" type="date" value="2026-06-25"></div>
         <div class="field"><label>${T.base}</label><input id="i_base" type="number" min="0" value="4000000"></div></div>
       <div class="field"><label>${T.concept}</label><input id="i_con" value="Venta de mercancía"></div>
+      <div class="two"><div class="field"><label>${T.reteicaLbl}</label><input id="i_ica" type="number" min="0" value="0"></div>
+        <div class="field"><label>${T.reteivaLbl}</label><input id="i_iva" type="number" min="0" value="0"></div></div>
       <div class="cufe" id="i_prev"></div>
     </div>
     <div class="mf"><button class="btn ink" onclick="closeModal()">${T.cancel}</button><button class="btn" onclick="submitInvoice('${id}')">${T.issue}</button></div>`);
@@ -424,7 +559,7 @@ async function modalInvoice(id){
 function invPreview(){const el=document.getElementById('i_prev');if(!el)return;const b=+document.getElementById('i_base').value||0;const iva=Math.round(b*0.19),rete=Math.round(b*0.025);el.innerHTML=`${t().previewInv}<br><br>${t().base.replace(' (COP)','')} ${COP(b)} · IVA ${COP(iva)} · Retefuente −${COP(rete)} · Total ${COP(b+iva-rete)}`;}
 async function submitInvoice(id){
   const T=t();
-  try{const r=await api(`/clients/${id}/invoices`,{method:'POST',body:JSON.stringify({client:document.getElementById('i_cli').value||'—',acquirerId:document.getElementById('i_nit').value,date:document.getElementById('i_date').value,concept:document.getElementById('i_con').value,base:+document.getElementById('i_base').value||0})});
+  try{const r=await api(`/clients/${id}/invoices`,{method:'POST',body:JSON.stringify({client:document.getElementById('i_cli').value||'—',acquirerId:document.getElementById('i_nit').value,date:document.getElementById('i_date').value,concept:document.getElementById('i_con').value,base:+document.getElementById('i_base').value||0,reteIcaBps:+document.getElementById('i_ica').value||0,reteIvaBps:+document.getElementById('i_iva').value||0})});
     closeModal();toast(`${T.okInv} (${r.number})`);clientView(id);
   }catch(e){alert(e.message);}
 }
@@ -443,19 +578,309 @@ function showEntry(id,entryId){
     </div>
     <div class="mf"><button class="btn ink" onclick="closeModal()">${T.close}</button></div>`);
 }
-const accName=code=>{const a=ACCOUNTS.find(x=>x.code===code);return a?a.name:code;};
+const accName=code=>{const a=ACCOUNTS.find(x=>x.code===code);return a?acctLbl(a):code;};
+
+/* ---------- Prove-this-number provenance ---------- */
+async function prov(id,code){
+  const T=t();const p=await api(`/clients/${id}/provenance/${code}`);
+  let run=0;
+  const rows=p.lines.map(l=>{run+=l.contribution;return `<tr><td class="ref">${l.entryId}</td><td>${l.date}</td><td>${l.memo}</td><td class="num">${l.contribution<0?'−':''}${COP(Math.abs(l.contribution))}</td><td class="num">${COP(run)}</td><td class="ref" title="${l.hash||''}">${l.hash?l.hash.slice(0,12)+'…':'—'}</td></tr>`;}).join('');
+  openModal(`<div class="mh">${T.proveTitle} ${p.code} · ${p.name}<button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb">
+      <p class="lead" style="margin-top:0">${T.tracedBy}</p>
+      <table class="lines"><thead><tr><th>${T.jRef}</th><th>${T.date}</th><th>${T.memo}</th><th>${T.contribution}</th><th>${T.runningBal}</th><th>${T.evHash}</th></tr></thead><tbody>${rows||`<tr><td colspan="6" class="none">${T.none2}</td></tr>`}</tbody></table>
+      <div class="bal"><span>${p.name}</span><span class="ok">· ${COP(p.natural)}</span></div>
+    </div>
+    <div class="mf"><button class="btn ink" onclick="closeModal()">${T.close}</button></div>`);
+}
+
+/* ---------- Working paper ---------- */
+async function newWP(id){
+  await ensureAccounts();const T=t();
+  openModal(`<div class="mh">${T.addPaper}<button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb">
+      <div class="two"><div class="field"><label>${T.account}</label><select id="w_acc">${acctOptions()}</select></div>
+        <div class="field"><label>${T.period}</label><input id="w_per" value="2026-06"></div></div>
+      <div class="field"><label>${T.support}</label><input id="w_sup" type="number" value="0"></div>
+      <div class="field"><label>${T.memo}</label><input id="w_note" value=""></div>
+      <p class="lead" style="margin:0">${T.tied} / ${T.untied}: ${LANG==='ar'?'الفرق بين الرصيد الدفتري والمستند الخارجي يحدد المطابقة.':'the gap between the booked balance and external support determines the tie-out.'}</p>
+    </div>
+    <div class="mf"><button class="btn ink" onclick="closeModal()">${T.cancel}</button><button class="btn" onclick="submitWP('${id}')">${T.create}</button></div>`);
+}
+async function submitWP(id){
+  const T=t();
+  try{await api(`/clients/${id}/working-papers`,{method:'POST',body:JSON.stringify({accountCode:document.getElementById('w_acc').value,period:document.getElementById('w_per').value,supportBalance:+document.getElementById('w_sup').value||0,notes:document.getElementById('w_note').value})});
+    closeModal();toast(T.addPaper+' ✓');clientView(id);
+  }catch(e){alert(e.message);}
+}
+
+/* ---------- Verifiable sharing ---------- */
+async function share(id){
+  const T=t();
+  const r=await api(`/clients/${id}/share`,{method:'POST'});
+  const url=location.origin+r.url;
+  openModal(`<div class="mh">${T.shareTitle}<button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb">
+      <p class="lead" style="margin-top:0">${T.shareDesc}</p>
+      <div class="verifybox" id="s_url">${url}</div>
+      <div style="margin-top:12px"><button class="btn" onclick="copyLink('${url}')">${T.copy}</button>
+        <a class="btn ink" style="text-decoration:none;display:inline-block" href="${url}" target="_blank">${LANG==='ar'?'فتح':'Open'}</a></div>
+    </div>
+    <div class="mf"><button class="btn ink" onclick="closeModal()">${T.close}</button></div>`);
+}
+function copyLink(url){navigator.clipboard&&navigator.clipboard.writeText(url);toast(t().copied);}
+window.prov=prov;window.newWP=newWP;window.submitWP=submitWP;window.share=share;window.copyLink=copyLink;
+
+/* ---------- maker-checker review ---------- */
+function reviewCell(id,e){
+  const T=t();
+  if(REVIEWS.has(e.id))return `<span class="status" style="color:var(--olive)">${T.reviewedBy} ✓</span>`;
+  if(can('accountant')&&e.user!==USER.name)return `<button class="act" onclick="event.stopPropagation();reviewEntry('${id}','${e.id}')">${T.review}</button>`;
+  return `<span class="status" style="color:var(--faint)">${T.pending}</span>`;
+}
+async function reviewEntry(id,eid){
+  try{await api(`/clients/${id}/entries/${eid}/review`,{method:'POST'});clientView(id);}catch(e){alert(e.message);}
+}
+
+/* ---------- bank reconciliation ---------- */
+function reconcile(id){
+  const T=t();
+  const sample=`2026-06-01,Consignación aporte socios,60000000\n2026-06-30,Comisión bancaria,-45000`;
+  openModal(`<div class="mh">${T.reconTitle}<button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb">
+      <p class="lead" style="margin-top:0">${T.reconDesc}</p>
+      <textarea id="rc_csv" style="width:100%;height:110px;font-family:ui-monospace,monospace;font-size:12px;border:1px solid var(--line);border-radius:3px;padding:10px;background:#fffdf8">${sample}</textarea>
+      <div style="margin-top:10px"><button class="btn" onclick="doReconcile('${id}')">${T.run}</button></div>
+      <div id="rc_out"></div>
+    </div>
+    <div class="mf"><button class="btn ink" onclick="closeModal()">${T.close}</button></div>`);
+}
+async function doReconcile(id){
+  const T=t();
+  try{
+    const r=await api(`/clients/${id}/reconcile`,{method:'POST',body:JSON.stringify({csv:document.getElementById('rc_csv').value})});
+    const sec=(title,color,rows)=>`<div class="bal" style="margin-top:14px"><span style="color:${color};font-weight:600">${title}</span></div><table class="lines"><tbody>${rows||`<tr><td class="none">—</td></tr>`}</tbody></table>`;
+    const m=r.matches.map(x=>`<tr><td>${x.date}</td><td>${x.description}</td><td class="num">${COP(x.amount)}</td><td class="ref">${x.entryId}</td></tr>`).join('');
+    const us=r.unmatchedStatement.map(x=>`<tr><td>${x.date}</td><td>${x.description}</td><td class="num">${COP(x.amount)}</td><td></td></tr>`).join('');
+    const ul=r.unmatchedLedger.map(x=>`<tr><td>${x.date}</td><td>${x.memo}</td><td class="num">${COP(x.delta)}</td><td class="ref">${x.entryId}</td></tr>`).join('');
+    document.getElementById('rc_out').innerHTML=
+      `<div class="closebar ${r.matchedCount===r.statementCount?'ok':'no'}" style="margin-top:14px;border:0">${r.matchedCount} ${T.of} ${r.statementCount} ${T.reconciled}</div>`+
+      sec(T.matchedC,'var(--olive)',m)+sec(T.unmatchedS,'var(--rust)',us)+sec(T.unmatchedL,'var(--ochre)',ul);
+  }catch(e){alert(e.message);}
+}
+
+/* ---------- CSV export ---------- */
+async function exportCSV(id,kind){
+  const r=await fetch(`/api/clients/${id}/export/${kind}.csv`,{headers:{authorization:'Bearer '+TOKEN}});
+  if(!r.ok){alert('Export failed');return;}
+  const blob=await r.blob();const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`${kind}.csv`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
+async function exportPDF(id){
+  const r=await fetch(`/api/clients/${id}/statements.pdf?lang=${LANG}&period=2026-06`,{headers:{authorization:'Bearer '+TOKEN}});
+  if(!r.ok){alert('Export failed');return;}
+  const blob=await r.blob();const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='estados-financieros.pdf';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
+window.reviewEntry=reviewEntry;window.reconcile=reconcile;window.doReconcile=doReconcile;window.exportCSV=exportCSV;window.exportPDF=exportPDF;
+
+/* ---------- close checklist ---------- */
+function checkRow(id,it){
+  const T=t();const label=CLABEL[it.key]?CLABEL[it.key][LANG]:it.label;
+  const clickable=!it.auto&&can('staff');
+  const meta=it.auto?`<span class="autotag">${T.autoTag}</span>`:(it.by?`<span class="cby">${T.by} ${it.by}</span>`:'');
+  return `<div class="ckrow ${clickable?'clk':''}" ${clickable?`onclick="toggleCheck('${id}','${it.key}',${!it.done})"`:''}>
+    <span class="ckmark ${it.done?'on':''}">✓</span><span class="cklabel">${label}</span><span style="flex:1"></span>${meta}</div>`;
+}
+async function toggleCheck(id,key,done){
+  try{await api(`/clients/${id}/checklist/${key}`,{method:'POST',body:JSON.stringify({period:'2026-06',done})});clientView(id);}catch(e){alert(e.message);}
+}
+
+/* ---------- recurring templates ---------- */
+async function templatesModal(id){
+  await ensureAccounts();const T=t();
+  const tpls=await api(`/clients/${id}/templates`);
+  const list=tpls.length?tpls.map(tp=>`<div class="tplrow">
+      <span class="nm">${tp.name}</span><span class="ref">${tp.lines.length} ${LANG==='ar'?'سطر':'lines'}</span><span style="flex:1"></span>
+      <input type="date" id="td_${tp.id}" value="2026-07-01" style="padding:5px 7px">
+      <button class="btn" style="padding:5px 10px" onclick="postTemplate('${id}','${tp.id}')">${T.postTpl}</button>
+      <button class="act esc" onclick="delTemplate('${id}','${tp.id}')">${T.del}</button>
+    </div>`).join(''):`<div class="none">${T.noTemplates}</div>`;
+  const line=`<tr><td><select class="tacc">${acctOptions()}</select></td><td><input class="tdeb" type="number" min="0" placeholder="0"></td><td><input class="tcred" type="number" min="0" placeholder="0"></td></tr>`;
+  openModal(`<div class="mh">${T.templates}<button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb">
+      <p class="lead" style="margin-top:0">${T.tplHint}</p>
+      ${list}
+      <div class="ckhead" style="margin-top:18px">${T.newTemplate}</div>
+      <div class="field"><label>${T.templateName}</label><input id="tpl_name" placeholder="${LANG==='ar'?'إيجار شهري':'Monthly rent'}"></div>
+      <table class="lines"><thead><tr><th>${T.account}</th><th>${T.debit}</th><th>${T.credit}</th></tr></thead><tbody id="tpl_lines">${line}${line}</tbody></table>
+      <div class="bal" id="tpl_bal"></div>
+    </div>
+    <div class="mf"><button class="btn ink" onclick="closeModal()">${T.cancel}</button><button class="btn" onclick="saveTemplate('${id}')">${T.saveTpl}</button></div>`);
+  modal.addEventListener('input',tplBal);tplBal();
+}
+function tplReadLines(){return [...document.querySelectorAll('#tpl_lines tr')].map(tr=>({accountCode:tr.querySelector('.tacc').value,debit:+tr.querySelector('.tdeb').value||0,credit:+tr.querySelector('.tcred').value||0}));}
+function tplBal(){const T=t();const L=tplReadLines();if(!L.length)return;const d=L.reduce((s,x)=>s+x.debit,0),c=L.reduce((s,x)=>s+x.credit,0);const ok=Math.round(d*100)===Math.round(c*100)&&d>0;const bar=document.getElementById('tpl_bal');if(bar)bar.innerHTML=`<span>${T.debit}: ${COP(d)}</span><span>${T.credit}: ${COP(c)}</span><span class="${ok?'ok':'no'}">${ok?'· '+T.balanced:'· '+T.unbalanced+' '+COP(Math.abs(d-c))}</span>`;}
+async function saveTemplate(id){
+  const T=t();const name=document.getElementById('tpl_name').value.trim();if(!name){alert(T.templateName);return;}
+  const lines=tplReadLines().filter(l=>l.debit||l.credit).map(l=>({accountCode:l.accountCode,debit:l.debit||undefined,credit:l.credit||undefined}));
+  try{await api(`/clients/${id}/templates`,{method:'POST',body:JSON.stringify({name,memo:name,source:'',lines})});templatesModal(id);}
+  catch(e){alert(e.message);}
+}
+async function postTemplate(id,tid){
+  const T=t();const date=document.getElementById('td_'+tid).value;
+  try{await api(`/clients/${id}/templates/${tid}/post`,{method:'POST',body:JSON.stringify({date})});closeModal();toast(T.okEntry);clientView(id);}
+  catch(e){alert(e.message);}
+}
+async function delTemplate(id,tid){try{await api(`/clients/${id}/templates/${tid}`,{method:'DELETE'});templatesModal(id);}catch(e){alert(e.message);}}
+window.checkRow=checkRow;window.toggleCheck=toggleCheck;window.templatesModal=templatesModal;window.saveTemplate=saveTemplate;window.postTemplate=postTemplate;window.delTemplate=delTemplate;
+
+/* ---------- AR / AP subledger ---------- */
+function agingMini(a){
+  const T=t();const b=a.buckets;
+  return `<table class="fin" style="margin-bottom:4px"><tbody>
+    <tr><td>${T.agCurrent}</td><td class="num">${COP(b.current)}</td></tr>
+    <tr><td>${T.ag1}</td><td class="num">${COP(b.d1_30)}</td></tr>
+    <tr><td>${T.ag2}</td><td class="num">${COP(b.d31_60)}</td></tr>
+    <tr><td>${T.ag3}</td><td class="num">${COP(b.d61_90)}</td></tr>
+    <tr><td>${T.ag4}</td><td class="num">${COP(b.d90plus)}</td></tr>
+    <tr class="tot"><td>${T.outCol}</td><td class="num">${COP(a.total)}</td></tr>
+  </tbody></table>`;
+}
+function openList(id,rows){
+  const T=t();
+  if(!rows.length)return `<div class="none">${T.noOpen}</div>`;
+  return `<table><thead><tr><th>${T.jSource}</th><th>${T.jRef}</th><th>${T.dueCol}</th><th class="num">${T.outCol}</th><th></th></tr></thead><tbody>${rows.map(r=>`<tr>
+    <td>${r.contactName}</td><td class="ref">${r.docNumber}</td>
+    <td>${r.dueDate}${r.daysOverdue>0?` <span class="autotag" style="border-color:rgba(154,56,32,.4);color:var(--rust)">${r.daysOverdue}d ${T.overdueTag}</span>`:''}</td>
+    <td class="num">${COP(r.outstanding)}</td>
+    <td>${can('staff')?`<button class="act" onclick="payModal('${id}','${r.id}',${r.outstanding})">${T.payBtn}</button>`:''}</td>
+  </tr>`).join('')}</tbody></table>`;
+}
+function arapPanel(id,ar,ap){
+  const T=t();
+  return `<div class="panel"><div class="cap">${T.arap}</div>
+    <div class="grid" style="padding:16px 20px;gap:20px">
+      <div><div class="ckhead">${T.receivables}</div>${agingMini(ar)}${openList(id,ar.rows)}</div>
+      <div><div class="ckhead">${T.payables}</div>${agingMini(ap)}${openList(id,ap.rows)}</div>
+    </div></div>`;
+}
+async function billModal(id){
+  await ensureAccounts();const T=t();
+  const opts=ACCOUNTS.filter(a=>a.type==='expense'||a.type==='cogs'||a.type==='asset').map(a=>`<option value="${a.code}">${a.code} · ${acctLbl(a)}</option>`).join('');
+  openModal(`<div class="mh">${T.newBill}<button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb">
+      <div class="two"><div class="field"><label>${T.vendor}</label><input id="b_name" value=""></div>
+        <div class="field"><label>NIT</label><input id="b_nit" value=""></div></div>
+      <div class="two"><div class="field"><label>${T.date}</label><input id="b_date" type="date" value="2026-06-15"></div>
+        <div class="field"><label>${T.expenseAcct}</label><select id="b_acct">${opts}</select></div></div>
+      <div class="field"><label>${T.base}</label><input id="b_base" type="number" min="0" value="1000000"></div>
+      <div class="cufe" id="b_prev"></div>
+    </div>
+    <div class="mf"><button class="btn ink" onclick="closeModal()">${T.cancel}</button><button class="btn" onclick="submitBill('${id}')">${T.createBill}</button></div>`);
+  modal.addEventListener('input',billPreview);billPreview();
+}
+function billPreview(){const el=document.getElementById('b_prev');if(!el)return;const b=+document.getElementById('b_base').value||0;const iva=Math.round(b*0.19),rete=Math.round(b*0.025);el.innerHTML=`IVA ${COP(iva)} · Retefuente −${COP(rete)} · ${t().payables.split('—')[0].trim()}: ${COP(b+iva-rete)}`;}
+async function submitBill(id){
+  const T=t();
+  try{await api(`/clients/${id}/bills`,{method:'POST',body:JSON.stringify({vendorName:document.getElementById('b_name').value||'—',vendorNit:document.getElementById('b_nit').value,date:document.getElementById('b_date').value,base:+document.getElementById('b_base').value||0,expenseAccount:document.getElementById('b_acct').value})});
+    closeModal();toast(T.okBill);clientView(id);}catch(e){alert(e.message);}
+}
+function payModal(id,itemId,outstanding){
+  const T=t();
+  openModal(`<div class="mh">${T.payTitle}<button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb">
+      <div class="two"><div class="field"><label>${T.payAmount}</label><input id="p_amt" type="number" min="0" value="${outstanding}"></div>
+        <div class="field"><label>${T.date}</label><input id="p_date" type="date" value="2026-06-25"></div></div>
+    </div>
+    <div class="mf"><button class="btn ink" onclick="closeModal()">${T.cancel}</button><button class="btn" onclick="submitPayment('${id}','${itemId}')">${T.payBtn}</button></div>`);
+}
+async function submitPayment(id,itemId){
+  const T=t();
+  try{await api(`/clients/${id}/payments`,{method:'POST',body:JSON.stringify({openItemId:itemId,amount:+document.getElementById('p_amt').value||0,date:document.getElementById('p_date').value})});
+    closeModal();toast(T.okPay);clientView(id);}catch(e){alert(e.message);}
+}
+window.arapPanel=arapPanel;window.billModal=billModal;window.submitBill=submitBill;window.payModal=payModal;window.submitPayment=submitPayment;window.billPreview=billPreview;window.agingMini=agingMini;window.openList=openList;
+
+/* ---------- period lock ---------- */
+async function togglePeriod(id,action){
+  const T=t();
+  try{await api(`/clients/${id}/periods/2026-06/${action}`,{method:'POST'});toast(action==='lock'?T.okLock:T.okUnlock);clientView(id);}catch(e){alert(e.message);}
+}
+window.togglePeriod=togglePeriod;
+
+/* ---------- opening balances (migration) ---------- */
+function openingModal(id){
+  const T=t();
+  const sample=`111005,60000000,0\n143505,18000000,0\n310505,0,78000000`;
+  openModal(`<div class="mh">${T.openingBal}<button class="x" onclick="closeModal()">×</button></div>
+    <div class="mb">
+      <p class="lead" style="margin-top:0">${T.obHint}</p>
+      <div class="two"><div class="field"><label>${T.date}</label><input id="ob_date" type="date" value="2026-01-01"></div><div></div></div>
+      <textarea id="ob_csv" style="width:100%;height:120px;font-family:ui-monospace,monospace;font-size:12px;border:1px solid var(--line);border-radius:3px;padding:10px;background:#fffdf8">${sample}</textarea>
+    </div>
+    <div class="mf"><button class="btn ink" onclick="closeModal()">${T.cancel}</button><button class="btn" onclick="submitOpening('${id}')">${T.importBtn}</button></div>`);
+}
+async function submitOpening(id){
+  const T=t();
+  const lines=document.getElementById('ob_csv').value.split(/\r?\n/).map(r=>r.trim()).filter(Boolean).map(r=>{const [acc,d,c]=r.split(',');return {accountCode:(acc||'').trim(),debit:+d||undefined,credit:+c||undefined};});
+  try{await api(`/clients/${id}/opening-balances`,{method:'POST',body:JSON.stringify({date:document.getElementById('ob_date').value,lines})});closeModal();toast(T.okOpening);clientView(id);}
+  catch(e){alert(e.message);}
+}
+window.openingModal=openingModal;window.submitOpening=submitOpening;
 
 function setLang(l){
-  LANG=l; document.documentElement.lang=l;
+  LANG=l; document.documentElement.lang=l; document.documentElement.dir=(l==='ar'?'rtl':'ltr');
   document.getElementById('en').classList.toggle('on',l==='en');
-  document.getElementById('es').classList.toggle('on',l==='es');
+  document.getElementById('ar').classList.toggle('on',l==='ar');
   document.querySelector('[data-i="tagline"]').textContent=t().tagline;
+  setUserChip(); route();
+}
+function route(){
+  if(!USER){loginView();return;}
   (CURRENT.page==='client'?clientView(CURRENT.id):consoleView());
 }
+function setUserChip(){
+  const el=document.getElementById('userchip');
+  el.innerHTML = USER? `<span class="who">${USER.name}</span><span class="role">${USER.role}</span><a onclick="logout()">${t().logout}</a>` : '';
+}
+
+/* ---------- login ---------- */
+function loginView(){
+  const T=t();const DEMO=[['ana@audita.co','partner'],['carlos@audita.co','accountant'],['sofia@audita.co','staff'],['cliente@andina.co','viewer']];
+  view.innerHTML=`<div class="login">
+    <div class="word2">Audit<em>a</em></div><div class="sub2">${T.tagline}</div>
+    <div class="panel"><div class="bd" style="padding:20px 22px">
+      <div class="field"><label>${T.email}</label><input id="lg_email" value="ana@audita.co"></div>
+      <div class="field"><label>${T.password}</label><input id="lg_pass" type="password" value="audita" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="btn" style="width:100%;justify-content:center" onclick="doLogin()">${T.signin}</button>
+      <div class="loginerr" id="lg_err"></div>
+      <div class="lead" style="margin:6px 0 6px">${T.quick}</div>
+      <div class="quick">${DEMO.map(([e,r])=>`<button onclick="doLogin('${e}')"><span>${e}</span><span class="r">${r}</span></button>`).join('')}</div>
+    </div></div></div>`;
+}
+async function doLogin(email){
+  const T=t();
+  const em=email||document.getElementById('lg_email').value;
+  const pw=email?'audita':document.getElementById('lg_pass').value;
+  try{
+    const r=await fetch('/api/auth/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:em,password:pw})});
+    if(!r.ok)throw new Error();
+    const data=await r.json();
+    TOKEN=data.token; USER=data.user; localStorage.setItem('audita_token',TOKEN);
+    CURRENT={page:'console',id:null}; setUserChip(); consoleView();
+  }catch(e){const el=document.getElementById('lg_err');if(el)el.textContent=T.badLogin;}
+}
+function logout(){TOKEN='';USER=null;localStorage.removeItem('audita_token');CURRENT={page:'console',id:null};setUserChip();loginView();}
+window.doLogin=doLogin;window.logout=logout;
 window.setLang=setLang;window.consoleView=consoleView;window.clientView=clientView;window.setStatus=setStatus;
 window.modalEntry=modalEntry;window.modalInvoice=modalInvoice;window.addLine=addLine;window.submitEntry=submitEntry;window.submitInvoice=submitInvoice;window.showEntry=showEntry;window.closeModal=closeModal;
 
-setLang('en');
+async function boot(){
+  if(TOKEN){ try{ USER=await api('/me'); }catch{ USER=null; TOKEN=''; localStorage.removeItem('audita_token'); } }
+  setLang('en');
+}
+boot();
 </script>
 </body>
 </html>

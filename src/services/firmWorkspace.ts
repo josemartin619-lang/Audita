@@ -13,12 +13,11 @@ import { Money } from '../domain/money.js';
 import { Repository } from '../persistence/repository.js';
 import { MemoryRepository } from '../persistence/memoryRepo.js';
 import { EInvoicingProvider } from '../einvoicing/provider.js';
+import { ZatcaEInvoicingProvider } from '../einvoicing/zatcaProvider.js';
 import { LedgerService } from './ledgerService.js';
 import { InvoiceService } from './invoiceService.js';
 import { scoreRisk, RiskScore } from '../domain/riskScoring.js';
 import { isOpen } from '../domain/findings.js';
-import { Jurisdiction } from '../domain/jurisdiction.js';
-import { COLOMBIA } from '../domain/jurisdictions/colombia.js';
 
 export interface ClientMeta {
   clientId: string;
@@ -39,11 +38,9 @@ export interface FirmOptions {
   relatedParties?: readonly string[];
   /** Provide a tenant-scoped repository per client (defaults to in-memory). */
   repoFactory?: (clientId: string) => Repository;
-  /** Provide the e-invoicing provider per client (defaults to the jurisdiction's provider). */
+  /** Provide the e-invoicing provider per client (defaults to sandbox). */
   providerFactory?: (meta: ClientMeta) => EInvoicingProvider;
   clock?: () => string;
-  /** Defaults to Colombia — the original, fully-tested jurisdiction. */
-  jurisdiction?: Jurisdiction;
 }
 
 export interface ConsoleRow {
@@ -56,11 +53,8 @@ export interface ConsoleRow {
 
 export class FirmWorkspace {
   private readonly clients = new Map<string, ClientLedger>();
-  private readonly jurisdiction: Jurisdiction;
 
-  constructor(private readonly opts: FirmOptions) {
-    this.jurisdiction = opts.jurisdiction ?? COLOMBIA;
-  }
+  constructor(private readonly opts: FirmOptions) {}
 
   addClient(meta: ClientMeta): ClientLedger {
     if (this.clients.has(meta.clientId)) {
@@ -72,10 +66,9 @@ export class FirmWorkspace {
       approvalThreshold: this.opts.approvalThreshold,
       relatedParties: this.opts.relatedParties,
       clock: this.opts.clock,
-      jurisdiction: this.jurisdiction,
     });
-    const provider = this.opts.providerFactory?.(meta) ?? this.jurisdiction.makeProvider(meta);
-    const invoices = new InvoiceService(repo, ledger, provider, this.jurisdiction);
+    const provider = this.opts.providerFactory?.(meta) ?? new ZatcaEInvoicingProvider({ sellerName: meta.name, vatNumber: meta.ofeNit });
+    const invoices = new InvoiceService(repo, ledger, provider);
     const cl: ClientLedger = { meta, repo, ledger, invoices };
     this.clients.set(meta.clientId, cl);
     return cl;

@@ -26,7 +26,7 @@ async function main() {
   // Opening capital
   await ledger.post({
     date: '2026-06-01', memo: 'Aporte inicial de capital', source: 'Socios', user: 'j.martin',
-    lines: [{ accountCode: '111005', debit: pesos(60_000_000) }, { accountCode: '310505', credit: pesos(60_000_000) }],
+    lines: [{ accountCode: '1010', debit: pesos(60_000_000) }, { accountCode: '3000', credit: pesos(60_000_000) }],
   });
 
   // Inventory purchase (Dr inventory + Dr IVA descontable, Cr banco)
@@ -35,9 +35,9 @@ async function main() {
     await ledger.post({
       date: '2026-06-03', memo: 'Compra de inventario', source: 'Distribuidora Norte', user: 'j.martin',
       lines: [
-        { accountCode: '143505', debit: base },
-        { accountCode: '135515', debit: iva },
-        { accountCode: '111005', credit: base + iva },
+        { accountCode: '1200', debit: base },
+        { accountCode: '1150', debit: iva },
+        { accountCode: '1010', credit: base + iva },
       ],
     });
   }
@@ -50,7 +50,7 @@ async function main() {
   // ANOMALY: weekend + round + manual cash adjustment (2026-06-13 is Saturday)
   await ledger.post({
     date: '2026-06-13', memo: 'Ajuste de caja — soporte pendiente', source: 'Ajuste manual', user: 'j.martin',
-    lines: [{ accountCode: '513505', debit: pesos(2_000_000) }, { accountCode: '110505', credit: pesos(2_000_000) }],
+    lines: [{ accountCode: '6000', debit: pesos(2_000_000) }, { accountCode: '1000', credit: pesos(2_000_000) }],
   });
 
   await invoices.issue({ client: 'Distrialimentos SAS', acquirerId: '830444', date: '2026-06-16', concept: 'Venta', base: pesos(5_600_000), ofeNit: OFE_NIT });
@@ -60,7 +60,7 @@ async function main() {
     const base = pesos(950_000), iva = applyRateBps(base, 1900);
     await ledger.post({
       date: '2026-06-18', memo: 'Servicios de consultoría', source: 'Asesorías JJ', user: 'j.martin',
-      lines: [{ accountCode: '523505', debit: base }, { accountCode: '135515', debit: iva }, { accountCode: '111005', credit: base + iva }],
+      lines: [{ accountCode: '6100', debit: base }, { accountCode: '1150', debit: iva }, { accountCode: '1010', credit: base + iva }],
     });
   }
 
@@ -120,13 +120,13 @@ async function main() {
   // ---- Working papers + close ----
   const now = '2026-07-01T09:00:00.000Z';
   const wpBank = buildWorkingPaper({
-    id: 'WP-111005', accountCode: '111005', period: '2026-06', entries,
-    supportBalance: naturalBalance('111005', entries), // ties (certificado bancario matches)
+    id: 'WP-1010', accountCode: '1010', period: '2026-06', entries,
+    supportBalance: naturalBalance('1010', entries), // ties (certificado bancario matches)
     preparedBy: 'j.martin', notes: 'Conciliado contra certificado bancario.', createdAt: now,
   });
   const wpClients = buildWorkingPaper({
-    id: 'WP-130505', accountCode: '130505', period: '2026-06', entries,
-    supportBalance: naturalBalance('130505', entries) - pesos(1_000_000), // deliberate untie
+    id: 'WP-1100', accountCode: '1100', period: '2026-06', entries,
+    supportBalance: naturalBalance('1100', entries) - pesos(1_000_000), // deliberate untie
     preparedBy: 'j.martin', notes: 'Diferencia por confirmar con cliente.', createdAt: now,
   });
   await repo.saveWorkingPaper(wpBank);

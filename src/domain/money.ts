@@ -42,18 +42,18 @@ export function abs(m: Money): Money {
   return m < 0n ? -m : m;
 }
 
-/** Format centavos as Colombian pesos, e.g. 6000000000n -> "$60.000.000,00". */
+/** Format minor units (halalas) as Saudi Riyal, e.g. 600000n -> "SAR 6,000.00". */
 export function formatCOP(m: Money, withCents = false): string {
   const sign = m < 0n ? '-' : '';
   const absVal = m < 0n ? -m : m;
-  const wholePesos = absVal / 100n;
+  const whole = absVal / 100n;
   const cents = absVal % 100n;
-  const grouped = wholePesos
+  const grouped = whole
     .toString()
-    .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   return withCents
-    ? `${sign}$${grouped},${cents.toString().padStart(2, '0')}`
-    : `${sign}$${grouped}`;
+    ? `${sign}SAR ${grouped}.${cents.toString().padStart(2, '0')}`
+    : `${sign}SAR ${grouped}`;
 }
 
 /** Convert to a JSON-safe number of pesos (for reports/UI only, never for math). */

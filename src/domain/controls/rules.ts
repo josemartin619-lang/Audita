@@ -8,8 +8,7 @@
 import { JournalEntry, entryAmount } from '../journal.js';
 import { Money, abs, formatCOP } from '../money.js';
 import { Severity } from '../findings.js';
-import { Jurisdiction } from '../jurisdiction.js';
-import { COLOMBIA } from '../jurisdictions/colombia.js';
+import { ACCT } from '../accounts.js';
 
 export interface RuleHit {
   rule: string;
@@ -21,14 +20,12 @@ export interface RuleHit {
 export interface RuleContext {
   /** All previously posted (non-reversed) entries, for cross-entry rules. */
   priorEntries: readonly JournalEntry[];
-  /** Approval threshold used by threshold/round rules (centavos). */
+  /** Approval threshold used by threshold/round rules (minor units). */
   approvalThreshold: Money;
   /** Invoice numbers already issued, for sequence-gap detection. */
   issuedInvoiceNumbers?: readonly string[];
-  /** Related-party names/NITs to watch (conflict-of-interest / transfer pricing). */
+  /** Related-party names/IDs to watch (conflict-of-interest / transfer pricing). */
   relatedParties?: readonly string[];
-  /** Active jurisdiction — resolves which accounts count as cash/bank, etc. */
-  jurisdiction: Jurisdiction;
 }
 
 type Rule = (e: JournalEntry, ctx: RuleContext) => RuleHit[];
@@ -41,10 +38,10 @@ const weekendPosting: Rule = (e) => {
   const d = dayOfWeek(e.date);
   if (d === 0 || d === 6) {
     return [{
-      rule: 'Registro en fin de semana',
+      rule: 'Weekend posting',
       severity: 'medium',
       entryId: e.id,
-      message: `Asiento fechado ${e.date} (${d === 0 ? 'domingo' : 'sábado'}). Revisar soporte.`,
+      message: `Entry dated ${e.date} (${d === 0 ? 'Sunday' : 'Saturday'}). Review supporting document.`,
     }];
   }
   return [];
@@ -53,28 +50,28 @@ const weekendPosting: Rule = (e) => {
 /** 2. Large, perfectly round amounts — often manual estimates or adjustments. */
 const roundAmount: Rule = (e) => {
   const amt = entryAmount(e);
-  // >= 1,000,000 pesos (100,000,000 centavos) and a multiple of 100,000 pesos
+  // >= 1,000,000 (100,000,000 minor units) and a multiple of 100,000
   if (amt >= 100_000_000n && amt % 10_000_000n === 0n) {
     return [{
-      rule: 'Monto redondo inusual',
+      rule: 'Unusual round amount',
       severity: 'medium',
       entryId: e.id,
-      message: `Valor exacto ${formatCOP(amt)} sin decimales. Posible estimación o ajuste manual.`,
+      message: `Exact value ${formatCOP(amt)}, no cents. Possible estimate or manual adjustment.`,
     }];
   }
   return [];
 };
 
-/** 3. Amount just under an approval threshold — possible fraccionamiento. */
+/** 3. Amount just under an approval threshold — possible structuring. */
 const underThreshold: Rule = (e, ctx) => {
   const amt = entryAmount(e);
   const floor = (ctx.approvalThreshold * 90n) / 100n; // within 10% below
   if (amt >= floor && amt < ctx.approvalThreshold) {
     return [{
-      rule: 'Monto bajo umbral de control',
+      rule: 'Amount just under approval threshold',
       severity: 'high',
       entryId: e.id,
-      message: `Valor ${formatCOP(amt)} justo por debajo del umbral de aprobación ${formatCOP(ctx.approvalThreshold)}. Posible fraccionamiento.`,
+      message: `Value ${formatCOP(amt)} sits just below the approval threshold ${formatCOP(ctx.approvalThreshold)}. Possible transaction splitting.`,
     }];
   }
   return [];
@@ -88,10 +85,10 @@ const duplicate: Rule = (e, ctx) => {
   );
   if (dup) {
     return [{
-      rule: 'Posible duplicado',
+      rule: 'Possible duplicate',
       severity: 'high',
       entryId: e.id,
-      message: `Mismo valor ${formatCOP(amt)}, misma fecha y contraparte que ${dup.id}. Verificar doble registro.`,
+      message: `Same value ${formatCOP(amt)}, same date and counterparty as ${dup.id}. Check for a double posting.`,
     }];
   }
   return [];
@@ -109,26 +106,25 @@ const benfordLeadingDigit: Rule = (e) => {
   const firstDigit = Number(abs(amt).toString()[0]);
   if (firstDigit === 9) {
     return [{
-      rule: 'Dígito inicial atípico (Benford)',
+      rule: 'Atypical leading digit (Benford)',
       severity: 'low',
       entryId: e.id,
-      message: `El valor ${formatCOP(amt)} inicia en 9; frecuencia baja según la ley de Benford. Señal débil, correlacionar en el periodo.`,
+      message: `Value ${formatCOP(amt)} starts with 9; low frequency under Benford's law. Weak signal, correlate across the period.`,
     }];
   }
   return [];
 };
 
 /** 6. Manual adjustment to a cash/bank account — higher scrutiny. */
-const manualCashAdjustment: Rule = (e, ctx) => {
-  const { CASH, BANK } = ctx.jurisdiction.accounts;
-  const touchesCash = e.lines.some((l) => l.accountCode === CASH || l.accountCode === BANK);
-  const looksManual = /ajuste|manual/i.test(`${e.memo} ${e.source}`);
+const manualCashAdjustment: Rule = (e) => {
+  const touchesCash = e.lines.some((l) => l.accountCode === ACCT.CASH || l.accountCode === ACCT.BANK);
+  const looksManual = /adjust|manual/i.test(`${e.memo} ${e.source}`);
   if (touchesCash && looksManual) {
     return [{
-      rule: 'Ajuste manual a caja/bancos',
+      rule: 'Manual cash/bank adjustment',
       severity: 'medium',
       entryId: e.id,
-      message: `Movimiento manual sobre caja/bancos: "${e.memo}". Requiere soporte y aprobación.`,
+      message: `Manual movement on cash/bank: "${e.memo}". Requires supporting document and approval.`,
     }];
   }
   return [];
@@ -140,10 +136,10 @@ const relatedParty: Rule = (e, ctx) => {
   const hit = watch.find((w) => e.source.toLowerCase().includes(w.toLowerCase()));
   if (hit) {
     return [{
-      rule: 'Transacción con parte relacionada',
+      rule: 'Related-party transaction',
       severity: 'medium',
       entryId: e.id,
-      message: `Contraparte "${e.source}" figura en la lista de partes relacionadas. Verificar valor de mercado y revelación (NIIF / precios de transferencia).`,
+      message: `Counterparty "${e.source}" is on the related-parties list. Verify arm's-length value and disclosure (IFRS / transfer pricing).`,
     }];
   }
   return [];
@@ -159,11 +155,8 @@ export const PER_ENTRY_RULES: Rule[] = [
   relatedParty,
 ];
 
-/** Cross-entry: detect gaps in the invoice consecutive numbering (regulator-mandated in every jurisdiction so far). */
-export function invoiceSequenceGaps(
-  numbers: readonly string[],
-  jurisdiction: Jurisdiction = COLOMBIA,
-): RuleHit[] {
+/** Cross-entry: detect gaps in the invoice consecutive numbering (ZATCA). */
+export function invoiceSequenceGaps(numbers: readonly string[]): RuleHit[] {
   const parsed = numbers
     .map((n) => ({ n, seq: parseInt(n.split('-')[1] ?? '', 10) }))
     .filter((x) => Number.isFinite(x.seq))
@@ -173,12 +166,12 @@ export function invoiceSequenceGaps(
     const gap = parsed[i]!.seq - parsed[i - 1]!.seq;
     if (gap > 1) {
       for (let missing = parsed[i - 1]!.seq + 1; missing < parsed[i]!.seq; missing++) {
-        const code = `${jurisdiction.invoiceNumberPrefix}-${String(missing).padStart(4, '0')}`;
+        const code = `FE-${String(missing).padStart(4, '0')}`;
         hits.push({
-          rule: 'Salto en consecutivo',
+          rule: 'Numbering gap',
           severity: 'medium',
           entryId: '—',
-          message: jurisdiction.sequenceGapMessage(code),
+          message: `Invoice ${code} is missing from the issued sequence. ZATCA requires continuous numbering (ICV / PIH chain).`,
         });
       }
     }

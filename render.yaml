@@ -1,0 +1,16 @@
+# Render Blueprint — one-click deploy.
+# In Render: New → Blueprint → connect this repo. Render reads this file,
+# builds the Dockerfile, generates a strong JWT secret, and gives you a public
+# HTTPS URL. No manual env setup needed to get a trial running.
+services:
+  - type: web
+    name: audita
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: AUDITA_JWT_SECRET
+        generateValue: true   # Render creates a secure random secret for you

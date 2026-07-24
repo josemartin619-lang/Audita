@@ -84,12 +84,12 @@ export function assembleClosePackage(input: {
 }): ClosePackage {
   const untied = input.workingPapers.filter((wp) => abs(wp.difference) !== ZERO);
   const blockers: string[] = [];
-  if (!input.trialBalanceBalanced) blockers.push('La balanza de comprobación no cuadra.');
-  if (!input.auditTrailValid) blockers.push('El rastro de evidencia está roto (posible alteración).');
+  if (!input.trialBalanceBalanced) blockers.push('Trial balance does not tie.');
+  if (!input.auditTrailValid) blockers.push('The evidence trail is broken (possible tampering).');
   if (input.openHighFindings > 0)
-    blockers.push(`${input.openHighFindings} hallazgo(s) de severidad alta sin resolver.`);
+    blockers.push(`${input.openHighFindings} unresolved high-severity finding(s).`);
   if (untied.length > 0)
-    blockers.push(`${untied.length} papel(es) de trabajo sin conciliar (tie-out ≠ 0).`);
+    blockers.push(`${untied.length} working paper(s) not tied out (tie-out ≠ 0).`);
   return {
     period: input.period,
     generatedAt: input.generatedAt,

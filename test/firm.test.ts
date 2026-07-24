@@ -10,7 +10,7 @@ describe('multi-tenant firm workspace', () => {
     const a = firm.addClient({ clientId: 'a', name: 'A', ofeNit: '900' });
     const b = firm.addClient({ clientId: 'b', name: 'B', ofeNit: '901' });
     await a.ledger.post({ date: '2026-06-10', memo: 'A entry', source: 's', user: 'f',
-      lines: [{ accountCode: '111005', debit: pesos(1_000_000) }, { accountCode: '310505', credit: pesos(1_000_000) }] });
+      lines: [{ accountCode: '1010', debit: pesos(1_000_000) }, { accountCode: '3000', credit: pesos(1_000_000) }] });
 
     expect((await a.repo.listEntries()).length).toBe(1);
     expect((await b.repo.listEntries()).length).toBe(0); // B cannot see A's entry
@@ -28,7 +28,7 @@ describe('multi-tenant firm workspace', () => {
     firm.addClient({ clientId: 'clean', name: 'Clean', ofeNit: '901' });
     // create findings on the risky client (weekend + round + duplicate)
     await risky.ledger.post({ date: '2026-06-13', memo: 'Ajuste manual', source: 'Ajuste manual', user: 'f',
-      lines: [{ accountCode: '513505', debit: pesos(2_000_000) }, { accountCode: '110505', credit: pesos(2_000_000) }] });
+      lines: [{ accountCode: '6000', debit: pesos(2_000_000) }, { accountCode: '1000', credit: pesos(2_000_000) }] });
     const rows = await firm.console();
     expect(rows[0]!.clientId).toBe('risky');
     expect(rows[0]!.risk.score).toBeGreaterThan(rows[1]!.risk.score);

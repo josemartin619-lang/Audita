@@ -35,9 +35,9 @@ describe('DIAN e-invoicing (sandbox) + booking', () => {
     const { repo, invoices } = make();
     const base = pesos(4_000_000);
     const inv = await invoices.issue({ client: 'Cliente B', acquirerId: '830222', date: '2026-06-10', concept: 'Venta', base, ofeNit: '900123456' });
-    expect(inv.iva).toBe(applyRateBps(base, 1900));
-    expect(inv.rete).toBe(applyRateBps(base, 250));
-    expect(inv.total).toBe(base + inv.iva - inv.rete);
+    expect(inv.iva).toBe(applyRateBps(base, 1500)); // KSA VAT 15%
+    expect(inv.rete).toBe(0n); // no KSA buyer withholding
+    expect(inv.total).toBe(base + inv.iva);
     const tb = trialBalance(await repo.listEntries());
     expect(tb.balanced).toBe(true);
   });
@@ -48,6 +48,6 @@ describe('DIAN e-invoicing (sandbox) + booking', () => {
     invoices.skipNumbers(1); // skip FE-0002
     await invoices.issue({ client: 'B', acquirerId: '2', date: '2026-06-11', concept: 'V', base: pesos(500_000), ofeNit: '900' });
     const findings = await repo.listFindings();
-    expect(findings.some((f) => f.rule === 'Salto en consecutivo')).toBe(true);
+    expect(findings.some((f) => f.rule === 'Numbering gap')).toBe(true);
   });
 });

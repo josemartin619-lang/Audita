@@ -14,11 +14,11 @@ describe('population analytics', () => {
     for (let i = 0; i < 4; i++) {
       await ledger.post({
         date: '2026-06-10', memo: `p${i}`, source: 'BurstCo', user: 't',
-        lines: [{ accountCode: '111005', debit: pesos(100_000 + i) }, { accountCode: '413505', credit: pesos(100_000 + i) }],
+        lines: [{ accountCode: '1010', debit: pesos(100_000 + i) }, { accountCode: '4000', credit: pesos(100_000 + i) }],
       });
     }
     const hits = velocityAnalysis(await repo.listEntries(), 3);
-    expect(hits.some((h) => h.rule === 'Velocidad de registro inusual')).toBe(true);
+    expect(hits.some((h) => h.rule === 'Unusual posting velocity')).toBe(true);
   });
 
   it('benford does not flag small samples, and computes a distribution', async () => {
@@ -26,7 +26,7 @@ describe('population analytics', () => {
     const ledger = new LedgerService(repo, { user: 't', approvalThreshold: pesos(1_000_000), clock });
     await ledger.post({
       date: '2026-06-10', memo: 'x', source: 's', user: 't',
-      lines: [{ accountCode: '111005', debit: pesos(123_000) }, { accountCode: '413505', credit: pesos(123_000) }],
+      lines: [{ accountCode: '1010', debit: pesos(123_000) }, { accountCode: '4000', credit: pesos(123_000) }],
     });
     const b = benfordAnalysis(await repo.listEntries());
     expect(b.n).toBe(1);
@@ -44,9 +44,9 @@ describe('related-party control', () => {
     });
     const { findings } = await ledger.post({
       date: '2026-06-10', memo: 'compra', source: 'Inversiones Familiares SAS', user: 't',
-      lines: [{ accountCode: '143505', debit: pesos(500_000) }, { accountCode: '111005', credit: pesos(500_000) }],
+      lines: [{ accountCode: '1200', debit: pesos(500_000) }, { accountCode: '1010', credit: pesos(500_000) }],
     });
-    expect(findings.some((f) => f.rule === 'Transacción con parte relacionada')).toBe(true);
+    expect(findings.some((f) => f.rule === 'Related-party transaction')).toBe(true);
   });
 });
 
@@ -56,10 +56,10 @@ describe('DIAN tax position', () => {
     const ledger = new LedgerService(repo, { user: 't', approvalThreshold: pesos(1_000_000), clock });
     // sale: Cr IVA 190,000
     await ledger.post({ date: '2026-06-10', memo: 'venta', source: 'c', user: 't',
-      lines: [{ accountCode: '111005', debit: pesos(1_190_000) }, { accountCode: '413505', credit: pesos(1_000_000) }, { accountCode: '240805', credit: pesos(190_000) }] });
+      lines: [{ accountCode: '1010', debit: pesos(1_190_000) }, { accountCode: '4000', credit: pesos(1_000_000) }, { accountCode: '2100', credit: pesos(190_000) }] });
     // purchase: Dr IVA descontable 76,000
     await ledger.post({ date: '2026-06-11', memo: 'compra', source: 'p', user: 't',
-      lines: [{ accountCode: '143505', debit: pesos(400_000) }, { accountCode: '135515', debit: pesos(76_000) }, { accountCode: '111005', credit: pesos(476_000) }] });
+      lines: [{ accountCode: '1200', debit: pesos(400_000) }, { accountCode: '1150', debit: pesos(76_000) }, { accountCode: '1010', credit: pesos(476_000) }] });
     const tax = taxPosition(await repo.listEntries());
     expect(tax.ivaGenerado).toBe(pesos(190_000));
     expect(tax.ivaDescontable).toBe(pesos(76_000));

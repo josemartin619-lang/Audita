@@ -57,7 +57,7 @@ export function scoreRisk(input: {
   if (sevPoints > 0) {
     const highs = open.filter((f) => f.severity === 'high').length;
     drivers.push(
-      `${open.length} hallazgo(s) abiertos${highs ? ` (${highs} de severidad alta)` : ''}`,
+      `${open.length} open finding(s)${highs ? ` (${highs} high-severity)` : ''}`,
     );
   }
 
@@ -65,7 +65,7 @@ export function scoreRisk(input: {
   const manual = input.entries.filter((e) => /ajuste|manual/i.test(`${e.memo} ${e.source}`)).length;
   const manualShare = manual / total;
   const manualPoints = Math.min(15, Math.round(manualShare * 60));
-  if (manualPoints > 0) drivers.push(`${Math.round(manualShare * 100)}% de asientos manuales/ajustes`);
+  if (manualPoints > 0) drivers.push(`${Math.round(manualShare * 100)}% manual entries/adjustments`);
 
   const weekend = input.entries.filter((e) => {
     const d = new Date(`${e.date}T12:00:00Z`).getUTCDay();
@@ -73,7 +73,7 @@ export function scoreRisk(input: {
   }).length;
   const weekendShare = weekend / total;
   const weekendPoints = Math.min(10, Math.round(weekendShare * 40));
-  if (weekendPoints > 0) drivers.push(`${weekend} asiento(s) en fin de semana`);
+  if (weekendPoints > 0) drivers.push(`${weekend} weekend entry(ies)`);
 
   const score = Math.min(100, sevPoints + manualPoints + weekendPoints);
   return {

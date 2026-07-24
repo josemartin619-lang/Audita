@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { MemoryRepository } from '../src/persistence/memoryRepo.js';
 import { LedgerService } from '../src/services/ledgerService.js';
 import { pesos } from '../src/domain/money.js';
-import { incomeStatement, balanceSheet, trialBalance, naturalBalance } from '../src/domain/reports.js';
+import { incomeStatement, balanceSheet, trialBalance, naturalBalance, cashFlowStatement } from '../src/domain/reports.js';
 import { buildWorkingPaper, assembleClosePackage, isTiedOut } from '../src/domain/workingPapers.js';
 
 const clock = () => '2026-06-15T12:00:00.000Z';
@@ -12,13 +12,13 @@ async function seeded() {
   const ledger = new LedgerService(repo, { user: 't', approvalThreshold: pesos(1_000_000), clock });
   // capital
   await ledger.post({ date: '2026-06-01', memo: 'capital', source: 'S', user: 't',
-    lines: [{ accountCode: '111005', debit: pesos(10_000_000) }, { accountCode: '310505', credit: pesos(10_000_000) }] });
+    lines: [{ accountCode: '1010', debit: pesos(10_000_000) }, { accountCode: '3000', credit: pesos(10_000_000) }] });
   // a sale: Dr banco 1,190,000 ; Cr ingresos 1,000,000 ; Cr IVA 190,000
   await ledger.post({ date: '2026-06-10', memo: 'venta', source: 'C', user: 't',
-    lines: [{ accountCode: '111005', debit: pesos(1_190_000) }, { accountCode: '413505', credit: pesos(1_000_000) }, { accountCode: '240805', credit: pesos(190_000) }] });
+    lines: [{ accountCode: '1010', debit: pesos(1_190_000) }, { accountCode: '4000', credit: pesos(1_000_000) }, { accountCode: '2100', credit: pesos(190_000) }] });
   // an expense: Dr gasto 500,000 ; Cr banco 500,000
   await ledger.post({ date: '2026-06-11', memo: 'gasto', source: 'P', user: 't',
-    lines: [{ accountCode: '513505', debit: pesos(500_000) }, { accountCode: '111005', credit: pesos(500_000) }] });
+    lines: [{ accountCode: '6000', debit: pesos(500_000) }, { accountCode: '1010', credit: pesos(500_000) }] });
   return repo;
 }
 
@@ -47,14 +47,28 @@ describe('financial reports', () => {
     const tb = trialBalance(entries);
     expect(tb.balanced).toBe(true);
   });
+
+  it('cash-flow statement classifies activities and reconciles to net change in cash', async () => {
+    const entries = await (await seeded()).listEntries();
+    const cf = cashFlowStatement(entries);
+    // seeded(): capital 10,000,000 (financing in), sale banked 1,190,000 (operating), expense 500,000 (operating out)
+    expect(cf.financing).toBe(pesos(10_000_000));
+    expect(cf.operating).toBe(pesos(1_190_000) - pesos(500_000)); // +690,000 net operating
+    expect(cf.investing).toBe(pesos(0));
+    // three activities sum to net change, which reconciles to closing cash (opening 0)
+    expect(cf.netChange).toBe(cf.operating + cf.financing + cf.investing);
+    expect(cf.closingCash).toBe(pesos(10_690_000));
+    expect(cf.reconciles).toBe(true);
+    expect(cf.openingCash).toBe(pesos(0));
+  });
 });
 
 describe('working papers + close', () => {
   it('a tied-out working paper has zero difference', async () => {
     const entries = await (await seeded()).listEntries();
     const wp = buildWorkingPaper({
-      id: 'WP-1', accountCode: '111005', period: '2026-06', entries,
-      supportBalance: naturalBalance('111005', entries), preparedBy: 't', createdAt: clock(),
+      id: 'WP-1', accountCode: '1010', period: '2026-06', entries,
+      supportBalance: naturalBalance('1010', entries), preparedBy: 't', createdAt: clock(),
     });
     expect(isTiedOut(wp)).toBe(true);
   });
@@ -62,15 +76,15 @@ describe('working papers + close', () => {
   it('blocks the close when a working paper does not tie out', async () => {
     const entries = await (await seeded()).listEntries();
     const untied = buildWorkingPaper({
-      id: 'WP-2', accountCode: '111005', period: '2026-06', entries,
-      supportBalance: naturalBalance('111005', entries) - pesos(1), preparedBy: 't', createdAt: clock(),
+      id: 'WP-2', accountCode: '1010', period: '2026-06', entries,
+      supportBalance: naturalBalance('1010', entries) - pesos(1), preparedBy: 't', createdAt: clock(),
     });
     const pkg = assembleClosePackage({
       period: '2026-06', generatedAt: clock(), trialBalanceBalanced: true, auditTrailValid: true,
       openHighFindings: 0, openFindings: 0, workingPapers: [untied],
     });
     expect(pkg.readyToClose).toBe(false);
-    expect(pkg.blockers.some((b) => /papel/.test(b))).toBe(true);
+    expect(pkg.blockers.some((b) => /working paper/.test(b))).toBe(true);
   });
 
   it('blocks the close when a high-severity finding is open', async () => {
