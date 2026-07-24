@@ -114,6 +114,22 @@
   .tin{width:64px;text-align:right;font-family:var(--mono);font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:#fff;}
   .tin:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(18,133,90,.12);}
   .tin:disabled{background:var(--panel);color:var(--faint);cursor:not-allowed;}
+  .fin tr.drill{cursor:pointer;transition:background .1s;}
+  .fin tr.drill:hover{background:rgba(18,133,90,.06);}
+  .fin tr.drill td:first-child{position:relative;}
+  .fin tr.drill td:first-child::after{content:'→';position:absolute;margin-left:9px;color:var(--green);opacity:0;transition:opacity .1s;font-family:var(--mono);}
+  .fin tr.drill:hover td:first-child::after{opacity:.9;}
+  .acttip{position:fixed;z-index:60;pointer-events:none;opacity:0;transform:translateY(3px);transition:opacity .1s,transform .1s;
+    background:var(--side);color:#fff;border-radius:10px;padding:11px 13px;min-width:210px;max-width:290px;
+    box-shadow:0 12px 34px rgba(0,0,0,.28);font-size:12.5px;line-height:1.3;}
+  .acttip.on{opacity:1;transform:translateY(0);}
+  .acttip .tt-h{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:7px;}
+  .acttip .tt-r{display:flex;justify-content:space-between;gap:16px;padding:2px 0;}
+  .acttip .tt-r .nm{color:rgba(255,255,255,.86);}
+  .acttip .tt-r .am{font-family:var(--mono);font-size:11.5px;white-space:nowrap;}
+  .acttip .tt-r.tt-tot{border-top:1px solid rgba(255,255,255,.16);margin-top:6px;padding-top:6px;font-weight:600;}
+  .acttip .tt-empty{color:rgba(255,255,255,.5);font-style:italic;}
+  .acttip .tt-go{font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--green);margin-top:8px;}
 
   /* ---------- RTL ---------- */
   [dir="rtl"] #app.on{grid-template-columns:1fr 236px;}
@@ -155,6 +171,7 @@
   </main>
 </div>
 <div class="toast" id="toast"></div>
+<div id="acctTip" class="acttip"></div>
 
 <script>
 let TOKEN=localStorage.getItem('aud_tok')||''; let USER=null; let LANG='en';
@@ -327,6 +344,27 @@ async function saveRates(id){
 async function viewDashboard(){
   const c=cur();setHead(c.name,navLabel(NAV[0]),'');
   const rep=await api(`/clients/${CUR}/reports`);const is=rep.incomeStatement,bs=rep.balanceSheet,tax=rep.taxPosition;
+  // Per-account natural balances from the trial balance, keyed by code.
+  const tbmap={};(rep.trialBalance.rows||[]).forEach(r=>tbmap[r.code]=r);
+  const bal=a=>{const r=tbmap[a.code]||{debit:0,credit:0};return a.normal==='D'?r.debit-r.credit:r.credit-r.debit;};
+  // Accounts of a chart type that actually carry a balance (skip empty ones).
+  const of=types=>ACCOUNTS.filter(a=>types.includes(a.type)).map(a=>({name:LANG==='ar'&&a.nameAr?a.nameAr:a.name,amount:bal(a)})).filter(x=>Math.abs(x.amount)>0.0001);
+  const neg=arr=>arr.map(x=>({name:x.name,amount:-x.amount}));
+  // Equity carries current-year earnings that aren't a posted account; surface
+  // the residual so the listed lines reconcile to the equity total.
+  const eqItems=of(['equity']);const eqResid=bs.patrimonio-eqItems.reduce((s,x)=>s+x.amount,0);
+  if(Math.abs(eqResid)>0.0001)eqItems.push({name:LANG==='ar'?'أرباح العام الحالي':'Current-year earnings',amount:eqResid});
+  // key -> {tab, items[], total}
+  DRILL={
+    revenue:{tab:'invoices',items:of(['revenue']),total:is.ingresos},
+    cogs:{tab:'bills',items:neg(of(['cogs'])),total:-is.costo},
+    expenses:{tab:'bills',items:neg(of(['expense'])),total:-is.gastos},
+    profit:{tab:'reports',items:[{name:'Revenue',amount:is.ingresos},{name:'Cost of sales',amount:-is.costo},{name:'Expenses',amount:-is.gastos}],total:is.utilidad},
+    assets:{tab:'reports',items:of(['asset']),total:bs.activos},
+    liabilities:{tab:'reports',items:of(['liability']),total:bs.pasivos},
+    equity:{tab:'reports',items:eqItems,total:bs.patrimonio},
+  };
+  const row=(k,label,val,tot)=>`<tr class="drill${tot?' tot':''}" data-drill="${k}" onmouseenter="tipShow(event,'${k}')" onmousemove="tipMove(event)" onmouseleave="tipHide()" onclick="tipGo('${k}')"><td>${label}</td><td class="num">${money(val)}</td></tr>`;
   $('view').innerHTML=`
     <div class="kpis">
       <div class="kpi"><div class="k">Revenue</div><div class="v">${money(is.ingresos)}</div></div>
@@ -334,17 +372,36 @@ async function viewDashboard(){
       <div class="kpi"><div class="k">Assets</div><div class="v">${money(bs.activos)}</div></div>
       <div class="kpi"><div class="k">VAT payable</div><div class="v">${money(tax.ivaAPagar)}</div></div>
     </div>
-    <div class="panel"><div class="cap">Financial position <span class="note">${rep.trialBalance.balanced?'trial balance ties':'OUT OF BALANCE'}</span></div>
+    <div class="panel"><div class="cap">Financial position <span class="note">${rep.trialBalance.balanced?'trial balance ties · hover a line for detail, click to open':'OUT OF BALANCE'}</span></div>
       <table class="fin"><tbody>
-        <tr><td>Revenue</td><td class="num">${money(is.ingresos)}</td></tr>
-        <tr><td>Cost of sales</td><td class="num">${money(-is.costo)}</td></tr>
-        <tr><td>Expenses</td><td class="num">${money(-is.gastos)}</td></tr>
-        <tr class="tot"><td>Profit</td><td class="num">${money(is.utilidad)}</td></tr>
-        <tr><td>Assets</td><td class="num">${money(bs.activos)}</td></tr>
-        <tr><td>Liabilities</td><td class="num">${money(bs.pasivos)}</td></tr>
-        <tr class="tot"><td>Equity</td><td class="num">${money(bs.patrimonio)}</td></tr>
+        ${row('revenue','Revenue',is.ingresos)}
+        ${row('cogs','Cost of sales',-is.costo)}
+        ${row('expenses','Expenses',-is.gastos)}
+        ${row('profit','Profit',is.utilidad,1)}
+        ${row('assets','Assets',bs.activos)}
+        ${row('liabilities','Liabilities',bs.pasivos)}
+        ${row('equity','Equity',bs.patrimonio,1)}
       </tbody></table></div>`;
 }
+let DRILL={};
+const TABLBL={invoices:'Invoices',bills:'Bills',reports:'Reports',tax:'Tax / VAT',banking:'Banking',journal:'Journal'};
+function tipShow(e,k){
+  const d=DRILL[k];if(!d)return;const el=$('acctTip');
+  const rows=d.items.length?d.items.map(i=>`<div class="tt-r"><span class="nm">${i.name}</span><span class="am">${money(i.amount)}</span></div>`).join('')
+    :'<div class="tt-empty">No postings yet</div>';
+  el.innerHTML=`<div class="tt-h">What's in this</div>${rows}<div class="tt-r tt-tot"><span class="nm">Total</span><span class="am">${money(d.total)}</span></div><div class="tt-go">Click → open ${TABLBL[d.tab]||d.tab}</div>`;
+  el.classList.add('on');tipMove(e);
+}
+function tipMove(e){
+  const el=$('acctTip');if(!el.classList.contains('on'))return;
+  const pad=14,w=el.offsetWidth,h=el.offsetHeight;
+  let x=e.clientX+pad,y=e.clientY+pad;
+  if(x+w>innerWidth-8)x=e.clientX-w-pad;
+  if(y+h>innerHeight-8)y=e.clientY-h-pad;
+  el.style.left=Math.max(8,x)+'px';el.style.top=Math.max(8,y)+'px';
+}
+function tipHide(){$('acctTip').classList.remove('on');}
+function tipGo(k){const d=DRILL[k];tipHide();if(d)go(d.tab);}
 
 async function viewJournal(){
   const c=cur();setHead(c.name,navLabel(NAV[1]),'<button class="btn sm" onclick="entryForm()">+ New entry</button>');
