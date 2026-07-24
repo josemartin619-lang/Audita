@@ -32,10 +32,12 @@ import {
   UserStore, authMiddleware, requireRole, signToken, verifyPassword,
   type AuthedRequest,
 } from './auth.js';
+import { Collection } from '../persistence/store.js';
+import type { ClientMeta } from '../services/firmWorkspace.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export function createApp(firm: FirmWorkspace, users: UserStore) {
+export function createApp(firm: FirmWorkspace, users: UserStore, clientStore?: Collection<ClientMeta>) {
   const app = express();
   // Security headers (HSTS, X-Content-Type-Options, frameguard, etc.). CSP is
   // disabled because the demo UI is inline; a strict CSP with nonces is the
@@ -85,6 +87,7 @@ export function createApp(firm: FirmWorkspace, users: UserStore) {
     }
     try {
       firm.addClient({ clientId, name, ofeNit });
+      clientStore?.set(String(clientId), { clientId, name, ofeNit });
       res.status(201).json({ clientId, name, ofeNit });
     } catch (e) {
       res.status(409).json({ error: (e as Error).message });
@@ -537,10 +540,12 @@ export function createApp(firm: FirmWorkspace, users: UserStore) {
   });
 
   // ---- AR/AP subledger: contacts, bills, payments, aging ----
-  const contactsStore = new Map<string, Map<string, Contact>>(); // clientId -> id -> contact
+  // Contacts (customers / vendors) — durable across restarts.
+  const contactsCol = new Collection<Contact & { clientId: string }>('contacts.json');
+  const contactsList = (cid: string): Contact[] =>
+    contactsCol.values().filter((x) => x.clientId === cid).map(({ clientId, ...r }) => { void clientId; return r; });
   const openItemsStore = new Map<string, Map<string, OpenItem>>(); // clientId -> id -> item
-  let contactSeq = 0; let itemSeq = 0; let billSeq = 0;
-  const contactsOf = (id: string) => { if (!contactsStore.has(id)) contactsStore.set(id, new Map()); return contactsStore.get(id)!; };
+  let itemSeq = 0; let billSeq = 0;
   const itemsOf = (id: string) => { if (!openItemsStore.has(id)) openItemsStore.set(id, new Map()); return openItemsStore.get(id)!; };
   const addDays = (date: string, n: number) => {
     const d = new Date(`${date}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n);
@@ -561,16 +566,66 @@ export function createApp(firm: FirmWorkspace, users: UserStore) {
 
   app.get('/api/clients/:id/contacts', (req, res) => {
     const c = withClient(req, res); if (!c) return;
-    res.json([...contactsOf(c.meta.clientId).values()]);
+    const kind = req.query.kind as string | undefined;
+    let list = contactsList(c.meta.clientId);
+    if (kind === 'customer' || kind === 'vendor') list = list.filter((x) => x.kind === kind || x.kind === 'both');
+    res.json(list);
   });
   app.post('/api/clients/:id/contacts', requireRole('staff'), (req, res) => {
     const c = withClient(req, res); if (!c) return;
     const { name, nit, kind } = req.body ?? {};
-    if (!name) return res.status(400).json({ error: 'name requerido.' });
-    contactSeq += 1;
-    const contact: Contact = { id: `CT-${contactSeq}`, name: String(name), nit: String(nit ?? ''), kind: (kind ?? 'both') };
-    contactsOf(c.meta.clientId).set(contact.id, contact);
-    res.status(201).json(contact);
+    if (!name) return res.status(400).json({ error: 'name is required.' });
+    const k: Contact['kind'] = kind === 'customer' || kind === 'vendor' ? kind : 'both';
+    const id = `CT-${randomUUID().slice(0, 8)}`;
+    const contact: Contact & { clientId: string } = { id, clientId: c.meta.clientId, name: String(name), nit: String(nit ?? ''), kind: k };
+    contactsCol.set(`${c.meta.clientId}:${id}`, contact);
+    res.status(201).json({ id, name: contact.name, nit: contact.nit, kind: k });
+  });
+
+  // ---- Inventory / Products — durable catalog with stock ----
+  interface Product { id: string; clientId: string; sku: string; name: string; nameAr?: string; unit: string; price: number; cost: number; stock: number; }
+  const productsCol = new Collection<Product>('products.json');
+  const productsList = (cid: string) => productsCol.values().filter((p) => p.clientId === cid)
+    .map(({ clientId, ...r }) => { void clientId; return r; });
+  if (productsCol.values().length === 0) {
+    const demo: [string, string, string, string, string, number, number, number][] = [
+      ['andina', 'AL-1050', 'Aluminum sheet 1050', 'صفيحة ألمنيوم', 'sheet', 340, 210, 120],
+      ['andina', 'FLT-22', 'Hydraulic filter FLT-22', 'مرشح هيدروليكي', 'unit', 890, 540, 36],
+      ['andina', 'BRG-6204', 'Bearing 6204-2RS', 'محمل كروي', 'unit', 45, 22, 480],
+      ['roble', 'RICE-25', 'Basmati rice 25kg', 'أرز بسمتي', 'bag', 128, 92, 210],
+    ];
+    for (const [cid, sku, name, nameAr, unit, price, cost, stock] of demo) {
+      const id = `P-${sku}`;
+      productsCol.set(`${cid}:${id}`, { id, clientId: cid, sku, name, nameAr, unit, price, cost, stock });
+    }
+  }
+  app.get('/api/clients/:id/products', (req, res) => {
+    const c = withClient(req, res); if (!c) return;
+    res.json(productsList(c.meta.clientId));
+  });
+  app.post('/api/clients/:id/products', requireRole('staff'), (req, res) => {
+    const c = withClient(req, res); if (!c) return;
+    const { sku, name, nameAr, unit, price, cost, stock } = req.body ?? {};
+    if (!name) return res.status(400).json({ error: 'name is required.' });
+    const id = `P-${randomUUID().slice(0, 8)}`;
+    const prod: Product = {
+      id, clientId: c.meta.clientId, sku: String(sku ?? ''), name: String(name),
+      nameAr: nameAr ? String(nameAr) : undefined, unit: String(unit ?? 'unit'),
+      price: Number(price) || 0, cost: Number(cost) || 0, stock: Number(stock) || 0,
+    };
+    productsCol.set(`${c.meta.clientId}:${id}`, prod);
+    const { clientId, ...rest } = prod; void clientId;
+    res.status(201).json(rest);
+  });
+  app.post('/api/clients/:id/products/:pid/stock', requireRole('staff'), (req, res) => {
+    const c = withClient(req, res); if (!c) return;
+    const key = `${c.meta.clientId}:${String(req.params.pid)}`;
+    const prod = productsCol.get(key);
+    if (!prod) return res.status(404).json({ error: 'Product not found.' });
+    prod.stock += Number(req.body?.delta) || 0;
+    productsCol.set(key, prod);
+    const { clientId, ...rest } = prod; void clientId;
+    res.json(rest);
   });
 
   // Vendor bill: books Dr expense + Dr IVA descontable, Cr retención, Cr proveedores; opens a payable.

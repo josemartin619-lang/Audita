@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    # A Postgres service so the pg integration smoke runs in CI too.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: audita
+          POSTGRES_PASSWORD: audita
+          POSTGRES_DB: audita
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit + property + API tests
+        run: npm test
+      - name: Load schema
+        run: psql "$DATABASE_URL" -f src/persistence/pg/schema.sql
+        env:
+          DATABASE_URL: postgres://audita:audita@localhost:5432/audita
+          PGPASSWORD: audita
+      - name: Postgres integration smoke
+        run: npm run test:pg
+        env:
+          DATABASE_URL: postgres://audita:audita@localhost:5432/audita

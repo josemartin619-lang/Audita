@@ -15,7 +15,13 @@ export async function seedFirm(): Promise<FirmWorkspace> {
     approvalThreshold: pesos(1_000_000),
     relatedParties: ['Al-Faris Holding', 'Family Investments'],
   });
+  await seedInto(firm);
+  return firm;
+}
 
+/** Populate a firm with the demo clients + a month of activity. Used on first
+ *  run (when no persisted data exists); afterwards the saved books load instead. */
+export async function seedInto(firm: FirmWorkspace): Promise<void> {
   // --- Client A: elevated risk (anomalies) ---
   {
     const a = firm.addClient({ clientId: 'andina', name: 'Al-Rajhi Trading Co.', ofeNit: '300012345600003' });
@@ -59,6 +65,4 @@ export async function seedFirm(): Promise<FirmWorkspace> {
     await c.ledger.post({ date: '2026-06-15', memo: 'Inventory adjustment', source: 'Stock count', user: 'seed',
       lines: [{ accountCode: '5000', debit: pesos(3_000_000) }, { accountCode: '1200', credit: pesos(3_000_000) }] });
   }
-
-  return firm;
 }

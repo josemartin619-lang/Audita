@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Audita</title>
 <style>
-  /* Local fonts, no CDN. Display: Space Grotesk · Text: Inter · Figures/labels: JetBrains Mono · Arabic: Cairo */
   @font-face{font-family:'Inter';font-weight:400;font-style:normal;font-display:swap;src:url('/fonts/inter-latin-400-normal.woff2') format('woff2');}
   @font-face{font-family:'Inter';font-weight:500;font-style:normal;font-display:swap;src:url('/fonts/inter-latin-500-normal.woff2') format('woff2');}
   @font-face{font-family:'Inter';font-weight:600;font-style:normal;font-display:swap;src:url('/fonts/inter-latin-600-normal.woff2') format('woff2');}
@@ -16,871 +15,452 @@
   @font-face{font-family:'JetBrains Mono';font-weight:500;font-style:normal;font-display:swap;src:url('/fonts/jetbrains-mono-latin-500-normal.woff2') format('woff2');}
   @font-face{font-family:'Cairo';font-weight:400;font-style:normal;font-display:swap;src:url('/fonts/cairo-arabic-400-normal.woff2') format('woff2');}
   @font-face{font-family:'Cairo';font-weight:600;font-style:normal;font-display:swap;src:url('/fonts/cairo-arabic-600-normal.woff2') format('woff2');}
-
   :root{
-    --bg:#f2f2ee; --ink:#181a1f; --umber:#5c5f66; --faint:#9a9ba1;
-    --gold:#12855a; --gold-soft:#1eb668;        /* accent green (deep) + positive green (bright) */
-    --cerulean:#3f6076;
-    --rust:#c0392b; --ochre:#bd8420; --olive:#12855a;
-    --line:#e2e2da; --line2:#ececE4;
-    --parch:#fbfbf8; --parch2:#fbfbf8;
-    --shadow:0 1px 2px rgba(20,18,12,.03), 0 20px 44px -28px rgba(20,18,12,.20);
-    --radius:15px;
-    --disp:'Space Grotesk','Inter',sans-serif;
-    --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
+    --bg:#f2f2ee; --panel:#fbfbf8; --ink:#181a1f; --umber:#5c5f66; --faint:#9a9ba1;
+    --green:#12855a; --green-soft:#1eb668; --rust:#c0392b; --ochre:#bd8420;
+    --line:#e2e2da; --line2:#ecebe4; --side:#161d19; --side-ink:#e8ede9; --side-faint:#8a978f;
+    --disp:'Space Grotesk','Inter',sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+    --radius:13px;
   }
-  *{box-sizing:border-box}
-  html,body{margin:0}
-  body{
-    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-    color:var(--ink); font-size:14px; line-height:1.5; letter-spacing:-.006em;
-    min-height:100vh; background:var(--bg);
-    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-  }
-  .stage{position:relative; z-index:1; max-width:1080px; margin:0 auto; padding:34px 32px 120px;}
-  .clock{display:none;}
-  .num,td.num,th.num,.score,.ref,.emono,.cufe,.verifybox,.cid,.note{font-family:var(--mono); font-variant-numeric:tabular-nums;}
+  *{box-sizing:border-box} html,body{margin:0}
+  body{font-family:'Inter',-apple-system,'Segoe UI',sans-serif;color:var(--ink);font-size:14px;line-height:1.5;background:var(--bg);-webkit-font-smoothing:antialiased;}
+  .mono{font-family:var(--mono);font-variant-numeric:tabular-nums;}
+  .num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;}
+  a{color:var(--green);text-decoration:none;} button{font-family:inherit;}
 
-  /* ---- Masthead ---- */
-  .mast{display:flex; align-items:center; justify-content:space-between; padding:2px 0 24px; border-bottom:1px solid var(--line); position:relative;}
-  .word{font-family:var(--disp); font-weight:700; font-size:27px; letter-spacing:-.03em; line-height:1; color:var(--ink);}
-  .word em{font-style:normal; color:var(--gold);}
-  .tag{font-family:var(--mono); font-weight:400; color:var(--faint); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; margin-top:9px;}
-  .lang{display:inline-flex; align-items:center; border:1px solid var(--line); border-radius:999px; padding:2px; background:var(--parch);}
-  .lang button{background:none; border:0; cursor:pointer; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); padding:5px 13px; font-weight:600; border-radius:999px; font-family:var(--mono); line-height:1.4;}
-  .lang button.on{color:var(--parch); background:var(--ink);}
-  .lang .sep{display:none;}
-  .mastright{display:flex; flex-direction:column; align-items:flex-end; gap:11px;}
-  .userchip{display:flex; align-items:center; gap:11px; font-size:12.5px; color:var(--umber);}
-  .userchip .who{font-family:var(--disp); font-weight:500; font-size:13.5px; color:var(--ink);}
-  .userchip .role{font-family:var(--mono); font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); background:none; border:1px solid var(--gold); padding:2px 8px; border-radius:999px; font-weight:500;}
-  .userchip a{font-family:var(--mono); color:var(--faint); cursor:pointer; text-decoration:none; font-size:10px; letter-spacing:.14em; text-transform:uppercase;}
-  .userchip a:hover{color:var(--rust);}
+  /* ---------- Login ---------- */
+  #login{display:none;max-width:380px;margin:14vh auto 0;padding:0 20px;}
+  #login.on{display:block;}
+  .brand-lg{font-family:var(--disp);font-weight:700;font-size:38px;letter-spacing:-.03em;text-align:center;}
+  .brand-lg em{color:var(--green);font-style:normal;}
+  .sub{font-family:var(--mono);text-transform:uppercase;letter-spacing:.16em;font-size:10px;color:var(--faint);text-align:center;margin:8px 0 26px;}
+  #login input{width:100%;font-size:15px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel);margin-bottom:10px;}
+  #login input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(18,133,90,.14);}
+  .btn{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-weight:500;border-radius:999px;padding:10px 18px;cursor:pointer;border:1px solid var(--green);background:var(--green);color:#fff;transition:background .12s;}
+  .btn:hover{background:#0e6e49;}
+  .btn.ghost{background:none;border-color:var(--line);color:var(--ink);}
+  .btn.ghost:hover{border-color:var(--ink);}
+  .sidebar .btn.ghost{color:var(--side-ink);border-color:rgba(255,255,255,.2);}
+  .sidebar .btn.ghost:hover{border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.05);}
+  .btn.sm{padding:7px 13px;font-size:10px;}
+  .quick{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
+  .quick button{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:11px 14px;cursor:pointer;font-size:13px;}
+  .quick button:hover{border-color:var(--green);}
+  .quick .r{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);}
+  .err{color:var(--rust);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;min-height:16px;margin-top:8px;}
 
-  /* ---- Login ---- */
-  .login{max-width:400px; margin:13vh auto 0;}
-  .login .word2{font-family:var(--disp); font-weight:700; font-size:40px; letter-spacing:-.03em; text-align:center; color:var(--ink);}
-  .login .word2 em{color:var(--gold); font-style:normal;}
-  .login .sub2{font-family:var(--mono); color:var(--faint); text-align:center; margin:10px 0 30px; font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;}
-  .login input{width:100%; font-family:inherit; font-size:15px; padding:12px 14px; border:1px solid var(--line); border-radius:11px; background:var(--parch); color:var(--ink); margin-bottom:10px;}
-  .login input:focus{outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(18,133,90,.14);}
-  .quick{display:flex; flex-direction:column; gap:8px; margin-top:16px;}
-  .quick button{display:flex; align-items:center; justify-content:space-between; border:1px solid var(--line); background:var(--parch); border-radius:11px; padding:13px 15px; cursor:pointer; font-family:inherit; font-size:14px; color:var(--ink);}
-  .quick button:hover{border-color:var(--gold);}
-  .quick .r{font-family:var(--mono); font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); font-weight:500;}
-  .loginerr{color:var(--rust); font-family:var(--mono); font-size:11px; letter-spacing:.06em; margin-top:12px; min-height:18px; text-transform:uppercase;}
+  /* ---------- App shell ---------- */
+  #app{display:none;} #app.on{display:grid;grid-template-columns:236px 1fr;min-height:100vh;}
+  .sidebar{background:var(--side);color:var(--side-ink);padding:20px 14px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh;overflow-y:auto;}
+  .sb-brand{font-family:var(--disp);font-weight:700;font-size:21px;letter-spacing:-.02em;color:#fff;padding:4px 10px 14px;}
+  .sb-brand em{color:var(--green-soft);font-style:normal;}
+  .sb-client{margin:0 6px 12px;padding:10px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;cursor:pointer;}
+  .sb-client .lbl{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--side-faint);}
+  .sb-client .nm{font-family:var(--disp);font-weight:500;font-size:14px;margin-top:3px;color:#fff;}
+  .sb-sec{font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--side-faint);padding:14px 12px 6px;}
+  .nav{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;cursor:pointer;color:var(--side-ink);font-size:13.5px;transition:background .1s;}
+  .nav:hover{background:rgba(255,255,255,.06);}
+  .nav.on{background:var(--green);color:#fff;}
+  .nav .ic{width:16px;text-align:center;font-size:14px;opacity:.9;}
+  .sb-foot{margin-top:auto;padding:12px 8px 0;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:8px;}
+  .sb-user{font-size:12px;color:var(--side-faint);padding:0 4px;}
+  .sb-user b{color:#fff;font-weight:500;font-family:var(--disp);display:block;font-size:13px;}
+  .langtog{display:inline-flex;background:rgba(255,255,255,.07);border-radius:8px;padding:2px;width:fit-content;}
+  .langtog button{background:none;border:0;color:var(--side-faint);font-family:var(--mono);font-size:10px;letter-spacing:.06em;padding:4px 10px;border-radius:6px;cursor:pointer;}
+  .langtog button.on{background:var(--green);color:#fff;}
 
-  /* view title — the big confident statement */
-  h2.section{font-family:var(--disp); font-weight:600; font-size:34px; letter-spacing:-.03em; line-height:1.04; margin:38px 0 8px; color:var(--ink);}
-  .lead{font-family:var(--mono); color:var(--faint); margin:0 0 30px; font-size:11px; letter-spacing:.1em; text-transform:uppercase; line-height:1.7;}
+  .workspace{min-width:0;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 34px 0;gap:14px;flex-wrap:wrap;}
+  .crumb{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);}
+  h1.page{font-family:var(--disp);font-weight:600;font-size:30px;letter-spacing:-.03em;margin:2px 0 0;}
+  .content{padding:22px 34px 90px;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  .spacer{flex:1;}
 
-  /* ---- Panels: numbered, editorial, light ---- */
-  #view{counter-reset:panelnum;}
-  .panel{counter-increment:panelnum; background:var(--parch); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:22px; overflow:hidden;}
-  .panel .cap{padding:17px 24px 15px; border-bottom:1px solid var(--line2); font-family:var(--disp); font-weight:600; font-size:18px; letter-spacing:-.02em; color:var(--ink); display:flex; align-items:center; justify-content:flex-start; gap:13px;}
-  .panel .cap::before{content:counter(panelnum,decimal-leading-zero); font-family:var(--mono); font-weight:500; font-size:12px; letter-spacing:.02em; color:var(--gold); align-self:center;}
-  .cap .note{font-family:var(--mono); font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); font-weight:400; margin-left:auto;}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:8px 0 22px;}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;}
+  .kpi .k{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);}
+  .kpi .v{font-family:var(--disp);font-weight:600;font-size:26px;letter-spacing:-.02em;margin-top:8px;font-variant-numeric:tabular-nums;}
+  .kpi .v.pos{color:var(--green);} .kpi .v.neg{color:var(--rust);}
+  @media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr);}}
 
-  table{width:100%; border-collapse:collapse;}
-  th,td{text-align:left; padding:13px 24px; border-bottom:1px solid var(--line2);}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:20px;overflow:hidden;}
+  .panel .cap{display:flex;align-items:center;gap:12px;padding:15px 20px 13px;border-bottom:1px solid var(--line2);font-family:var(--disp);font-weight:600;font-size:15.5px;}
+  .cap .note{margin-left:auto;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
+  table{width:100%;border-collapse:collapse;}
+  th,td{text-align:left;padding:11px 20px;border-bottom:1px solid var(--line2);font-size:13.5px;}
   tbody tr:last-child td{border-bottom:0;}
-  th{font-family:var(--mono); font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); font-weight:500;}
-  td{font-size:14px; color:var(--ink);}
-  td.num,th.num{text-align:right; font-size:13px;}
-  tbody.rows tr{cursor:pointer; transition:background .12s;}
-  tbody.rows tr:hover{background:#f4f4ee;}
-  .cname{font-family:var(--disp); font-weight:600; font-size:16px; letter-spacing:-.01em; color:var(--ink);}
-  .cid{font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); margin-top:3px;}
+  th{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:500;}
+  th.num,td.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;}
+  tbody.click tr{cursor:pointer;} tbody.click tr:hover{background:#f4f4ee;}
+  .fin td:first-child{color:var(--umber);} .fin tr.tot td{font-weight:600;border-top:1.5px solid var(--ink);}
+  .pill{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;border:1px solid currentColor;border-radius:999px;padding:2px 9px;display:inline-block;}
+  .pill.hi,.pill.high{color:var(--rust);} .pill.med,.pill.medium{color:var(--ochre);} .pill.lo,.pill.low,.pill.ok{color:var(--green);}
+  .muted{color:var(--faint);} .empty{padding:34px;text-align:center;color:var(--faint);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:#fff;font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;padding:12px 20px;border-radius:999px;z-index:80;opacity:0;transition:opacity .2s;pointer-events:none;}
+  .toast.on{opacity:1;}
 
-  .risk{display:flex; align-items:center; gap:14px;}
-  .track{position:relative; width:120px; height:4px; background:#e4e4dc; border-radius:999px; overflow:hidden;}
-  .track i{position:absolute; left:0; top:0; height:4px; border-radius:999px;}
-  .track b{display:none;}
-  .score{font-family:var(--disp); font-weight:600; font-size:22px; min-width:34px; color:var(--ink); letter-spacing:-.02em;}
+  .form{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:18px 20px;}
+  .form .full{grid-column:1/-1;}
+  .field label{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--umber);margin-bottom:5px;}
+  .field input,.field select,.field textarea{width:100%;font-family:inherit;font-size:14px;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:#fff;}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(18,133,90,.12);}
+  .linerow{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;margin-bottom:7px;align-items:center;}
+  .linerow input,.linerow select{padding:7px 9px;font-size:13px;border:1px solid var(--line);border-radius:7px;}
+  .x{background:none;border:0;color:var(--faint);cursor:pointer;font-size:16px;}
 
-  /* pill status — the atuin/cofactr signature */
-  .band{font-family:var(--mono); font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:500; border:1px solid currentColor; border-radius:999px; padding:3px 10px;}
-  .band.alto,.band.high{color:var(--rust);}
-  .band.medio,.band.medium{color:var(--ochre);}
-  .band.bajo,.band.low{color:var(--gold);}
-  .drivers{margin:9px 0 0; padding:0; list-style:none;}
-  .drivers li{font-family:var(--mono); font-size:10.5px; letter-spacing:.02em; color:var(--umber); text-transform:uppercase; line-height:1.7;}
-
-  .grid{display:grid; grid-template-columns:1fr 1fr; gap:22px;}
-  .fin td:first-child{color:var(--umber);}
-  .fin tr.tot td{font-weight:600; color:var(--ink); border-top:1.5px solid var(--ink);}
-  .stamp{padding:15px 24px; font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--faint); border-top:1px solid var(--line2);}
-  .valid{color:var(--gold); font-weight:500;} .broken{color:var(--rust); font-weight:500;}
-
-  .sev{font-family:var(--mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; font-weight:500; border:1px solid currentColor; border-radius:999px; padding:3px 9px; background:none;}
-  .sev.high{color:var(--rust);} .sev.medium{color:var(--ochre);} .sev.low{color:var(--cerulean);}
-
-  .status{font-family:var(--mono); font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--umber);}
-  .ref{font-size:11px; color:var(--faint);}
-  .msg{max-width:360px; color:var(--umber); font-size:13px; line-height:1.5;}
-
-  .act{font-family:var(--mono); border:1px solid var(--line); background:var(--parch); color:var(--umber); border-radius:999px; padding:5px 12px; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; font-weight:500; margin-left:6px;}
-  .act:hover{border-color:var(--gold); color:var(--gold);}
-  .act.esc{color:var(--rust); border-color:rgba(192,57,43,.35);}
-  .act.esc:hover{background:var(--rust); color:var(--parch); border-color:var(--rust);}
-
-  .back{font-family:var(--mono); background:none; border:0; color:var(--umber); cursor:pointer; font-size:10px; letter-spacing:.12em; text-transform:uppercase; padding:0; margin:4px 0 22px;}
-  .back:hover{color:var(--gold);}
-  .foot{font-family:var(--mono); color:var(--faint); font-size:10px; letter-spacing:.08em; text-transform:uppercase; margin-top:10px;}
-  .none{padding:36px; text-align:center; color:var(--faint); font-family:var(--mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase;}
-
-  /* toolbar — pills, one green primary, rest ghost */
-  .toolbar{display:flex; gap:8px; align-items:center; margin:4px 0 26px; flex-wrap:wrap;}
-  .btn{font-family:var(--mono); border:1px solid var(--gold); background:var(--gold); color:var(--parch); border-radius:999px; padding:9px 17px; font-size:10px; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; font-weight:500; transition:all .12s;}
-  .btn:hover{background:#0e6e49; border-color:#0e6e49;}
-  .btn.ink{background:none; border-color:var(--line); color:var(--ink);}
-  .btn.ink:hover{border-color:var(--ink); background:none;}
-
-  /* modal */
-  .scrim{position:fixed; inset:0; background:rgba(24,26,20,.4); backdrop-filter:blur(4px); display:none; align-items:center; justify-content:center; z-index:50; padding:24px;}
-  .scrim.on{display:flex;}
-  .modal{background:var(--parch); border:1px solid var(--line); border-radius:18px; box-shadow:0 34px 90px -34px rgba(20,18,12,.44); width:620px; max-width:100%; max-height:90vh; overflow:auto;}
-  .modal .mh{padding:20px 26px 16px; border-bottom:1px solid var(--line2); font-family:var(--disp); font-weight:600; font-size:21px; letter-spacing:-.02em; display:flex; align-items:center; justify-content:space-between;}
-  .modal .mh .x{background:none; border:0; font-size:22px; color:var(--faint); cursor:pointer; line-height:1;}
-  .modal .mb{padding:24px 26px;}
-  .modal .mf{padding:16px 26px; border-top:1px solid var(--line2); display:flex; gap:10px; justify-content:flex-end;}
-  .field{margin-bottom:15px;}
-  .field label{font-family:var(--mono); display:block; font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--umber); font-weight:500; margin-bottom:7px;}
-  .field input,.field select{width:100%; font-family:inherit; font-size:14px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--parch); color:var(--ink);}
-  .field input:focus,.field select:focus{outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(18,133,90,.14);}
-  .two{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
-  .lines{width:100%; border-collapse:collapse; margin-top:4px;}
-  .lines th{padding:4px 6px; font-size:9px;}
-  .lines td{padding:4px 6px; border:0;}
-  .lines input,.lines select{width:100%; padding:7px 9px; font-size:13px; border:1px solid var(--line); border-radius:8px; background:var(--parch); font-family:inherit;}
-  .addln{font-family:var(--mono); background:none; border:0; color:var(--gold); cursor:pointer; font-size:10px; letter-spacing:.1em; text-transform:uppercase; padding:8px 0;}
-  .bal{display:flex; gap:18px; align-items:center; padding:11px 0 2px; font-size:13px;}
-  .bal .ok{color:var(--gold); font-weight:600;} .bal .no{color:var(--rust); font-weight:600;}
-  .cufe{background:#eef0ea; border:0; border-radius:10px; padding:13px 15px; font-size:11px; color:var(--umber); word-break:break-all; line-height:1.7;}
-  .emono{font-size:11px; color:var(--faint);}
-  .imm{margin-top:15px; padding:13px 15px; background:#eef0ea; border-radius:10px; font-family:var(--mono); font-size:11px; letter-spacing:.02em; color:var(--umber); line-height:1.7;}
-  .toast{position:fixed; left:50%; bottom:30px; transform:translateX(-50%); background:var(--ink); color:var(--parch); padding:13px 22px; border-radius:999px; font-family:var(--mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; box-shadow:0 16px 40px -14px rgba(20,18,12,.5); z-index:80;}
-
-  tr.trace{cursor:pointer;}
-  tr.trace td:first-child{color:var(--gold);}
-  tr.trace:hover{background:#f4f4ee;}
-  .closebar{padding:13px 24px; font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; border-bottom:1px solid var(--line2);}
-  .closebar.ok{color:var(--gold);} .closebar.no{color:var(--rust);}
-  .verifybox{background:#eef0ea; border:0; border-radius:10px; padding:13px 15px; font-size:11px; color:var(--umber); word-break:break-all; margin-top:8px;}
-  .checklist{padding:16px 24px; border-bottom:1px solid var(--line2);}
-  .ckhead{font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); margin-bottom:12px;}
-  .ckrow{display:flex; align-items:center; gap:12px; padding:8px 0; font-size:14px;}
-  .ckrow.clk{cursor:pointer;} .ckrow.clk:hover .cklabel{color:var(--gold);}
-  .ckmark{width:20px; height:20px; border:1.5px solid var(--line); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px; color:transparent;}
-  .ckmark.on{background:var(--gold); border-color:var(--gold); color:var(--parch);}
-  .autotag{font-family:var(--mono); font-size:8.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); border:1px solid var(--line); border-radius:999px; padding:2px 8px;}
-  .cby{font-family:var(--mono); color:var(--faint); font-size:10px; letter-spacing:.04em; text-transform:uppercase;}
-  .tplrow{display:flex; align-items:center; gap:11px; padding:11px 0; border-bottom:1px solid var(--line2);}
-  .tplrow .nm{font-family:var(--disp); font-weight:500; font-size:14.5px;}
-  @media(max-width:820px){.grid{grid-template-columns:1fr}.clock{display:none}.word{font-size:23px}.two{grid-template-columns:1fr}.stage{padding:26px 18px 90px}h2.section{font-size:27px}}
-
-  /* ---- Arabic / RTL ---- */
-  [dir="rtl"] body, [dir="rtl"] .msg, [dir="rtl"] td, [dir="rtl"] .ckrow, [dir="rtl"] .quick button, [dir="rtl"] input, [dir="rtl"] textarea, [dir="rtl"] select{
-    font-family:'Cairo','Inter','Segoe UI',Tahoma,sans-serif;
-  }
-  [dir="rtl"] h2.section, [dir="rtl"] .panel .cap, [dir="rtl"] .cname, [dir="rtl"] .word2, [dir="rtl"] .tplrow .nm, [dir="rtl"] .modal .mh{
-    font-family:'Cairo','Space Grotesk',sans-serif; font-weight:600; letter-spacing:0;
-  }
-  [dir="rtl"] .tag, [dir="rtl"] .lead, [dir="rtl"] .th, [dir="rtl"] th, [dir="rtl"] .cid, [dir="rtl"] .band, [dir="rtl"] .sev,
-  [dir="rtl"] .note, [dir="rtl"] .role, [dir="rtl"] .autotag, [dir="rtl"] .userchip a, [dir="rtl"] .status, [dir="rtl"] .field label,
-  [dir="rtl"] .drivers li, [dir="rtl"] .foot, [dir="rtl"] .back, [dir="rtl"] .none, [dir="rtl"] .ckhead, [dir="rtl"] .btn, [dir="rtl"] .act, [dir="rtl"] .sub2, [dir="rtl"] .cby, [dir="rtl"] .lang button{
-    font-family:'Cairo',var(--mono); letter-spacing:0; text-transform:none;
-  }
-  [dir="rtl"] th, [dir="rtl"] td{text-align:right;}
-  [dir="rtl"] td.num, [dir="rtl"] th.num{text-align:left; font-family:var(--mono);}
-  [dir="rtl"] .panel .cap{justify-content:flex-start;}
-  [dir="rtl"] .track i{left:auto; right:0;}
-  [dir="rtl"] .word, [dir="rtl"] .login .word2, [dir="rtl"] .word em, [dir="rtl"] .login .word2 em{font-family:var(--disp);}
-
+  /* ---------- RTL ---------- */
+  [dir="rtl"] #app.on{grid-template-columns:1fr 236px;}
+  [dir="rtl"] .sidebar{order:2;} [dir="rtl"] .workspace{order:1;}
+  [dir="rtl"] body,[dir="rtl"] .nav,[dir="rtl"] td,[dir="rtl"] .field input,[dir="rtl"] .kpi{font-family:'Cairo','Inter',sans-serif;}
+  [dir="rtl"] h1.page,[dir="rtl"] .cap,[dir="rtl"] .sb-brand,[dir="rtl"] .sb-client .nm,[dir="rtl"] .kpi .v,[dir="rtl"] .brand-lg{font-family:'Cairo','Space Grotesk',sans-serif;}
+  [dir="rtl"] th,[dir="rtl"] td{text-align:right;} [dir="rtl"] th.num,[dir="rtl"] td.num{text-align:left;}
+  [dir="rtl"] .num{text-align:left;}
+  [dir="rtl"] .cap .note{margin-left:0;margin-right:auto;}
 </style>
 </head>
 <body>
-<div class="stage">
-  <svg class="clock" viewBox="0 0 240 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M40 70 C40 40 90 34 118 42 C150 51 172 44 176 74 C182 118 150 128 150 150 C150 176 120 182 96 176 C60 168 60 150 54 120 C49 96 40 100 40 70 Z"
-      fill="#6a5a44" stroke="#2a2118" stroke-width="1.2"/>
-    <ellipse cx="108" cy="96" rx="52" ry="44" fill="#faf5e9" stroke="#2a2118" stroke-width="1.4"/>
-    <path d="M108 96 L108 66 M108 96 L138 104" stroke="#2a2118" stroke-width="1.6" stroke-linecap="round"/>
-    <path d="M150 150 C150 174 146 190 138 196" stroke="#2a2118" stroke-width="1" opacity=".5"/>
-  </svg>
-
-  <header class="mast">
-    <div>
-      <div class="word">Audit<em>a</em></div>
-      <div class="tag" data-i="tagline"></div>
-    </div>
-    <div class="mastright">
-      <div id="userchip" class="userchip"></div>
-      <nav class="lang">
-        <button id="en" onclick="setLang('en')">EN</button>
-        <span class="sep">/</span>
-        <button id="ar" onclick="setLang('ar')">العربية</button>
-      </nav>
-    </div>
-  </header>
-
-  <main id="view"></main>
+<div id="login">
+  <div class="brand-lg">Audit<em>a</em></div>
+  <div class="sub" data-t="tagline">Books that are born audited</div>
+  <input id="lg_email" type="text" placeholder="you@firm.com" autocomplete="username"/>
+  <input id="lg_pass" type="password" placeholder="password" autocomplete="current-password"/>
+  <button class="btn" style="width:100%" onclick="doLogin()" data-t="signin">Sign in</button>
+  <div class="err" id="lg_err"></div>
+  <div class="sub" style="margin:18px 0 6px" data-t="demo">Or sign in as a demo user</div>
+  <div class="quick" id="quick"></div>
 </div>
 
-<div class="scrim" id="scrim"><div class="modal" id="modal"></div></div>
+<div id="app">
+  <aside class="sidebar">
+    <div class="sb-brand">Audit<em>a</em></div>
+    <div class="sb-client" id="clientBox" onclick="go('clients')"></div>
+    <div class="sb-sec" data-t="secWork">Workspace</div>
+    <div id="navMain"></div>
+    <div class="sb-foot">
+      <div class="langtog"><button id="lg-en" onclick="setLang('en')" class="on">EN</button><button id="lg-ar" onclick="setLang('ar')">ع</button></div>
+      <div class="sb-user"><b id="uName"></b><span id="uRole"></span></div>
+      <button class="btn ghost sm" onclick="logout()" data-t="signout">Sign out</button>
+    </div>
+  </aside>
+  <main class="workspace">
+    <div class="topbar"><div><div class="crumb" id="crumb"></div><h1 class="page" id="pageTitle"></h1></div><div class="row" id="pageActions"></div></div>
+    <div class="content" id="view"></div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
 
 <script>
-let LANG='en';
-let TOKEN=localStorage.getItem('audita_token')||'';
-let USER=null;
-let ENTRY_CACHE=[], AUDIT_CACHE=[], REVIEWS=new Set(), ACCOUNTS=[];
-const RANK={viewer:0,staff:1,accountant:2,partner:3};
-const can=min=>!!USER&&RANK[USER.role]>=RANK[min];
-const api=async(p,o={})=>{
-  const r=await fetch('/api'+p,{...o,headers:{'content-type':'application/json',...(TOKEN?{authorization:'Bearer '+TOKEN}:{}),...(o.headers||{})}});
-  if(r.status===401){logout();throw new Error('401');}
-  if(!r.ok)throw new Error((await r.json().catch(()=>({error:r.statusText}))).error);
-  return r.json();
-};
-const COP=n=>'SAR '+Math.round(n).toLocaleString('en-US');
+let TOKEN=localStorage.getItem('aud_tok')||''; let USER=null; let LANG='en';
+let CLIENTS=[]; let CUR=null; let PAGE='dashboard'; let ACCOUNTS=[];
+const money=n=>'SAR '+Math.round(Number(n||0)).toLocaleString('en-US');
+const $=id=>document.getElementById(id);
 
-/* ---------- i18n ---------- */
-const T={
-  en:{
-    tagline:'Books that are born audited.',
-    consoleTitle:'The firm’s clients',
-    consoleLead:'Every client keeps an isolated ledger. Ordered by risk. Select a name to open it.',
-    cClient:'Client', cRisk:'Risk', cScore:'Score', cOpen:'Open findings', cEntries:'Entries',
-    footConsole:'Served live from the firm ledger. Each book is structurally isolated.',
-    back:'All clients',
-    financials:'Financial statements', tax:'Tax position — ZATCA', findingsCap:'Continuous controls',
-    revenue:'Revenue', expenses:'Expenses', profit:'Profit', assets:'Assets', liabilities:'Liabilities', equity:'Equity', balances:'Trial balance ties',
-    ivaOut:'Output VAT', ivaIn:'Input VAT', ivaPay:'VAT payable', ivaCredit:'Credit balance', retFavor:'Withholdings in our favor', retPayable:'Withholdings we owe',
-    trail:'Evidence trail', events:'events', chainValid:'chain intact', chainBroken:'chain broken',
-    fId:'ID', fSev:'Severity', fRule:'Rule', fEntry:'Entry', fDesc:'Description', fStatus:'Status', fAct:'Action',
-    clear:'Clear', escalate:'Escalate', none:'No findings.',
-    footClient:'Changing a finding’s status is recorded in the immutable trail.',
-    openF:n=>`${n} open finding${n===1?'':'s'}`, high:n=>`${n} high severity`, manual:p=>`${p}% manual / adjustment entries`, weekend:n=>`${n} weekend entr${n===1?'y':'ies'}`, quiet:'No material risk signals',
-    band:{alto:'High',medio:'Medium',bajo:'Low'}, sev:{high:'High',medium:'Medium',low:'Low'},
-    st:{open:'Open',reviewed:'Reviewed',cleared:'Cleared',escalated:'Escalated'},
-    yes:'yes', dash:'—',
-  },
-  ar:{
-    tagline:'دفاتر تُولد مُدقَّقة.',
-    consoleTitle:'عملاء المكتب',
-    consoleLead:'لكل عميل دفتر مستقل. مُرتّبون حسب المخاطر. اختر اسمًا لفتحه.',
-    cClient:'العميل', cRisk:'المخاطر', cScore:'الدرجة', cOpen:'ملاحظات مفتوحة', cEntries:'القيود',
-    footConsole:'يُعرض مباشرةً من دفتر المكتب. كل دفتر معزول هيكليًا.',
-    back:'كل العملاء',
-    financials:'القوائم المالية', tax:'الوضع الضريبي — هيئة الزكاة والضريبة (ZATCA)', findingsCap:'الرقابة المستمرة',
-    revenue:'الإيرادات', expenses:'المصروفات', profit:'صافي الربح', assets:'الأصول', liabilities:'الالتزامات', equity:'حقوق الملكية', balances:'ميزان المراجعة متوازن',
-    ivaOut:'ضريبة المخرجات', ivaIn:'ضريبة المدخلات', ivaPay:'ضريبة مستحقة الدفع', ivaCredit:'رصيد دائن', retFavor:'استقطاعات لصالحنا', retPayable:'استقطاعات علينا',
-    trail:'سجل الأدلة', events:'أحداث', chainValid:'السلسلة سليمة', chainBroken:'السلسلة مكسورة',
-    fId:'المعرّف', fSev:'الخطورة', fRule:'القاعدة', fEntry:'القيد', fDesc:'الوصف', fStatus:'الحالة', fAct:'الإجراء',
-    clear:'إغلاق', escalate:'تصعيد', none:'لا توجد ملاحظات.',
-    footClient:'تغيير حالة أي ملاحظة يُسجَّل في السجل غير القابل للتعديل.',
-    openF:n=>`${n} ملاحظة مفتوحة`, high:n=>`${n} عالية الخطورة`, manual:p=>`${p}٪ قيود يدوية / تسويات`, weekend:n=>`${n} قيد في نهاية الأسبوع`, quiet:'لا توجد مؤشرات مخاطر جوهرية',
-    band:{alto:'مرتفع',medio:'متوسط',bajo:'منخفض'}, sev:{high:'مرتفع',medium:'متوسط',low:'منخفض'},
-    st:{open:'مفتوح',reviewed:'مُراجَع',cleared:'مُغلق',escalated:'مُصعَّد'},
-    yes:'نعم', dash:'—',
-  }
-};
-Object.assign(T.en,{
-  newEntry:'New entry', newInvoice:'Issue invoice', journal:'Journal',
-  jDate:'Date', jRef:'Ref', jMemo:'Concept', jSource:'Counterparty', jAmount:'Amount', jStatus:'Status',
-  posted:'Posted', reversed:'Reversed',
-  account:'Account', debit:'Debit', credit:'Credit', addLine:'+ Add line',
-  memo:'Concept', source:'Counterparty', date:'Date', balanced:'Balanced', unbalanced:'Out by',
-  post:'Post entry', cancel:'Cancel', customer:'Customer', taxId:'Tax ID', base:'Taxable base (SAR)', concept:'Concept', issue:'Issue & post',
-  previewInv:'VAT 15% will be computed, the ZATCA invoice hash generated, and the double-entry posted.',
-  entry:'Entry', lines:'Lines', evHash:'Evidence hash', prev:'prev',
-  immutable:'This entry is immutable. To correct it, post a reversing entry — the original stays in the evidence trail.',
-  okEntry:'Entry posted and added to the evidence trail.', okInv:'Invoice issued, ZATCA hash generated, entry posted.',
-  raised:'raised', close:'Close', none2:'No entries yet.',
-  proveTitle:'Provenance —', contribution:'Contribution', runningBal:'Running', tracedBy:'Traced entries contributing to this balance. Each links to its evidence hash.',
-  assurance:'Assurance & close', papers:'Working papers', addPaper:'New working paper', tied:'Tied', untied:'Untied',
-  support:'Support balance (SAR)', booked:'Booked', diff:'Difference', period:'Period', account:'Account', create:'Create',
-  closeReady:'Evidence-ready — cleared to close', closeBlocked:'Close blocked',
-  analytics:'Population analytics', benford:'Benford deviation', velocity:'Velocity flags',
-  within:'within expectation', anomalous:'anomalous', noPapers:'No working papers yet.',
-  share:'Share verified view', shareTitle:'Verifiable link', shareDesc:'Anyone with this link re-verifies these books in their own browser — no login, no trusting this server. The recipient’s browser recomputes the hash chain and the trial balance.',
-  copy:'Copy link', copied:'Link copied', seal:'Ledger fingerprint',
-  signin:'Sign in', email:'Email', password:'Password', quick:'Or sign in as a demo user', logout:'Sign out', badLogin:'Incorrect email or password.',
-  reconcile:'Reconcile', reconTitle:'Bank reconciliation', reconDesc:'Paste the statement — one line per row: date, description, amount. Positive for deposits, negative for withdrawals.',
-  run:'Reconcile', matchedC:'Matched', unmatchedS:'Unmatched — statement', unmatchedL:'Unmatched — ledger', createFrom:'Create entry', of:'of', reconciled:'reconciled',
-  exportT:'Export', exportTB:'Trial balance (CSV)', exportJ:'Journal (CSV)',
-  review:'Review', reviewedBy:'Reviewed', pending:'Pending review',
-  templates:'Templates', newTemplate:'New template', templateName:'Template name', saveTpl:'Save template',
-  tplHint:'Save a recurring entry — rent, depreciation, accruals — and post it each month in one click.',
-  noTemplates:'No templates yet.', del:'Delete', postTpl:'Post', checklist:'Close checklist', complete:'complete', autoTag:'auto', by:'by',
-  arap:'Receivables & Payables', receivables:'Receivables — customers owe', payables:'Payables — we owe', newBill:'New bill',
-  agCurrent:'Current', ag1:'1–30', ag2:'31–60', ag3:'61–90', ag4:'90+', outCol:'Outstanding', dueCol:'Due', payBtn:'Pay',
-  payTitle:'Record payment', payAmount:'Amount (SAR)', vendor:'Vendor', createBill:'Create bill', noOpen:'Nothing outstanding.',
-  okPay:'Payment recorded.', okBill:'Bill created.', expenseAcct:'Expense/asset account', overdueTag:'overdue',
-  cashFlow:'Cash flow', cfOperating:'Operating', cfInvesting:'Investing', cfFinancing:'Financing', cfNet:'Net change in cash', cfOpen:'Opening cash', cfClose:'Closing cash',
-  lockPeriod:'Lock period', unlockPeriod:'Reopen', lockedTag:'Locked', openTag:'Open', period:'Period', okLock:'Period locked.', okUnlock:'Period reopened.',
-  statementsPdf:'Statements (PDF)',
-  openingBal:'Opening balances', obHint:'Paste a migrated trial balance — one line per row: account,debit,credit.', importBtn:'Import', okOpening:'Opening balances imported.',
-  reteicaLbl:'ReteICA (bps, e.g. 69)', reteivaLbl:'ReteIVA (bps, e.g. 1500)',
-});
-Object.assign(T.ar,{
-  newEntry:'قيد جديد', newInvoice:'إصدار فاتورة', journal:'دفتر اليومية',
-  jDate:'التاريخ', jRef:'المرجع', jMemo:'البيان', jSource:'الطرف المقابل', jAmount:'المبلغ', jStatus:'الحالة',
-  posted:'مُرحَّل', reversed:'معكوس',
-  account:'الحساب', debit:'مدين', credit:'دائن', addLine:'+ إضافة سطر',
-  memo:'البيان', source:'الطرف المقابل', date:'التاريخ', balanced:'متوازن', unbalanced:'فرق قدره',
-  post:'ترحيل القيد', cancel:'إلغاء', customer:'العميل', taxId:'الرقم الضريبي', base:'الوعاء الخاضع للضريبة (SAR)', concept:'البيان', issue:'إصدار وترحيل',
-  previewInv:'ستُحتسب ضريبة القيمة المضافة 15٪، ويُولَّد رقم تجزئة فاتورة ZATCA، ويُرحَّل القيد المزدوج.',
-  entry:'قيد', lines:'السطور', evHash:'تجزئة الدليل', prev:'السابق',
-  immutable:'هذا القيد غير قابل للتعديل. لتصحيحه، رحِّل قيدًا عكسيًا — يبقى الأصل في سجل الأدلة.',
-  okEntry:'تم ترحيل القيد وإضافته إلى سجل الأدلة.', okInv:'تم إصدار الفاتورة وتوليد تجزئة ZATCA وترحيل القيد.',
-  raised:'أثار', close:'إغلاق', none2:'لا توجد قيود بعد.',
-  proveTitle:'مصدر الرقم —', contribution:'المساهمة', runningBal:'الرصيد الجاري', tracedBy:'القيود المتتبَّعة المساهمة في هذا الرصيد. كل منها يرتبط بتجزئة دليله.',
-  assurance:'التأكيد والإقفال', papers:'أوراق العمل', addPaper:'ورقة عمل جديدة', tied:'مطابق', untied:'غير مطابق',
-  support:'رصيد المستند (SAR)', booked:'بالدفاتر', diff:'الفرق', period:'الفترة', account:'الحساب', create:'إنشاء',
-  closeReady:'جاهز للإقفال — الأدلة مكتملة', closeBlocked:'الإقفال محجوب',
-  analytics:'تحليلات المجتمع الكلي', benford:'انحراف بنفورد', velocity:'تنبيهات السرعة',
-  within:'ضمن المتوقع', anomalous:'شاذ', noPapers:'لا توجد أوراق عمل بعد.',
-  share:'مشاركة عرض قابل للتحقق', shareTitle:'رابط قابل للتحقق', shareDesc:'أي شخص لديه هذا الرابط يتحقق من هذه الدفاتر في متصفحه — دون تسجيل دخول ودون الوثوق بهذا الخادم. يعيد متصفح المستلم حساب سلسلة التجزئة وميزان المراجعة.',
-  copy:'نسخ الرابط', copied:'تم نسخ الرابط', seal:'بصمة الدفتر',
-  signin:'تسجيل الدخول', email:'البريد الإلكتروني', password:'كلمة المرور', quick:'أو ادخل كمستخدم تجريبي', logout:'خروج', badLogin:'بريد إلكتروني أو كلمة مرور غير صحيحة.',
-  reconcile:'تسوية', reconTitle:'التسوية البنكية', reconDesc:'الصق كشف الحساب — سطر لكل صف: التاريخ، الوصف، المبلغ. موجب للإيداعات، سالب للسحوبات.',
-  run:'تسوية', matchedC:'مطابَقة', unmatchedS:'غير مطابَق — الكشف', unmatchedL:'غير مطابَق — الدفتر', createFrom:'إنشاء قيد', of:'من', reconciled:'مُسوّاة',
-  exportT:'تصدير', exportTB:'ميزان المراجعة (CSV)', exportJ:'دفتر اليومية (CSV)',
-  review:'مراجعة', reviewedBy:'روجع', pending:'بانتظار المراجعة',
-  templates:'القوالب', newTemplate:'قالب جديد', templateName:'اسم القالب', saveTpl:'حفظ القالب',
-  tplHint:'احفظ قيدًا متكررًا — إيجار، إهلاك، استحقاقات — ورحِّله كل شهر بنقرة واحدة.',
-  noTemplates:'لا توجد قوالب بعد.', del:'حذف', postTpl:'ترحيل', checklist:'قائمة الإقفال', complete:'مكتمل', autoTag:'تلقائي', by:'بواسطة',
-  arap:'الذمم المدينة والدائنة', receivables:'مدينة — العملاء مدينون', payables:'دائنة — نحن مدينون', newBill:'فاتورة مشتريات جديدة',
-  agCurrent:'جاري', ag1:'1–30', ag2:'31–60', ag3:'61–90', ag4:'+90', outCol:'المتبقي', dueCol:'الاستحقاق', payBtn:'دفع',
-  payTitle:'تسجيل دفعة', payAmount:'المبلغ (SAR)', vendor:'المورّد', createBill:'إنشاء فاتورة', noOpen:'لا شيء مستحق.',
-  okPay:'تم تسجيل الدفعة.', okBill:'تم إنشاء الفاتورة.', expenseAcct:'حساب مصروف/أصل', overdueTag:'متأخر',
-  cashFlow:'التدفق النقدي', cfOperating:'تشغيلي', cfInvesting:'استثماري', cfFinancing:'تمويلي', cfNet:'صافي التغير في النقد', cfOpen:'النقد الافتتاحي', cfClose:'النقد الختامي',
-  lockPeriod:'إقفال الفترة', unlockPeriod:'إعادة فتح', lockedTag:'مُقفلة', openTag:'مفتوحة', period:'الفترة', okLock:'تم إقفال الفترة.', okUnlock:'تمت إعادة فتح الفترة.',
-  statementsPdf:'القوائم (PDF)',
-  openingBal:'الأرصدة الافتتاحية', obHint:'الصق ميزان مراجعة مُرحّلًا — سطر لكل صف: الحساب، مدين، دائن.', importBtn:'استيراد', okOpening:'تم استيراد الأرصدة الافتتاحية.',
-  reteicaLbl:'استقطاع أ (نقطة أساس، مثال 69)', reteivaLbl:'استقطاع ب (نقطة أساس، مثال 1500)',
-});
-const CLABEL={
-  trial_balance:{en:'Trial balance reviewed and ties',ar:'مراجعة ميزان المراجعة ومطابقته'},
-  bank_recs:{en:'Bank reconciliations complete',ar:'إتمام التسويات البنكية'},
-  invoicing:{en:'All sales invoiced (ZATCA)',ar:'فوترة كل المبيعات (ZATCA)'},
-  accruals:{en:'Accruals & depreciation posted',ar:'ترحيل الاستحقاقات والإهلاك'},
-  working_papers:{en:'Working papers tied out',ar:'مطابقة أوراق العمل'},
-  findings:{en:'Control findings cleared',ar:'معالجة ملاحظات الرقابة'},
-  taxes:{en:'VAT position (ZATCA) reviewed',ar:'مراجعة الوضع الضريبي (ZATCA)'},
-  statements:{en:'Financial statements reviewed',ar:'مراجعة القوائم المالية'},
-};
-const t=()=>T[LANG];
+const NAV=[
+  {id:'dashboard',en:'Dashboard',ar:'لوحة المعلومات',ic:'▢'},
+  {id:'journal',en:'Journal',ar:'دفتر اليومية',ic:'▤'},
+  {id:'invoices',en:'Invoices',ar:'الفواتير',ic:'⛁'},
+  {id:'bills',en:'Bills',ar:'فواتير الشراء',ic:'⛃'},
+  {id:'contacts',en:'Contacts',ar:'جهات الاتصال',ic:'☰'},
+  {id:'inventory',en:'Inventory',ar:'المخزون',ic:'▦'},
+  {id:'banking',en:'Banking',ar:'البنوك',ic:'⑃'},
+  {id:'reports',en:'Reports',ar:'التقارير',ic:'◪'},
+  {id:'tax',en:'Tax — ZATCA',ar:'الضريبة — ZATCA',ic:'٪'},
+  {id:'controls',en:'Controls',ar:'الرقابة',ic:'◈'},
+  {id:'close',en:'Close',ar:'الإقفال',ic:'✓'},
+];
+const T={en:{tagline:'Books that are born audited',signin:'Sign in',demo:'Or sign in as a demo user',secWork:'Workspace',signout:'Sign out',clients:'Client'},
+         ar:{tagline:'دفاتر تُولد مُدقَّقة',signin:'تسجيل الدخول',demo:'أو ادخل كمستخدم تجريبي',secWork:'مساحة العمل',signout:'خروج',clients:'العميل'}};
+const t=k=>(T[LANG][k]||T.en[k]||k);
+const navLabel=n=>LANG==='ar'?n.ar:n.en;
 
-/* rule-name translation — the domain emits English rule names; map to Arabic in AR mode */
-const RULE_AR={
-  'Weekend posting':'قيد في نهاية الأسبوع',
-  'Unusual round amount':'مبلغ مستدير غير معتاد',
-  'Amount just under approval threshold':'مبلغ أقل بقليل من حد الاعتماد',
-  'Possible duplicate':'ازدواج محتمل',
-  'Atypical leading digit (Benford)':'رقم استهلالي غير معتاد (بنفورد)',
-  'Manual cash/bank adjustment':'تسوية يدوية للنقد/البنك',
-  'Related-party transaction':'معاملة مع طرف ذي علاقة',
-  'Numbering gap':'فجوة في الترقيم',
-  'Unusual posting velocity':'سرعة ترحيل غير معتادة',
-};
-const ruleName=r=>LANG==='ar'?(RULE_AR[r]||r):r;
+function setLang(l){LANG=l;document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';
+  $('lg-en').classList.toggle('on',l==='en');$('lg-ar').classList.toggle('on',l==='ar');
+  document.querySelectorAll('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));
+  if(USER){renderSidebar();route();}}
 
-/* finding messages come from the server already in English; render as-is */
-const message=(rule,m)=>m;
-
-function driverLines(factors){
-  const T=t(); const out=[];
-  if(factors.openFindings>0){let s=T.openF(factors.openFindings); if(factors.highFindings>0)s+=` (${T.high(factors.highFindings)})`; out.push(s);}
-  const p=Math.round(factors.manualShare*100); if(p>0)out.push(T.manual(p));
-  if(factors.weekendCount>0)out.push(T.weekend(factors.weekendCount));
-  if(!out.length)out.push(T.quiet);
-  return out;
+async function api(path,opts={}){
+  const r=await fetch('/api'+path,{...opts,headers:{'content-type':'application/json',...(TOKEN?{authorization:'Bearer '+TOKEN}:{}),...(opts.headers||{})}});
+  if(r.status===401){logout();throw new Error('Session expired');}
+  if(!r.ok){let m='Error';try{m=(await r.json()).error||m;}catch{}throw new Error(m);}
+  const ct=r.headers.get('content-type')||''; return ct.includes('json')?r.json():r.text();
 }
-const bandColor=b=>({alto:'#c0392b',medio:'#bd8420',bajo:'#1eb668'})[b];
+function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('on');setTimeout(()=>el.classList.remove('on'),2200);}
 
-/* ---------- views ---------- */
-const view=document.getElementById('view');
-let CURRENT={page:'console',id:null};
-
-async function consoleView(){
-  CURRENT={page:'console',id:null};
-  const rows=await api('/clients'); const T=t();
-  view.innerHTML=`<h2 class="section">${T.consoleTitle}</h2><p class="lead">${T.consoleLead}</p>
-  <div class="panel"><table><thead><tr><th>${T.cClient}</th><th>${T.cRisk}</th><th class="num">${T.cScore}</th><th class="num">${T.cOpen}</th><th class="num">${T.cEntries}</th></tr></thead>
-  <tbody class="rows">${rows.map(r=>`<tr onclick="clientView('${r.clientId}')">
-    <td><div class="cname">${r.name}</div><div class="cid">${r.clientId}</div>
-      <ul class="drivers">${driverLines(r.risk.factors).slice(0,1).map(d=>`<li>${d}</li>`).join('')}</ul></td>
-    <td><span class="band ${r.risk.band}">${T.band[r.risk.band]}</span></td>
-    <td class="num"><div class="risk"><span class="track"><i style="width:${r.risk.score}%;background:${bandColor(r.risk.band)}"></i><b style="left:calc(${r.risk.score}% - 1px)"></b></span><span class="score">${r.risk.score}</span></div></td>
-    <td class="num">${r.openFindings}</td><td class="num">${r.entryCount}</td></tr>`).join('')}</tbody></table></div>
-  <p class="foot">${T.footConsole}</p>`;
-}
-
-async function clientView(id){
-  CURRENT={page:'client',id};
-  await ensureAccounts();
-  const [reports,findings,audit,entries,wps,close,analytics,checklist,arAging,apAging,periods]=await Promise.all([api('/clients/'+id+'/reports'),api('/clients/'+id+'/findings'),api('/clients/'+id+'/audit'),api('/clients/'+id+'/entries'),api('/clients/'+id+'/working-papers'),api('/clients/'+id+'/close?period=2026-06'),api('/clients/'+id+'/analytics'),api('/clients/'+id+'/checklist?period=2026-06'),api('/clients/'+id+'/aging?kind=receivable&asOf=2026-06-30'),api('/clients/'+id+'/aging?kind=payable&asOf=2026-06-30'),api('/clients/'+id+'/periods')]);
-  const periodLocked=(periods.locked||[]).includes('2026-06');
-  ENTRY_CACHE=entries; AUDIT_CACHE=audit.events;
-  REVIEWS=new Set(audit.events.filter(e=>e.action==='ENTRY_REVIEWED').map(e=>e.ref));
-  const T=t(); const r=reports, v=audit.verification;
-  view.innerHTML=`<button class="back" onclick="consoleView()">← ${T.back}</button>
-  <div class="toolbar">
-    ${can('staff')?`<button class="btn" onclick="modalEntry('${id}')">${T.newEntry}</button><button class="btn ink" onclick="modalInvoice('${id}')">${T.newInvoice}</button><button class="btn ink" onclick="billModal('${id}')">${T.newBill}</button><button class="btn ink" onclick="reconcile('${id}')">${T.reconcile}</button><button class="btn ink" onclick="templatesModal('${id}')">${T.templates}</button>`:''}${can('accountant')?`<button class="btn ink" onclick="openingModal('${id}')">${T.openingBal}</button>`:''}
-    <span style="flex:1"></span>
-    <button class="btn ink" onclick="exportPDF('${id}')">${T.statementsPdf}</button>
-    <button class="btn ink" onclick="exportCSV('${id}','trial-balance')">${T.exportTB}</button>
-    <button class="btn ink" onclick="exportCSV('${id}','journal')">${T.exportJ}</button>
-    ${can('accountant')?`<button class="btn" onclick="share('${id}')">${T.share}</button>`:''}
-  </div>
-  <div class="grid">
-    <div class="panel"><div class="cap">${T.financials}</div>
-      <table class="fin"><tbody>
-        <tr class="trace" onclick="prov('${id}','4000')"><td>${T.revenue} ›</td><td class="num">${COP(r.incomeStatement.ingresos)}</td></tr>
-        <tr><td>${T.expenses}</td><td class="num">-${COP(r.incomeStatement.gastos)}</td></tr>
-        <tr class="tot"><td>${T.profit}</td><td class="num">${COP(r.incomeStatement.utilidad)}</td></tr>
-        <tr><td>${T.assets}</td><td class="num">${COP(r.balanceSheet.activos)}</td></tr>
-        <tr><td>${T.liabilities}</td><td class="num">${COP(r.balanceSheet.pasivos)}</td></tr>
-        <tr><td>${T.equity}</td><td class="num">${COP(r.balanceSheet.patrimonio)}</td></tr>
-        <tr class="tot"><td>${T.balances}</td><td class="num">${r.trialBalance.balanced?T.yes:'—'}</td></tr>
-      </tbody></table></div>
-    <div class="panel"><div class="cap">${T.tax}</div>
-      <table class="fin"><tbody>
-        <tr class="trace" onclick="prov('${id}','2100')"><td>${T.ivaOut} ›</td><td class="num">${COP(r.taxPosition.ivaGenerado)}</td></tr>
-        <tr class="trace" onclick="prov('${id}','1150')"><td>${T.ivaIn} ›</td><td class="num">${COP(r.taxPosition.ivaDescontable)}</td></tr>
-        <tr class="tot"><td>${T.ivaPay}</td><td class="num">${COP(r.taxPosition.ivaAPagar)}</td></tr>
-        <tr><td>${T.ivaCredit}</td><td class="num">${COP(r.taxPosition.saldoAFavor)}</td></tr>
-        <tr class="trace" onclick="prov('${id}','1160')"><td>${T.retFavor} ›</td><td class="num">${COP(r.taxPosition.retencionesAFavor)}</td></tr>
-        <tr><td>${T.retPayable}</td><td class="num">${COP(r.taxPosition.retencionesPorPagar)}</td></tr>
-      </tbody></table>
-      <div class="stamp">${T.trail}: ${audit.events.length} ${T.events} — <span class="${v.valid?'valid':'broken'}">${v.valid?T.chainValid:T.chainBroken}</span></div>
-    </div>
-  </div>
-  <div class="panel"><div class="cap">${T.cashFlow}</div>
-    <table class="fin"><tbody>
-      <tr><td>${T.cfOperating}</td><td class="num">${COP(r.cashFlow.operating)}</td></tr>
-      <tr><td>${T.cfInvesting}</td><td class="num">${COP(r.cashFlow.investing)}</td></tr>
-      <tr><td>${T.cfFinancing}</td><td class="num">${COP(r.cashFlow.financing)}</td></tr>
-      <tr class="tot"><td>${T.cfNet}</td><td class="num">${COP(r.cashFlow.netChange)}</td></tr>
-      <tr><td>${T.cfOpen}</td><td class="num">${COP(r.cashFlow.openingCash)}</td></tr>
-      <tr class="tot"><td>${T.cfClose}</td><td class="num">${COP(r.cashFlow.closingCash)}</td></tr>
-    </tbody></table></div>
-  <div class="panel"><div class="cap">${T.assurance}${can('staff')?`<button class="btn" style="padding:5px 11px" onclick="newWP('${id}')">${T.addPaper}</button>`:''}</div>
-    <div class="closebar ${close.readyToClose?'ok':'no'}">${close.readyToClose?T.closeReady:T.closeBlocked+': '+close.blockers.join(' · ')}</div>
-    <div class="checklist" style="display:flex;align-items:center;gap:12px">
-      <span class="cklabel">${T.period} 2026-06: <b style="color:${periodLocked?'var(--rust)':'var(--olive)'}">${periodLocked?T.lockedTag:T.openTag}</b></span>
-      <span style="flex:1"></span>
-      ${can('partner')?`<button class="btn ${periodLocked?'ink':''}" style="padding:5px 11px" onclick="togglePeriod('${id}','${periodLocked?'unlock':'lock'}')">${periodLocked?T.unlockPeriod:T.lockPeriod}</button>`:''}
-    </div>
-    <div class="checklist"><div class="ckhead">${T.checklist} — ${checklist.done}/${checklist.total} ${T.complete}</div>
-      ${checklist.items.map(it=>checkRow(id,it)).join('')}</div>
-    <table><thead><tr><th>${T.account}</th><th>${T.period}</th><th class="num">${T.booked}</th><th class="num">${T.support}</th><th class="num">${T.diff}</th><th>${T.jStatus}</th></tr></thead>
-    <tbody>${wps.length?wps.map(w=>`<tr><td>${w.accountCode}</td><td>${w.period}</td><td class="num">${COP(w.bookedBalance)}</td><td class="num">${COP(w.supportBalance)}</td><td class="num">${COP(w.difference)}</td><td><span class="band ${w.difference===0?'bajo':'alto'}">${w.difference===0?T.tied:T.untied}</span></td></tr>`).join(''):`<tr><td colspan="6" class="none">${T.noPapers}</td></tr>`}</tbody></table>
-    <div class="stamp">${T.analytics}: ${T.benford} χ²=${analytics.benford.chiSquare.toFixed(1)} (${analytics.benford.anomalous?T.anomalous:T.within}) · ${T.velocity}: ${analytics.velocity.length}</div>
-  </div>
-  ${arapPanel(id,arAging,apAging)}
-  <div class="panel"><div class="cap">${T.findingsCap}<span class="note">${findings.length}</span></div>
-   <table><thead><tr><th>${T.fId}</th><th>${T.fSev}</th><th>${T.fRule}</th><th>${T.fEntry}</th><th>${T.fDesc}</th><th>${T.fStatus}</th><th>${T.fAct}</th></tr></thead>
-   <tbody>${findings.length?findings.map(f=>`<tr>
-     <td class="ref">${f.id}</td>
-     <td><span class="sev ${f.severity}">${T.sev[f.severity]}</span></td>
-     <td>${ruleName(f.rule)}</td>
-     <td class="ref">${f.entryId}</td>
-     <td class="msg">${message(f.rule,f.message)}</td>
-     <td><span class="status">${T.st[f.status]}</span></td>
-     <td style="white-space:nowrap">${can('accountant')&&(f.status==='open'||f.status==='escalated')?`<button class="act" onclick="setStatus('${id}','${f.id}','cleared')">${T.clear}</button><button class="act esc" onclick="setStatus('${id}','${f.id}','escalated')">${T.escalate}</button>`:'—'}</td>
-   </tr>`).join(''):`<tr><td colspan="7" class="none">${T.none}</td></tr>`}</tbody></table></div>
-  <div class="panel"><div class="cap">${T.journal}<span class="note">${entries.length}</span></div>
-   <table><thead><tr><th>${T.jRef}</th><th>${T.jDate}</th><th>${T.jMemo}</th><th>${T.jSource}</th><th class="num">${T.jAmount}</th><th>${T.jStatus}</th><th>${T.reviewedBy}</th></tr></thead>
-   <tbody class="rows">${entries.length?entries.slice().reverse().map(e=>`<tr onclick="showEntry('${id}','${e.id}')">
-     <td class="ref">${e.id}</td><td>${e.date}</td><td>${e.memo}</td><td style="color:var(--umber)">${e.source}</td>
-     <td class="num">${COP(e.amount)}</td>
-     <td><span class="status">${e.reversed?T.reversed:T.posted}</span></td>
-     <td>${reviewCell(id,e)}</td>
-   </tr>`).join(''):`<tr><td colspan="7" class="none">${T.none2}</td></tr>`}</tbody></table></div>
-  <p class="foot">${T.footClient}</p>`;
-}
-
-async function setStatus(id,fid,status){try{await api(`/clients/${id}/findings/${fid}/status`,{method:'POST',body:JSON.stringify({status})});clientView(id);}catch(e){alert(e.message);}}
-
-/* ---------- modals, forms, entry drill-down ---------- */
-const scrim=document.getElementById('scrim'), modal=document.getElementById('modal');
-function openModal(html){modal.innerHTML=html;scrim.classList.add('on');}
-function closeModal(){scrim.classList.remove('on');modal.innerHTML='';}
-scrim.addEventListener('click',e=>{if(e.target===scrim)closeModal();});
-function toast(msg){const el=document.createElement('div');el.className='toast';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),3400);}
-async function ensureAccounts(){if(!ACCOUNTS.length)ACCOUNTS=await api('/accounts');return ACCOUNTS;}
-const acctLbl=a=>LANG==='ar'&&a.nameAr?a.nameAr:a.name;
-const acctOptions=()=>ACCOUNTS.map(a=>`<option value="${a.code}">${a.code} · ${acctLbl(a)}</option>`).join('');
-
-async function modalEntry(id){
-  await ensureAccounts(); const T=t();
-  const line=`<tr><td><select class="acc">${acctOptions()}</select></td><td><input class="deb" type="number" min="0" placeholder="0"></td><td><input class="cred" type="number" min="0" placeholder="0"></td></tr>`;
-  openModal(`<div class="mh">${T.newEntry}<button class="x" onclick="closeModal()">×</button></div>
-    <div class="mb">
-      <div class="two"><div class="field"><label>${T.date}</label><input id="e_date" type="date" value="2026-06-25"></div>
-        <div class="field"><label>${T.source}</label><input id="e_src" value=""></div></div>
-      <div class="field"><label>${T.memo}</label><input id="e_memo" value=""></div>
-      <table class="lines"><thead><tr><th>${T.account}</th><th>${T.debit}</th><th>${T.credit}</th></tr></thead><tbody id="e_lines">${line}${line}</tbody></table>
-      <button class="addln" onclick="addLine()">${T.addLine}</button>
-      <div class="bal" id="e_bal"></div>
-    </div>
-    <div class="mf"><button class="btn ink" onclick="closeModal()">${T.cancel}</button><button class="btn" id="e_post" onclick="submitEntry('${id}')">${T.post}</button></div>`);
-  modal.addEventListener('input',recalcBal); recalcBal();
-}
-function addLine(){const tb=document.getElementById('e_lines');const tr=document.createElement('tr');tr.innerHTML=`<td><select class="acc">${acctOptions()}</select></td><td><input class="deb" type="number" min="0" placeholder="0"></td><td><input class="cred" type="number" min="0" placeholder="0"></td>`;tb.appendChild(tr);recalcBal();}
-function readLines(){return [...document.querySelectorAll('#e_lines tr')].map(tr=>({accountCode:tr.querySelector('.acc').value,debit:+tr.querySelector('.deb').value||0,credit:+tr.querySelector('.cred').value||0}));}
-function recalcBal(){const T=t();const L=readLines();const d=L.reduce((s,x)=>s+x.debit,0),c=L.reduce((s,x)=>s+x.credit,0);const ok=Math.round(d*100)===Math.round(c*100)&&d>0;const bar=document.getElementById('e_bal');if(!bar)return;bar.innerHTML=`<span>${T.debit}: ${COP(d)}</span><span>${T.credit}: ${COP(c)}</span><span class="${ok?'ok':'no'}">${ok?'· '+T.balanced:'· '+T.unbalanced+' '+COP(Math.abs(d-c))}</span>`;const btn=document.getElementById('e_post');if(btn)btn.style.opacity=ok?'1':'.45';}
-async function submitEntry(id){
-  const T=t();const lines=readLines().filter(l=>l.debit||l.credit).map(l=>({accountCode:l.accountCode,debit:l.debit||undefined,credit:l.credit||undefined}));
-  try{const r=await api(`/clients/${id}/entries`,{method:'POST',body:JSON.stringify({date:document.getElementById('e_date').value,memo:document.getElementById('e_memo').value||'—',source:document.getElementById('e_src').value||'—',lines})});
-    closeModal();toast(T.okEntry+(r.findings&&r.findings.length?` — ${r.findings.length} ${T.raised}`:''));clientView(id);
-  }catch(e){alert(e.message);}
-}
-
-async function modalInvoice(id){
-  const T=t();
-  openModal(`<div class="mh">${T.newInvoice}<button class="x" onclick="closeModal()">×</button></div>
-    <div class="mb">
-      <div class="two"><div class="field"><label>${T.customer}</label><input id="i_cli" value=""></div>
-        <div class="field"><label>${T.taxId}</label><input id="i_nit" value="830000"></div></div>
-      <div class="two"><div class="field"><label>${T.date}</label><input id="i_date" type="date" value="2026-06-25"></div>
-        <div class="field"><label>${T.base}</label><input id="i_base" type="number" min="0" value="4000000"></div></div>
-      <div class="field"><label>${T.concept}</label><input id="i_con" value="Venta de mercancía"></div>
-      <div class="two"><div class="field"><label>${T.reteicaLbl}</label><input id="i_ica" type="number" min="0" value="0"></div>
-        <div class="field"><label>${T.reteivaLbl}</label><input id="i_iva" type="number" min="0" value="0"></div></div>
-      <div class="cufe" id="i_prev"></div>
-    </div>
-    <div class="mf"><button class="btn ink" onclick="closeModal()">${T.cancel}</button><button class="btn" onclick="submitInvoice('${id}')">${T.issue}</button></div>`);
-  modal.addEventListener('input',invPreview); invPreview();
-}
-function invPreview(){const el=document.getElementById('i_prev');if(!el)return;const b=+document.getElementById('i_base').value||0;const iva=Math.round(b*0.19),rete=Math.round(b*0.025);el.innerHTML=`${t().previewInv}<br><br>${t().base.replace(' (COP)','')} ${COP(b)} · IVA ${COP(iva)} · Retefuente −${COP(rete)} · Total ${COP(b+iva-rete)}`;}
-async function submitInvoice(id){
-  const T=t();
-  try{const r=await api(`/clients/${id}/invoices`,{method:'POST',body:JSON.stringify({client:document.getElementById('i_cli').value||'—',acquirerId:document.getElementById('i_nit').value,date:document.getElementById('i_date').value,concept:document.getElementById('i_con').value,base:+document.getElementById('i_base').value||0,reteIcaBps:+document.getElementById('i_ica').value||0,reteIvaBps:+document.getElementById('i_iva').value||0})});
-    closeModal();toast(`${T.okInv} (${r.number})`);clientView(id);
-  }catch(e){alert(e.message);}
-}
-
-function showEntry(id,entryId){
-  const T=t();const e=ENTRY_CACHE.find(x=>x.id===entryId);if(!e)return;
-  const ev=AUDIT_CACHE.find(a=>a.ref===entryId&&a.action==='POST_ENTRY');
-  const rows=e.lines.map(l=>`<tr><td class="ref">${l.accountCode}</td><td>${accName(l.accountCode)}</td><td class="num">${l.debit?COP(l.debit):''}</td><td class="num">${l.credit?COP(l.credit):''}</td></tr>`).join('');
-  openModal(`<div class="mh">${T.entry} ${e.id}<button class="x" onclick="closeModal()">×</button></div>
-    <div class="mb">
-      <div class="two"><div><label class="emono">${T.date}</label><div>${e.date}</div></div><div><label class="emono">${T.source}</label><div>${e.source}</div></div></div>
-      <div style="margin:12px 0 4px"><label class="emono">${T.memo}</label><div>${e.memo}</div></div>
-      <table class="lines" style="margin-top:10px"><thead><tr><th>${T.account}</th><th></th><th>${T.debit}</th><th>${T.credit}</th></tr></thead><tbody>${rows}</tbody></table>
-      ${ev?`<div style="margin-top:14px"><label class="emono">${T.evHash}</label><div class="cufe">${ev.hash}<br><span style="opacity:.6">${T.prev}: ${ev.prevHash}</span></div></div>`:''}
-      <div class="imm">${T.immutable}</div>
-    </div>
-    <div class="mf"><button class="btn ink" onclick="closeModal()">${T.close}</button></div>`);
-}
-const accName=code=>{const a=ACCOUNTS.find(x=>x.code===code);return a?acctLbl(a):code;};
-
-/* ---------- Prove-this-number provenance ---------- */
-async function prov(id,code){
-  const T=t();const p=await api(`/clients/${id}/provenance/${code}`);
-  let run=0;
-  const rows=p.lines.map(l=>{run+=l.contribution;return `<tr><td class="ref">${l.entryId}</td><td>${l.date}</td><td>${l.memo}</td><td class="num">${l.contribution<0?'−':''}${COP(Math.abs(l.contribution))}</td><td class="num">${COP(run)}</td><td class="ref" title="${l.hash||''}">${l.hash?l.hash.slice(0,12)+'…':'—'}</td></tr>`;}).join('');
-  openModal(`<div class="mh">${T.proveTitle} ${p.code} · ${p.name}<button class="x" onclick="closeModal()">×</button></div>
-    <div class="mb">
-      <p class="lead" style="margin-top:0">${T.tracedBy}</p>
-      <table class="lines"><thead><tr><th>${T.jRef}</th><th>${T.date}</th><th>${T.memo}</th><th>${T.contribution}</th><th>${T.runningBal}</th><th>${T.evHash}</th></tr></thead><tbody>${rows||`<tr><td colspan="6" class="none">${T.none2}</td></tr>`}</tbody></table>
-      <div class="bal"><span>${p.name}</span><span class="ok">· ${COP(p.natural)}</span></div>
-    </div>
-    <div class="mf"><button class="btn ink" onclick="closeModal()">${T.close}</button></div>`);
-}
-
-/* ---------- Working paper ---------- */
-async function newWP(id){
-  await ensureAccounts();const T=t();
-  openModal(`<div class="mh">${T.addPaper}<button class="x" onclick="closeModal()">×</button></div>
-    <div class="mb">
-      <div class="two"><div class="field"><label>${T.account}</label><select id="w_acc">${acctOptions()}</select></div>
-        <div class="field"><label>${T.period}</label><input id="w_per" value="2026-06"></div></div>
-      <div class="field"><label>${T.support}</label><input id="w_sup" type="number" value="0"></div>
-      <div class="field"><label>${T.memo}</label><input id="w_note" value=""></div>
-      <p class="lead" style="margin:0">${T.tied} / ${T.untied}: ${LANG==='ar'?'الفرق بين الرصيد الدفتري والمستند الخارجي يحدد المطابقة.':'the gap between the booked balance and external support determines the tie-out.'}</p>
-    </div>
-    <div class="mf"><button class="btn ink" onclick="closeModal()">${T.cancel}</button><button class="btn" onclick="submitWP('${id}')">${T.create}</button></div>`);
-}
-async function submitWP(id){
-  const T=t();
-  try{await api(`/clients/${id}/working-papers`,{method:'POST',body:JSON.stringify({accountCode:document.getElementById('w_acc').value,period:document.getElementById('w_per').value,supportBalance:+document.getElementById('w_sup').value||0,notes:document.getElementById('w_note').value})});
-    closeModal();toast(T.addPaper+' ✓');clientView(id);
-  }catch(e){alert(e.message);}
-}
-
-/* ---------- Verifiable sharing ---------- */
-async function share(id){
-  const T=t();
-  const r=await api(`/clients/${id}/share`,{method:'POST'});
-  const url=location.origin+r.url;
-  openModal(`<div class="mh">${T.shareTitle}<button class="x" onclick="closeModal()">×</button></div>
-    <div class="mb">
-      <p class="lead" style="margin-top:0">${T.shareDesc}</p>
-      <div class="verifybox" id="s_url">${url}</div>
-      <div style="margin-top:12px"><button class="btn" onclick="copyLink('${url}')">${T.copy}</button>
-        <a class="btn ink" style="text-decoration:none;display:inline-block" href="${url}" target="_blank">${LANG==='ar'?'فتح':'Open'}</a></div>
-    </div>
-    <div class="mf"><button class="btn ink" onclick="closeModal()">${T.close}</button></div>`);
-}
-function copyLink(url){navigator.clipboard&&navigator.clipboard.writeText(url);toast(t().copied);}
-window.prov=prov;window.newWP=newWP;window.submitWP=submitWP;window.share=share;window.copyLink=copyLink;
-
-/* ---------- maker-checker review ---------- */
-function reviewCell(id,e){
-  const T=t();
-  if(REVIEWS.has(e.id))return `<span class="status" style="color:var(--olive)">${T.reviewedBy} ✓</span>`;
-  if(can('accountant')&&e.user!==USER.name)return `<button class="act" onclick="event.stopPropagation();reviewEntry('${id}','${e.id}')">${T.review}</button>`;
-  return `<span class="status" style="color:var(--faint)">${T.pending}</span>`;
-}
-async function reviewEntry(id,eid){
-  try{await api(`/clients/${id}/entries/${eid}/review`,{method:'POST'});clientView(id);}catch(e){alert(e.message);}
-}
-
-/* ---------- bank reconciliation ---------- */
-function reconcile(id){
-  const T=t();
-  const sample=`2026-06-01,Consignación aporte socios,60000000\n2026-06-30,Comisión bancaria,-45000`;
-  openModal(`<div class="mh">${T.reconTitle}<button class="x" onclick="closeModal()">×</button></div>
-    <div class="mb">
-      <p class="lead" style="margin-top:0">${T.reconDesc}</p>
-      <textarea id="rc_csv" style="width:100%;height:110px;font-family:ui-monospace,monospace;font-size:12px;border:1px solid var(--line);border-radius:3px;padding:10px;background:#fffdf8">${sample}</textarea>
-      <div style="margin-top:10px"><button class="btn" onclick="doReconcile('${id}')">${T.run}</button></div>
-      <div id="rc_out"></div>
-    </div>
-    <div class="mf"><button class="btn ink" onclick="closeModal()">${T.close}</button></div>`);
-}
-async function doReconcile(id){
-  const T=t();
+async function doLogin(){
   try{
-    const r=await api(`/clients/${id}/reconcile`,{method:'POST',body:JSON.stringify({csv:document.getElementById('rc_csv').value})});
-    const sec=(title,color,rows)=>`<div class="bal" style="margin-top:14px"><span style="color:${color};font-weight:600">${title}</span></div><table class="lines"><tbody>${rows||`<tr><td class="none">—</td></tr>`}</tbody></table>`;
-    const m=r.matches.map(x=>`<tr><td>${x.date}</td><td>${x.description}</td><td class="num">${COP(x.amount)}</td><td class="ref">${x.entryId}</td></tr>`).join('');
-    const us=r.unmatchedStatement.map(x=>`<tr><td>${x.date}</td><td>${x.description}</td><td class="num">${COP(x.amount)}</td><td></td></tr>`).join('');
-    const ul=r.unmatchedLedger.map(x=>`<tr><td>${x.date}</td><td>${x.memo}</td><td class="num">${COP(x.delta)}</td><td class="ref">${x.entryId}</td></tr>`).join('');
-    document.getElementById('rc_out').innerHTML=
-      `<div class="closebar ${r.matchedCount===r.statementCount?'ok':'no'}" style="margin-top:14px;border:0">${r.matchedCount} ${T.of} ${r.statementCount} ${T.reconciled}</div>`+
-      sec(T.matchedC,'var(--olive)',m)+sec(T.unmatchedS,'var(--rust)',us)+sec(T.unmatchedL,'var(--ochre)',ul);
-  }catch(e){alert(e.message);}
+    const res=await api('/auth/login',{method:'POST',body:JSON.stringify({email:$('lg_email').value,password:$('lg_pass').value})});
+    TOKEN=res.token;localStorage.setItem('aud_tok',TOKEN);USER=res.user;await boot();
+  }catch(e){$('lg_err').textContent=e.message;}
 }
-
-/* ---------- CSV export ---------- */
-async function exportCSV(id,kind){
-  const r=await fetch(`/api/clients/${id}/export/${kind}.csv`,{headers:{authorization:'Bearer '+TOKEN}});
-  if(!r.ok){alert('Export failed');return;}
-  const blob=await r.blob();const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download=`${kind}.csv`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
-}
-async function exportPDF(id){
-  const r=await fetch(`/api/clients/${id}/statements.pdf?lang=${LANG}&period=2026-06`,{headers:{authorization:'Bearer '+TOKEN}});
-  if(!r.ok){alert('Export failed');return;}
-  const blob=await r.blob();const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download='estados-financieros.pdf';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
-}
-window.reviewEntry=reviewEntry;window.reconcile=reconcile;window.doReconcile=doReconcile;window.exportCSV=exportCSV;window.exportPDF=exportPDF;
-
-/* ---------- close checklist ---------- */
-function checkRow(id,it){
-  const T=t();const label=CLABEL[it.key]?CLABEL[it.key][LANG]:it.label;
-  const clickable=!it.auto&&can('staff');
-  const meta=it.auto?`<span class="autotag">${T.autoTag}</span>`:(it.by?`<span class="cby">${T.by} ${it.by}</span>`:'');
-  return `<div class="ckrow ${clickable?'clk':''}" ${clickable?`onclick="toggleCheck('${id}','${it.key}',${!it.done})"`:''}>
-    <span class="ckmark ${it.done?'on':''}">✓</span><span class="cklabel">${label}</span><span style="flex:1"></span>${meta}</div>`;
-}
-async function toggleCheck(id,key,done){
-  try{await api(`/clients/${id}/checklist/${key}`,{method:'POST',body:JSON.stringify({period:'2026-06',done})});clientView(id);}catch(e){alert(e.message);}
-}
-
-/* ---------- recurring templates ---------- */
-async function templatesModal(id){
-  await ensureAccounts();const T=t();
-  const tpls=await api(`/clients/${id}/templates`);
-  const list=tpls.length?tpls.map(tp=>`<div class="tplrow">
-      <span class="nm">${tp.name}</span><span class="ref">${tp.lines.length} ${LANG==='ar'?'سطر':'lines'}</span><span style="flex:1"></span>
-      <input type="date" id="td_${tp.id}" value="2026-07-01" style="padding:5px 7px">
-      <button class="btn" style="padding:5px 10px" onclick="postTemplate('${id}','${tp.id}')">${T.postTpl}</button>
-      <button class="act esc" onclick="delTemplate('${id}','${tp.id}')">${T.del}</button>
-    </div>`).join(''):`<div class="none">${T.noTemplates}</div>`;
-  const line=`<tr><td><select class="tacc">${acctOptions()}</select></td><td><input class="tdeb" type="number" min="0" placeholder="0"></td><td><input class="tcred" type="number" min="0" placeholder="0"></td></tr>`;
-  openModal(`<div class="mh">${T.templates}<button class="x" onclick="closeModal()">×</button></div>
-    <div class="mb">
-      <p class="lead" style="margin-top:0">${T.tplHint}</p>
-      ${list}
-      <div class="ckhead" style="margin-top:18px">${T.newTemplate}</div>
-      <div class="field"><label>${T.templateName}</label><input id="tpl_name" placeholder="${LANG==='ar'?'إيجار شهري':'Monthly rent'}"></div>
-      <table class="lines"><thead><tr><th>${T.account}</th><th>${T.debit}</th><th>${T.credit}</th></tr></thead><tbody id="tpl_lines">${line}${line}</tbody></table>
-      <div class="bal" id="tpl_bal"></div>
-    </div>
-    <div class="mf"><button class="btn ink" onclick="closeModal()">${T.cancel}</button><button class="btn" onclick="saveTemplate('${id}')">${T.saveTpl}</button></div>`);
-  modal.addEventListener('input',tplBal);tplBal();
-}
-function tplReadLines(){return [...document.querySelectorAll('#tpl_lines tr')].map(tr=>({accountCode:tr.querySelector('.tacc').value,debit:+tr.querySelector('.tdeb').value||0,credit:+tr.querySelector('.tcred').value||0}));}
-function tplBal(){const T=t();const L=tplReadLines();if(!L.length)return;const d=L.reduce((s,x)=>s+x.debit,0),c=L.reduce((s,x)=>s+x.credit,0);const ok=Math.round(d*100)===Math.round(c*100)&&d>0;const bar=document.getElementById('tpl_bal');if(bar)bar.innerHTML=`<span>${T.debit}: ${COP(d)}</span><span>${T.credit}: ${COP(c)}</span><span class="${ok?'ok':'no'}">${ok?'· '+T.balanced:'· '+T.unbalanced+' '+COP(Math.abs(d-c))}</span>`;}
-async function saveTemplate(id){
-  const T=t();const name=document.getElementById('tpl_name').value.trim();if(!name){alert(T.templateName);return;}
-  const lines=tplReadLines().filter(l=>l.debit||l.credit).map(l=>({accountCode:l.accountCode,debit:l.debit||undefined,credit:l.credit||undefined}));
-  try{await api(`/clients/${id}/templates`,{method:'POST',body:JSON.stringify({name,memo:name,source:'',lines})});templatesModal(id);}
-  catch(e){alert(e.message);}
-}
-async function postTemplate(id,tid){
-  const T=t();const date=document.getElementById('td_'+tid).value;
-  try{await api(`/clients/${id}/templates/${tid}/post`,{method:'POST',body:JSON.stringify({date})});closeModal();toast(T.okEntry);clientView(id);}
-  catch(e){alert(e.message);}
-}
-async function delTemplate(id,tid){try{await api(`/clients/${id}/templates/${tid}`,{method:'DELETE'});templatesModal(id);}catch(e){alert(e.message);}}
-window.checkRow=checkRow;window.toggleCheck=toggleCheck;window.templatesModal=templatesModal;window.saveTemplate=saveTemplate;window.postTemplate=postTemplate;window.delTemplate=delTemplate;
-
-/* ---------- AR / AP subledger ---------- */
-function agingMini(a){
-  const T=t();const b=a.buckets;
-  return `<table class="fin" style="margin-bottom:4px"><tbody>
-    <tr><td>${T.agCurrent}</td><td class="num">${COP(b.current)}</td></tr>
-    <tr><td>${T.ag1}</td><td class="num">${COP(b.d1_30)}</td></tr>
-    <tr><td>${T.ag2}</td><td class="num">${COP(b.d31_60)}</td></tr>
-    <tr><td>${T.ag3}</td><td class="num">${COP(b.d61_90)}</td></tr>
-    <tr><td>${T.ag4}</td><td class="num">${COP(b.d90plus)}</td></tr>
-    <tr class="tot"><td>${T.outCol}</td><td class="num">${COP(a.total)}</td></tr>
-  </tbody></table>`;
-}
-function openList(id,rows){
-  const T=t();
-  if(!rows.length)return `<div class="none">${T.noOpen}</div>`;
-  return `<table><thead><tr><th>${T.jSource}</th><th>${T.jRef}</th><th>${T.dueCol}</th><th class="num">${T.outCol}</th><th></th></tr></thead><tbody>${rows.map(r=>`<tr>
-    <td>${r.contactName}</td><td class="ref">${r.docNumber}</td>
-    <td>${r.dueDate}${r.daysOverdue>0?` <span class="autotag" style="border-color:rgba(154,56,32,.4);color:var(--rust)">${r.daysOverdue}d ${T.overdueTag}</span>`:''}</td>
-    <td class="num">${COP(r.outstanding)}</td>
-    <td>${can('staff')?`<button class="act" onclick="payModal('${id}','${r.id}',${r.outstanding})">${T.payBtn}</button>`:''}</td>
-  </tr>`).join('')}</tbody></table>`;
-}
-function arapPanel(id,ar,ap){
-  const T=t();
-  return `<div class="panel"><div class="cap">${T.arap}</div>
-    <div class="grid" style="padding:16px 20px;gap:20px">
-      <div><div class="ckhead">${T.receivables}</div>${agingMini(ar)}${openList(id,ar.rows)}</div>
-      <div><div class="ckhead">${T.payables}</div>${agingMini(ap)}${openList(id,ap.rows)}</div>
-    </div></div>`;
-}
-async function billModal(id){
-  await ensureAccounts();const T=t();
-  const opts=ACCOUNTS.filter(a=>a.type==='expense'||a.type==='cogs'||a.type==='asset').map(a=>`<option value="${a.code}">${a.code} · ${acctLbl(a)}</option>`).join('');
-  openModal(`<div class="mh">${T.newBill}<button class="x" onclick="closeModal()">×</button></div>
-    <div class="mb">
-      <div class="two"><div class="field"><label>${T.vendor}</label><input id="b_name" value=""></div>
-        <div class="field"><label>NIT</label><input id="b_nit" value=""></div></div>
-      <div class="two"><div class="field"><label>${T.date}</label><input id="b_date" type="date" value="2026-06-15"></div>
-        <div class="field"><label>${T.expenseAcct}</label><select id="b_acct">${opts}</select></div></div>
-      <div class="field"><label>${T.base}</label><input id="b_base" type="number" min="0" value="1000000"></div>
-      <div class="cufe" id="b_prev"></div>
-    </div>
-    <div class="mf"><button class="btn ink" onclick="closeModal()">${T.cancel}</button><button class="btn" onclick="submitBill('${id}')">${T.createBill}</button></div>`);
-  modal.addEventListener('input',billPreview);billPreview();
-}
-function billPreview(){const el=document.getElementById('b_prev');if(!el)return;const b=+document.getElementById('b_base').value||0;const iva=Math.round(b*0.19),rete=Math.round(b*0.025);el.innerHTML=`IVA ${COP(iva)} · Retefuente −${COP(rete)} · ${t().payables.split('—')[0].trim()}: ${COP(b+iva-rete)}`;}
-async function submitBill(id){
-  const T=t();
-  try{await api(`/clients/${id}/bills`,{method:'POST',body:JSON.stringify({vendorName:document.getElementById('b_name').value||'—',vendorNit:document.getElementById('b_nit').value,date:document.getElementById('b_date').value,base:+document.getElementById('b_base').value||0,expenseAccount:document.getElementById('b_acct').value})});
-    closeModal();toast(T.okBill);clientView(id);}catch(e){alert(e.message);}
-}
-function payModal(id,itemId,outstanding){
-  const T=t();
-  openModal(`<div class="mh">${T.payTitle}<button class="x" onclick="closeModal()">×</button></div>
-    <div class="mb">
-      <div class="two"><div class="field"><label>${T.payAmount}</label><input id="p_amt" type="number" min="0" value="${outstanding}"></div>
-        <div class="field"><label>${T.date}</label><input id="p_date" type="date" value="2026-06-25"></div></div>
-    </div>
-    <div class="mf"><button class="btn ink" onclick="closeModal()">${T.cancel}</button><button class="btn" onclick="submitPayment('${id}','${itemId}')">${T.payBtn}</button></div>`);
-}
-async function submitPayment(id,itemId){
-  const T=t();
-  try{await api(`/clients/${id}/payments`,{method:'POST',body:JSON.stringify({openItemId:itemId,amount:+document.getElementById('p_amt').value||0,date:document.getElementById('p_date').value})});
-    closeModal();toast(T.okPay);clientView(id);}catch(e){alert(e.message);}
-}
-window.arapPanel=arapPanel;window.billModal=billModal;window.submitBill=submitBill;window.payModal=payModal;window.submitPayment=submitPayment;window.billPreview=billPreview;window.agingMini=agingMini;window.openList=openList;
-
-/* ---------- period lock ---------- */
-async function togglePeriod(id,action){
-  const T=t();
-  try{await api(`/clients/${id}/periods/2026-06/${action}`,{method:'POST'});toast(action==='lock'?T.okLock:T.okUnlock);clientView(id);}catch(e){alert(e.message);}
-}
-window.togglePeriod=togglePeriod;
-
-/* ---------- opening balances (migration) ---------- */
-function openingModal(id){
-  const T=t();
-  const sample=`111005,60000000,0\n143505,18000000,0\n310505,0,78000000`;
-  openModal(`<div class="mh">${T.openingBal}<button class="x" onclick="closeModal()">×</button></div>
-    <div class="mb">
-      <p class="lead" style="margin-top:0">${T.obHint}</p>
-      <div class="two"><div class="field"><label>${T.date}</label><input id="ob_date" type="date" value="2026-01-01"></div><div></div></div>
-      <textarea id="ob_csv" style="width:100%;height:120px;font-family:ui-monospace,monospace;font-size:12px;border:1px solid var(--line);border-radius:3px;padding:10px;background:#fffdf8">${sample}</textarea>
-    </div>
-    <div class="mf"><button class="btn ink" onclick="closeModal()">${T.cancel}</button><button class="btn" onclick="submitOpening('${id}')">${T.importBtn}</button></div>`);
-}
-async function submitOpening(id){
-  const T=t();
-  const lines=document.getElementById('ob_csv').value.split(/\r?\n/).map(r=>r.trim()).filter(Boolean).map(r=>{const [acc,d,c]=r.split(',');return {accountCode:(acc||'').trim(),debit:+d||undefined,credit:+c||undefined};});
-  try{await api(`/clients/${id}/opening-balances`,{method:'POST',body:JSON.stringify({date:document.getElementById('ob_date').value,lines})});closeModal();toast(T.okOpening);clientView(id);}
-  catch(e){alert(e.message);}
-}
-window.openingModal=openingModal;window.submitOpening=submitOpening;
-
-function setLang(l){
-  LANG=l; document.documentElement.lang=l; document.documentElement.dir=(l==='ar'?'rtl':'ltr');
-  document.getElementById('en').classList.toggle('on',l==='en');
-  document.getElementById('ar').classList.toggle('on',l==='ar');
-  document.querySelector('[data-i="tagline"]').textContent=t().tagline;
-  setUserChip(); route();
-}
-function route(){
-  if(!USER){loginView();return;}
-  (CURRENT.page==='client'?clientView(CURRENT.id):consoleView());
-}
-function setUserChip(){
-  const el=document.getElementById('userchip');
-  el.innerHTML = USER? `<span class="who">${USER.name}</span><span class="role">${USER.role}</span><a onclick="logout()">${t().logout}</a>` : '';
-}
-
-/* ---------- login ---------- */
-function loginView(){
-  const T=t();const DEMO=[['ana@audita.co','partner'],['carlos@audita.co','accountant'],['sofia@audita.co','staff'],['cliente@andina.co','viewer']];
-  view.innerHTML=`<div class="login">
-    <div class="word2">Audit<em>a</em></div><div class="sub2">${T.tagline}</div>
-    <div class="panel"><div class="bd" style="padding:20px 22px">
-      <div class="field"><label>${T.email}</label><input id="lg_email" value="ana@audita.co"></div>
-      <div class="field"><label>${T.password}</label><input id="lg_pass" type="password" value="audita" onkeydown="if(event.key==='Enter')doLogin()"></div>
-      <button class="btn" style="width:100%;justify-content:center" onclick="doLogin()">${T.signin}</button>
-      <div class="loginerr" id="lg_err"></div>
-      <div class="lead" style="margin:6px 0 6px">${T.quick}</div>
-      <div class="quick">${DEMO.map(([e,r])=>`<button onclick="doLogin('${e}')"><span>${e}</span><span class="r">${r}</span></button>`).join('')}</div>
-    </div></div></div>`;
-}
-async function doLogin(email){
-  const T=t();
-  const em=email||document.getElementById('lg_email').value;
-  const pw=email?'audita':document.getElementById('lg_pass').value;
-  try{
-    const r=await fetch('/api/auth/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({email:em,password:pw})});
-    if(!r.ok)throw new Error();
-    const data=await r.json();
-    TOKEN=data.token; USER=data.user; localStorage.setItem('audita_token',TOKEN);
-    CURRENT={page:'console',id:null}; setUserChip(); consoleView();
-  }catch(e){const el=document.getElementById('lg_err');if(el)el.textContent=T.badLogin;}
-}
-function logout(){TOKEN='';USER=null;localStorage.removeItem('audita_token');CURRENT={page:'console',id:null};setUserChip();loginView();}
-window.doLogin=doLogin;window.logout=logout;
-window.setLang=setLang;window.consoleView=consoleView;window.clientView=clientView;window.setStatus=setStatus;
-window.modalEntry=modalEntry;window.modalInvoice=modalInvoice;window.addLine=addLine;window.submitEntry=submitEntry;window.submitInvoice=submitInvoice;window.showEntry=showEntry;window.closeModal=closeModal;
-
+function logout(){TOKEN='';USER=null;localStorage.removeItem('aud_tok');$('app').classList.remove('on');$('login').classList.add('on');}
 async function boot(){
-  if(TOKEN){ try{ USER=await api('/me'); }catch{ USER=null; TOKEN=''; localStorage.removeItem('audita_token'); } }
-  setLang('en');
+  USER=USER||await api('/me');
+  $('login').classList.remove('on');$('app').classList.add('on');
+  $('uName').textContent=USER.name;$('uRole').textContent=USER.role;
+  CLIENTS=await api('/clients');
+  CUR=CUR||(CLIENTS[0]&&CLIENTS[0].clientId);
+  ACCOUNTS=await api('/accounts');
+  renderSidebar();go(CUR?'dashboard':'clients');
 }
-boot();
+
+function renderSidebar(){
+  const c=CLIENTS.find(x=>x.clientId===CUR);
+  $('clientBox').innerHTML=`<div class="lbl">${t('clients')}</div><div class="nm">${c?c.name:'—'} ▾</div>`;
+  $('navMain').innerHTML=NAV.map(n=>`<div class="nav ${PAGE===n.id?'on':''}" onclick="go('${n.id}')"><span class="ic">${n.ic}</span> ${navLabel(n)}</div>`).join('');
+  document.querySelectorAll('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));
+}
+
+function go(page){PAGE=page;renderSidebar();route();}
+function setHead(crumb,title,actions){$('crumb').textContent=crumb;$('pageTitle').textContent=title;$('pageActions').innerHTML=actions||'';}
+async function route(){
+  const v=$('view');v.innerHTML='<div class="empty">Loading…</div>';
+  try{
+    if(PAGE==='clients')return viewClients();
+    if(!CUR){v.innerHTML='<div class="empty">No client selected</div>';return;}
+    await ({dashboard:viewDashboard,journal:viewJournal,invoices:viewInvoices,bills:viewBills,contacts:viewContacts,
+      inventory:viewInventory,banking:viewBanking,reports:viewReports,tax:viewTax,controls:viewControls,close:viewClose}[PAGE]||viewDashboard)();
+  }catch(e){v.innerHTML=`<div class="empty">${e.message}</div>`;}
+}
+const cur=()=>CLIENTS.find(c=>c.clientId===CUR)||{name:CUR,clientId:CUR};
+const bandCls=b=>({alto:'high',medio:'med',bajo:'low'}[b]||b);
+const bandTxt=b=>({alto:'High',medio:'Medium',bajo:'Low'}[b]||b);
+
+async function viewClients(){
+  setHead('Firm','The firm’s clients','<button class="btn sm" onclick="newClient()">+ New client</button>');
+  CLIENTS=await api('/clients');
+  $('view').innerHTML=`<div class="panel"><table><thead><tr><th>Client</th><th>Risk</th><th class="num">Score</th><th class="num">Open findings</th><th class="num">Entries</th></tr></thead>
+    <tbody class="click">${CLIENTS.map(r=>`<tr onclick="openClient('${r.clientId}')"><td><b style="font-family:var(--disp)">${r.name}</b><div class="mono" style="font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.1em">${r.clientId}</div></td>
+      <td><span class="pill ${bandCls(r.risk.band)}">${bandTxt(r.risk.band)}</span></td><td class="num">${r.risk.score}</td><td class="num">${r.openFindings}</td><td class="num">${r.entryCount}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function openClient(id){CUR=id;renderSidebar();go('dashboard');}
+async function newClient(){
+  const name=prompt('Client name');if(!name)return;
+  const clientId=name.toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,24);
+  const ofeNit=prompt('VAT / Tax ID')||'300000000000000';
+  try{await api('/clients',{method:'POST',body:JSON.stringify({clientId,name,ofeNit})});CLIENTS=await api('/clients');CUR=clientId;renderSidebar();toast('Client created');go('dashboard');}catch(e){toast(e.message);}
+}
+
+async function viewDashboard(){
+  const c=cur();setHead(c.name,navLabel(NAV[0]),'');
+  const rep=await api(`/clients/${CUR}/reports`);const is=rep.incomeStatement,bs=rep.balanceSheet,tax=rep.taxPosition;
+  $('view').innerHTML=`
+    <div class="kpis">
+      <div class="kpi"><div class="k">Revenue</div><div class="v">${money(is.ingresos)}</div></div>
+      <div class="kpi"><div class="k">Profit</div><div class="v ${is.utilidad>=0?'pos':'neg'}">${money(is.utilidad)}</div></div>
+      <div class="kpi"><div class="k">Assets</div><div class="v">${money(bs.activos)}</div></div>
+      <div class="kpi"><div class="k">VAT payable</div><div class="v">${money(tax.ivaAPagar)}</div></div>
+    </div>
+    <div class="panel"><div class="cap">Financial position <span class="note">${rep.trialBalance.balanced?'trial balance ties':'OUT OF BALANCE'}</span></div>
+      <table class="fin"><tbody>
+        <tr><td>Revenue</td><td class="num">${money(is.ingresos)}</td></tr>
+        <tr><td>Cost of sales</td><td class="num">${money(-is.costo)}</td></tr>
+        <tr><td>Expenses</td><td class="num">${money(-is.gastos)}</td></tr>
+        <tr class="tot"><td>Profit</td><td class="num">${money(is.utilidad)}</td></tr>
+        <tr><td>Assets</td><td class="num">${money(bs.activos)}</td></tr>
+        <tr><td>Liabilities</td><td class="num">${money(bs.pasivos)}</td></tr>
+        <tr class="tot"><td>Equity</td><td class="num">${money(bs.patrimonio)}</td></tr>
+      </tbody></table></div>`;
+}
+
+async function viewJournal(){
+  const c=cur();setHead(c.name,navLabel(NAV[1]),'<button class="btn sm" onclick="entryForm()">+ New entry</button>');
+  const es=await api(`/clients/${CUR}/entries`);
+  $('view').innerHTML=`<div class="panel"><div class="cap">Journal <span class="note">${es.length} entries</span></div>
+    <table><thead><tr><th>Ref</th><th>Date</th><th>Concept</th><th>Counterparty</th><th class="num">Amount</th></tr></thead>
+    <tbody>${es.length?es.slice().reverse().map(e=>`<tr><td class="mono" style="font-size:11px">${e.id}</td><td class="mono" style="font-size:12px">${e.date}</td><td>${e.memo}</td><td class="muted">${e.source}</td><td class="num">${money(e.amount)}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">No entries yet</td></tr>'}</tbody></table></div>`;
+}
+let ELINES=[];
+function entryForm(){
+  ELINES=[{a:'',d:'',c:''},{a:'',d:'',c:''}];
+  window._opts=ACCOUNTS.map(a=>`<option value="${a.code}">${a.code} · ${LANG==='ar'&&a.nameAr?a.nameAr:a.name}</option>`).join('');
+  $('view').innerHTML=`<div class="panel"><div class="cap">New journal entry</div>
+    <div class="form">
+      <div class="field"><label>Date</label><input id="e_date" type="date" value="2026-06-30"></div>
+      <div class="field"><label>Counterparty</label><input id="e_src" placeholder="e.g. Danube Markets"></div>
+      <div class="field full"><label>Concept</label><input id="e_memo" placeholder="Description"></div>
+      <div class="full"><label style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--umber)">Lines — debits must equal credits</label>
+        <div id="elines" style="margin-top:8px"></div>
+        <button class="btn ghost sm" onclick="ELINES.push({a:'',d:'',c:''});drawLines()">+ Add line</button>
+        <span id="ebal" class="mono" style="margin-left:14px;font-size:12px"></span></div>
+      <div class="full row"><button class="btn" onclick="postEntry()">Post entry</button><button class="btn ghost" onclick="go('journal')">Cancel</button></div>
+    </div></div>`;
+  drawLines();
+}
+function drawLines(){
+  $('elines').innerHTML=ELINES.map((l,i)=>`<div class="linerow">
+    <select onchange="ELINES[${i}].a=this.value"><option value="">Account…</option>${window._opts}</select>
+    <input type="number" placeholder="Debit" value="${l.d}" oninput="ELINES[${i}].d=this.value;bal()">
+    <input type="number" placeholder="Credit" value="${l.c}" oninput="ELINES[${i}].c=this.value;bal()">
+    <button class="x" onclick="ELINES.splice(${i},1);drawLines()">×</button></div>`).join('');
+  ELINES.forEach((l,i)=>{const s=$('elines').querySelectorAll('select')[i];if(s)s.value=l.a;});bal();
+}
+function bal(){const d=ELINES.reduce((s,l)=>s+(Number(l.d)||0),0),c=ELINES.reduce((s,l)=>s+(Number(l.c)||0),0);
+  const el=$('ebal');if(!el)return;el.textContent=d===c&&d>0?'✓ balanced':`out by ${money(Math.abs(d-c))}`;el.style.color=d===c&&d>0?'var(--green)':'var(--rust)';}
+async function postEntry(){
+  const lines=ELINES.filter(l=>l.a&&(l.d||l.c)).map(l=>({accountCode:l.a,debit:Number(l.d)||undefined,credit:Number(l.c)||undefined}));
+  try{await api(`/clients/${CUR}/entries`,{method:'POST',body:JSON.stringify({date:$('e_date').value,memo:$('e_memo').value,source:$('e_src').value,lines})});
+    toast('Entry posted');go('journal');}catch(e){toast(e.message);}
+}
+
+async function viewInvoices(){
+  const c=cur();setHead(c.name,navLabel(NAV[2]),'<button class="btn sm" onclick="invForm()">+ Issue invoice</button>');
+  const es=(await api(`/clients/${CUR}/entries`)).filter(e=>/invoice|factura|fe-/i.test(e.memo));
+  $('view').innerHTML=`<div class="panel"><div class="cap">Sales invoices <span class="note">ZATCA · 15% VAT</span></div>
+    <table><thead><tr><th>Ref</th><th>Date</th><th>Concept</th><th>Customer</th><th class="num">Total</th></tr></thead>
+    <tbody>${es.length?es.slice().reverse().map(e=>`<tr><td class="mono" style="font-size:11px">${e.id}</td><td class="mono" style="font-size:12px">${e.date}</td><td>${e.memo}</td><td class="muted">${e.source}</td><td class="num">${money(e.amount)}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">No invoices yet</td></tr>'}</tbody></table></div>`;
+}
+function invForm(){
+  $('view').innerHTML=`<div class="panel"><div class="cap">Issue invoice</div><div class="form">
+    <div class="field"><label>Customer</label><input id="i_client" placeholder="Customer name"></div>
+    <div class="field"><label>Customer VAT ID</label><input id="i_nit" placeholder="3000..."></div>
+    <div class="field"><label>Date</label><input id="i_date" type="date" value="2026-06-30"></div>
+    <div class="field"><label>Concept</label><input id="i_concept" value="Sale"></div>
+    <div class="field"><label>Taxable base (SAR)</label><input id="i_base" type="number" placeholder="0"></div>
+    <div class="field"><label>&nbsp;</label><div class="muted mono" style="font-size:11px;padding-top:9px">15% VAT + ZATCA hash added automatically</div></div>
+    <div class="full row"><button class="btn" onclick="postInvoice()">Issue & post</button><button class="btn ghost" onclick="go('invoices')">Cancel</button></div>
+  </div></div>`;
+}
+async function postInvoice(){
+  try{const r=await api(`/clients/${CUR}/invoices`,{method:'POST',body:JSON.stringify({client:$('i_client').value,acquirerId:$('i_nit').value,date:$('i_date').value,concept:$('i_concept').value,base:Number($('i_base').value)})});
+    toast('Invoice '+r.number+' issued');go('invoices');}catch(e){toast(e.message);}
+}
+
+async function viewBills(){
+  const c=cur();setHead(c.name,navLabel(NAV[3]),'<button class="btn sm" onclick="billForm()">+ New bill</button>');
+  const ap=await api(`/clients/${CUR}/open-items?kind=payable`);
+  $('view').innerHTML=`<div class="panel"><div class="cap">Payables <span class="note">${ap.length} open</span></div>
+    <table><thead><tr><th>Vendor</th><th>Doc</th><th>Due</th><th class="num">Outstanding</th></tr></thead>
+    <tbody>${ap.length?ap.map(i=>`<tr><td>${i.contactName}</td><td class="mono" style="font-size:11px">${i.docNumber}</td><td class="mono" style="font-size:12px">${i.dueDate}</td><td class="num">${money(i.outstanding)}</td></tr>`).join(''):'<tr><td colspan="4" class="empty">Nothing outstanding</td></tr>'}</tbody></table></div>`;
+}
+function billForm(){
+  const opts=ACCOUNTS.filter(a=>['expense','cogs','asset'].includes(a.type)).map(a=>`<option value="${a.code}">${a.code} · ${a.name}</option>`).join('');
+  $('view').innerHTML=`<div class="panel"><div class="cap">New vendor bill</div><div class="form">
+    <div class="field"><label>Vendor</label><input id="b_v" placeholder="Vendor name"></div>
+    <div class="field"><label>Date</label><input id="b_date" type="date" value="2026-06-30"></div>
+    <div class="field"><label>Base amount (SAR)</label><input id="b_base" type="number"></div>
+    <div class="field"><label>Expense account</label><select id="b_acct">${opts}</select></div>
+    <div class="full row"><button class="btn" onclick="postBill()">Create bill</button><button class="btn ghost" onclick="go('bills')">Cancel</button></div>
+  </div></div>`;
+}
+async function postBill(){
+  try{await api(`/clients/${CUR}/bills`,{method:'POST',body:JSON.stringify({vendorName:$('b_v').value,date:$('b_date').value,base:Number($('b_base').value),expenseAccount:$('b_acct').value})});
+    toast('Bill created');go('bills');}catch(e){toast(e.message);}
+}
+
+async function viewContacts(){
+  const c=cur();setHead(c.name,navLabel(NAV[4]),'<button class="btn sm" onclick="contactForm()">+ Add contact</button>');
+  const list=await api(`/clients/${CUR}/contacts`);
+  $('view').innerHTML=`<div class="panel"><div class="cap">Customers & vendors <span class="note">${list.length}</span></div>
+    <table><thead><tr><th>Name</th><th>Tax ID</th><th>Type</th></tr></thead>
+    <tbody>${list.length?list.map(x=>`<tr><td><b style="font-family:var(--disp)">${x.name}</b></td><td class="mono" style="font-size:12px">${x.nit||'—'}</td><td><span class="pill lo">${x.kind}</span></td></tr>`).join(''):'<tr><td colspan="3" class="empty">No contacts yet — add your first</td></tr>'}</tbody></table></div>`;
+}
+function contactForm(){
+  $('view').innerHTML=`<div class="panel"><div class="cap">Add contact</div><div class="form">
+    <div class="field"><label>Name</label><input id="c_name" placeholder="Company or person"></div>
+    <div class="field"><label>Tax ID / VAT</label><input id="c_nit" placeholder="Optional"></div>
+    <div class="field"><label>Type</label><select id="c_kind"><option value="customer">Customer</option><option value="vendor">Vendor</option><option value="both">Both</option></select></div>
+    <div class="field"></div>
+    <div class="full row"><button class="btn" onclick="saveContact()">Save contact</button><button class="btn ghost" onclick="go('contacts')">Cancel</button></div>
+  </div></div>`;
+}
+async function saveContact(){
+  if(!$('c_name').value)return toast('Name required');
+  try{await api(`/clients/${CUR}/contacts`,{method:'POST',body:JSON.stringify({name:$('c_name').value,nit:$('c_nit').value,kind:$('c_kind').value})});
+    toast('Contact saved');go('contacts');}catch(e){toast(e.message);}
+}
+
+async function viewInventory(){
+  const c=cur();setHead(c.name,navLabel(NAV[5]),'<button class="btn sm" onclick="productForm()">+ Add product</button>');
+  const list=await api(`/clients/${CUR}/products`);
+  $('view').innerHTML=`<div class="panel"><div class="cap">Products <span class="note">${list.length} items</span></div>
+    <table><thead><tr><th>SKU</th><th>Name</th><th class="num">Price</th><th class="num">Cost</th><th class="num">Stock</th><th></th></tr></thead>
+    <tbody>${list.length?list.map(p=>`<tr><td class="mono" style="font-size:11px">${p.sku||'—'}</td><td><b style="font-family:var(--disp)">${LANG==='ar'&&p.nameAr?p.nameAr:p.name}</b></td>
+      <td class="num">${money(p.price)}</td><td class="num">${money(p.cost)}</td><td class="num"><b>${p.stock}</b> <span class="muted" style="font-size:11px">${p.unit}</span></td>
+      <td class="num"><button class="btn ghost sm" onclick="adjStock('${p.id}',1)">+</button> <button class="btn ghost sm" onclick="adjStock('${p.id}',-1)">−</button></td></tr>`).join(''):'<tr><td colspan="6" class="empty">No products yet</td></tr>'}</tbody></table></div>`;
+}
+function productForm(){
+  $('view').innerHTML=`<div class="panel"><div class="cap">Add product</div><div class="form">
+    <div class="field"><label>SKU</label><input id="p_sku" placeholder="e.g. AV-100"></div>
+    <div class="field"><label>Name</label><input id="p_name" placeholder="Product name"></div>
+    <div class="field"><label>Unit</label><input id="p_unit" value="unit"></div>
+    <div class="field"><label>Opening stock</label><input id="p_stock" type="number" value="0"></div>
+    <div class="field"><label>Sale price (SAR)</label><input id="p_price" type="number" value="0"></div>
+    <div class="field"><label>Cost (SAR)</label><input id="p_cost" type="number" value="0"></div>
+    <div class="full row"><button class="btn" onclick="saveProduct()">Save product</button><button class="btn ghost" onclick="go('inventory')">Cancel</button></div>
+  </div></div>`;
+}
+async function saveProduct(){
+  if(!$('p_name').value)return toast('Name required');
+  try{await api(`/clients/${CUR}/products`,{method:'POST',body:JSON.stringify({sku:$('p_sku').value,name:$('p_name').value,unit:$('p_unit').value,stock:Number($('p_stock').value),price:Number($('p_price').value),cost:Number($('p_cost').value)})});
+    toast('Product saved');go('inventory');}catch(e){toast(e.message);}
+}
+async function adjStock(pid,delta){try{await api(`/clients/${CUR}/products/${pid}/stock`,{method:'POST',body:JSON.stringify({delta})});viewInventory();}catch(e){toast(e.message);}}
+
+async function viewBanking(){
+  const c=cur();setHead(c.name,navLabel(NAV[6]),'');
+  $('view').innerHTML=`<div class="panel"><div class="cap">Bank reconciliation</div><div class="form">
+    <div class="field full"><label>Paste statement — one row per line: date, description, amount (+ deposit, − withdrawal)</label>
+      <textarea id="rc" rows="6">2026-06-01,Capital deposit,60000000
+2026-06-13,Manual cash,-2000000</textarea></div>
+    <div class="full"><button class="btn" onclick="runRecon()">Reconcile</button> <span id="rcOut" class="mono" style="margin-left:14px"></span></div>
+  </div></div>`;
+}
+async function runRecon(){
+  try{const r=await api(`/clients/${CUR}/reconcile`,{method:'POST',body:JSON.stringify({csv:$('rc').value})});
+    $('rcOut').innerHTML=`Matched <b style="color:var(--green)">${r.matchedCount}</b>/${r.statementCount} · unmatched ${r.unmatchedStatement.length}`;
+  }catch(e){toast(e.message);}
+}
+
+async function viewReports(){
+  const c=cur();setHead(c.name,navLabel(NAV[7]),`<button class="btn ghost sm" onclick="dl('/clients/${CUR}/export/trial-balance.csv','trial-balance.csv')">TB CSV</button>
+    <button class="btn ghost sm" onclick="dl('/clients/${CUR}/export/journal.csv','journal.csv')">Journal CSV</button>
+    <button class="btn sm" onclick="dl('/clients/${CUR}/statements.pdf?lang='+LANG,'statements.pdf')">Statements PDF</button>`);
+  const rep=await api(`/clients/${CUR}/reports`);
+  $('view').innerHTML=`<div class="panel"><div class="cap">Trial balance <span class="note">${rep.trialBalance.balanced?'balanced':'OUT OF BALANCE'}</span></div>
+    <table><thead><tr><th>Code</th><th>Account</th><th class="num">Debit</th><th class="num">Credit</th></tr></thead>
+    <tbody>${rep.trialBalance.rows.map(r=>`<tr><td class="mono" style="font-size:11px">${r.code}</td><td>${r.name}</td><td class="num">${r.debit?money(r.debit):''}</td><td class="num">${r.credit?money(r.credit):''}</td></tr>`).join('')}
+    <tr class="tot"><td></td><td>Total</td><td class="num">${money(rep.trialBalance.totalDebit)}</td><td class="num">${money(rep.trialBalance.totalCredit)}</td></tr></tbody></table></div>`;
+}
+async function dl(path,name){try{const r=await fetch('/api'+path,{headers:{authorization:'Bearer '+TOKEN}});const b=await r.blob();const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}catch(e){toast('Export failed');}}
+
+async function viewTax(){
+  const c=cur();setHead(c.name,navLabel(NAV[8]),'');
+  const tax=(await api(`/clients/${CUR}/reports`)).taxPosition;
+  $('view').innerHTML=`<div class="panel"><div class="cap">Tax position — ZATCA</div><table class="fin"><tbody>
+    <tr><td>Output VAT (on sales)</td><td class="num">${money(tax.ivaGenerado)}</td></tr>
+    <tr><td>Input VAT (on purchases)</td><td class="num">${money(tax.ivaDescontable)}</td></tr>
+    <tr class="tot"><td>VAT payable</td><td class="num">${money(tax.ivaAPagar)}</td></tr>
+    <tr><td>Credit balance</td><td class="num">${money(tax.saldoAFavor)}</td></tr>
+    <tr><td>Withholdings in our favor</td><td class="num">${money(tax.retencionesAFavor)}</td></tr>
+    <tr><td>Withholdings we owe</td><td class="num">${money(tax.retencionesPorPagar)}</td></tr>
+  </tbody></table></div>`;
+}
+
+async function viewControls(){
+  const c=cur();setHead(c.name,navLabel(NAV[9]),'');
+  const f=await api(`/clients/${CUR}/findings`);
+  $('view').innerHTML=`<div class="panel"><div class="cap">Continuous controls <span class="note">${f.length} findings</span></div>
+    <table><thead><tr><th>Severity</th><th>Rule</th><th>Description</th><th>Status</th></tr></thead>
+    <tbody>${f.length?f.map(x=>`<tr><td><span class="pill ${x.severity}">${x.severity}</span></td><td>${x.rule}</td><td class="muted">${x.message}</td><td class="mono" style="font-size:11px;text-transform:uppercase">${x.status}</td></tr>`).join(''):'<tr><td colspan="4" class="empty">No findings</td></tr>'}</tbody></table></div>`;
+}
+
+async function viewClose(){
+  const c=cur();setHead(c.name,navLabel(NAV[10]),'');
+  const [close,ck]=await Promise.all([api(`/clients/${CUR}/close?period=2026-06`),api(`/clients/${CUR}/checklist?period=2026-06`)]);
+  $('view').innerHTML=`<div class="panel"><div class="cap">Period close — 2026-06 <span class="note" style="color:${close.readyToClose?'var(--green)':'var(--rust)'}">${close.readyToClose?'ready to close':'blocked'}</span></div>
+    <div style="padding:8px 20px 12px">${close.blockers&&close.blockers.length?close.blockers.map(b=>`<div class="mono" style="color:var(--rust);font-size:12px;padding:3px 0">• ${b}</div>`).join(''):'<div class="mono" style="color:var(--green);font-size:12px">All checks pass.</div>'}</div>
+    <table><tbody>${ck.items.map(i=>`<tr><td style="width:30px"><span style="color:${i.done?'var(--green)':'var(--faint)'}">${i.done?'✓':'○'}</span></td><td>${i.label}</td><td class="num">${i.auto?'<span class="mono muted" style="font-size:9px;text-transform:uppercase">auto</span>':''}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+function renderQuick(){
+  const demos=[['ana@audita.co','Partner'],['carlos@audita.co','Accountant'],['sofia@audita.co','Staff']];
+  $('quick').innerHTML=demos.map(([e,r])=>`<button onclick="$('lg_email').value='${e}';$('lg_pass').value='audita';doLogin()"><span>${e}</span><span class="r">${r}</span></button>`).join('');
+}
+(async function(){renderQuick();
+  if(TOKEN){try{await boot();return;}catch(e){}}
+  $('login').classList.add('on');
+})();
 </script>
 </body>
 </html>
