@@ -34,7 +34,7 @@ import {
 } from './auth.js';
 import { Collection } from '../persistence/store.js';
 import type { ClientMeta } from '../services/firmWorkspace.js';
-import { GCC, gccCountry } from '../domain/gcc.js';
+import { GCC, gccCountry, type GccCountry } from '../domain/gcc.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -76,8 +76,41 @@ export function createApp(firm: FirmWorkspace, users: UserStore, clientStore?: C
     res.json(CHART_OF_ACCOUNTS.map((a) => ({ code: a.code, name: a.name, nameAr: a.nameAr, type: a.type, normal: a.normal })));
   });
 
-  // GCC country catalogue — drives the "choose your country" picker and per-country config.
-  app.get('/api/gcc', (_req, res) => res.json(GCC));
+  // GCC country catalogue + editable rate overrides (a firm can adjust a rate
+  // if a country changes it, without a code change). Overrides persist.
+  const taxOverrides = new Collection<{ vatBps?: number; corpTaxPct?: number; zakatPct?: number | null }>('tax-overrides.json');
+  const resolveCountry = (id?: string): GccCountry => {
+    const base = gccCountry(id);
+    const o = taxOverrides.get(base.id);
+    if (!o) return base;
+    return {
+      ...base,
+      vatBps: o.vatBps ?? base.vatBps,
+      corpTaxPct: o.corpTaxPct ?? base.corpTaxPct,
+      zakatPct: o.zakatPct === undefined ? base.zakatPct : o.zakatPct,
+    };
+  };
+  app.get('/api/gcc', (_req, res) => res.json(GCC.map((c) => resolveCountry(c.id))));
+  // Edit the tax rates for a country (partner only). Body: {vatBps?, corpTaxPct?, zakatPct?}
+  app.post('/api/gcc/:id', requireRole('partner'), (req, res) => {
+    const base = GCC.find((c) => c.id === String(req.params.id).toUpperCase());
+    if (!base) return res.status(404).json({ error: 'Unknown country.' });
+    const b = req.body ?? {};
+    taxOverrides.set(base.id, {
+      vatBps: b.vatBps != null ? Math.round(Number(b.vatBps)) : undefined,
+      corpTaxPct: b.corpTaxPct != null ? Number(b.corpTaxPct) : undefined,
+      zakatPct: b.zakatPct === '' || b.zakatPct === null ? null : b.zakatPct != null ? Number(b.zakatPct) : undefined,
+    });
+    res.json(resolveCountry(base.id));
+  });
+  // Change a client's country (accountant+). Switches its currency, VAT and compliance.
+  app.post('/api/clients/:id/country', requireRole('accountant'), (req, res) => {
+    const c = withClient(req, res); if (!c) return;
+    const country = gccCountry(req.body?.country).id;
+    c.meta.country = country;
+    clientStore?.set(c.meta.clientId, { ...c.meta });
+    res.json({ clientId: c.meta.clientId, country });
+  });
 
   // --- Firm console: all clients ranked by risk ---
   app.get('/api/clients', async (_req, res) => {
@@ -139,7 +172,7 @@ export function createApp(firm: FirmWorkspace, users: UserStore, clientStore?: C
       const inv = await c.invoices.issue({
         client, acquirerId: acquirerId ?? '222222', date, concept: concept ?? 'Sale',
         base: pesos(Number(base)), ofeNit: c.meta.ofeNit,
-        vatBps: gccCountry(c.meta.country).vatBps,
+        vatBps: resolveCountry(c.meta.country).vatBps,
         reteIcaBps: Number(reteIcaBps) || 0, reteIvaBps: Number(reteIvaBps) || 0,
       });
       // open a receivable so the customer's balance is tracked and ages
@@ -511,7 +544,7 @@ export function createApp(firm: FirmWorkspace, users: UserStore, clientStore?: C
   // ---- GCC compliance profile (country tax posture + Zakat / corporate-tax estimates) ----
   app.get('/api/clients/:id/compliance', async (req, res) => {
     const c = withClient(req, res); if (!c) return;
-    const country = gccCountry(c.meta.country);
+    const country = resolveCountry(c.meta.country);
     const rep = serializeReports(await c.repo.listEntries());
     const equity = rep.balanceSheet.patrimonio;
     const profit = rep.incomeStatement.utilidad;
@@ -658,7 +691,7 @@ export function createApp(firm: FirmWorkspace, users: UserStore, clientStore?: C
     const baseM = pesos(Number(base) || 0);
     if (!vendorName || baseM <= 0n) return res.status(400).json({ error: 'vendorName y base (>0) requeridos.' });
     const acct = String(expenseAccount || '6000');
-    const iva = applyRateBps(baseM, gccCountry(c.meta.country).vatBps); // VAT at the client's country rate
+    const iva = applyRateBps(baseM, resolveCountry(c.meta.country).vatBps); // VAT at the client's country rate
     const rete = 0n; // no domestic buyer withholding in KSA (applyRete kept for API compat)
     void applyRete;
     const payable = baseM + iva - rete;

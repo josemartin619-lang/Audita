@@ -111,6 +111,9 @@
   .ccard{border:1px solid var(--line);border-radius:11px;padding:16px 12px;text-align:center;cursor:pointer;background:#fff;transition:all .12s;}
   .ccard:hover{border-color:var(--green);}
   .ccard.on{border-color:var(--green);box-shadow:0 0 0 3px rgba(18,133,90,.16);}
+  .tin{width:64px;text-align:right;font-family:var(--mono);font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:7px;background:#fff;}
+  .tin:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(18,133,90,.12);}
+  .tin:disabled{background:var(--panel);color:var(--faint);cursor:not-allowed;}
 
   /* ---------- RTL ---------- */
   [dir="rtl"] #app.on{grid-template-columns:1fr 236px;}
@@ -174,6 +177,7 @@ const NAV=[
   {id:'compliance',en:'Compliance',ar:'الامتثال',ic:'⚖'},
   {id:'controls',en:'Controls',ar:'الرقابة',ic:'◈'},
   {id:'close',en:'Close',ar:'الإقفال',ic:'✓'},
+  {id:'settings',en:'Settings',ar:'الإعدادات',ic:'⚙'},
 ];
 const T={en:{tagline:'Books that are born audited',signin:'Sign in',demo:'Or sign in as a demo user',secWork:'Workspace',signout:'Sign out',clients:'Client'},
          ar:{tagline:'دفاتر تُولد مُدقَّقة',signin:'تسجيل الدخول',demo:'أو ادخل كمستخدم تجريبي',secWork:'مساحة العمل',signout:'خروج',clients:'العميل'}};
@@ -226,7 +230,7 @@ async function route(){
     if(PAGE==='clients')return viewClients();
     if(!CUR){v.innerHTML='<div class="empty">No client selected</div>';return;}
     await ({dashboard:viewDashboard,journal:viewJournal,invoices:viewInvoices,bills:viewBills,contacts:viewContacts,
-      inventory:viewInventory,banking:viewBanking,reports:viewReports,tax:viewTax,compliance:viewCompliance,controls:viewControls,close:viewClose}[PAGE]||viewDashboard)();
+      inventory:viewInventory,banking:viewBanking,reports:viewReports,tax:viewTax,compliance:viewCompliance,controls:viewControls,close:viewClose,settings:viewSettings}[PAGE]||viewDashboard)();
   }catch(e){v.innerHTML=`<div class="empty">${e.message}</div>`;}
 }
 const cur=()=>CLIENTS.find(c=>c.clientId===CUR)||{name:CUR,clientId:CUR};
@@ -286,6 +290,40 @@ async function viewCompliance(){
       <tr><td>Status</td><td>${co.eInvoicing.status}</td></tr></tbody></table></div>`;
 }
 
+async function viewSettings(){
+  const c=cur();setHead(c.name,LANG==='ar'?'الإعدادات':'Settings','');
+  const g=await api('/gcc');GCCMAP={};g.forEach(x=>GCCMAP[x.id]=x);
+  const curCountry=CLIENTS.find(x=>x.clientId===CUR)?.country||'SA';
+  const isPartner=USER.role==='partner';
+  const cards=g.map(co=>`<div class="ccard${co.id===curCountry?' on':''}" data-cc="${co.id}" onclick="setClientCountry('${co.id}')">
+    <div style="font-size:28px;line-height:1">${co.flag}</div>
+    <div style="font-family:var(--disp);font-weight:600;margin-top:6px;font-size:13.5px">${LANG==='ar'?co.nameAr:co.name}</div>
+    <div class="mono muted" style="font-size:9.5px;margin-top:4px">${co.currency.code} · VAT ${(co.vatBps/100)||0}%</div></div>`).join('');
+  const rows=g.map(co=>`<tr>
+    <td><b style="font-family:var(--disp)">${co.flag} ${LANG==='ar'?co.nameAr:co.name}</b><div class="mono muted" style="font-size:9.5px">${co.currency.code}</div></td>
+    <td class="num"><input class="tin" id="vat_${co.id}" type="number" step="0.5" value="${(co.vatBps/100)||0}" ${isPartner?'':'disabled'}> %</td>
+    <td class="num"><input class="tin" id="corp_${co.id}" type="number" step="0.5" value="${co.corpTaxPct}" ${isPartner?'':'disabled'}> %</td>
+    <td class="num"><input class="tin" id="zak_${co.id}" type="number" step="0.5" placeholder="—" value="${co.zakatPct!=null?co.zakatPct:''}" ${isPartner?'':'disabled'}> %</td>
+    <td class="num">${isPartner?`<button class="btn sm" onclick="saveRates('${co.id}')">Save</button>`:'<span class="muted mono" style="font-size:9.5px">partner only</span>'}</td></tr>`).join('');
+  $('view').innerHTML=`
+    <div class="panel"><div class="cap">Client jurisdiction <span class="note">${c.name}</span></div>
+      <div style="padding:12px 20px 6px;color:var(--umber);font-size:13px">Sets this client's currency, VAT rate, e-invoicing regime and compliance posture. Existing entries are not re-stated.</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:8px 20px 18px">${cards}</div></div>
+    <div class="panel"><div class="cap">Tax rates by country <span class="note">${isPartner?'editable — applies firm-wide':'view only'}</span></div>
+      <div style="padding:11px 20px 4px;color:var(--umber);font-size:12.5px">Override the built-in rate if a jurisdiction changes it. Saved overrides apply to every client in that country and drive new invoices, bills and compliance estimates.</div>
+      <table class="fin"><thead><tr><th>Country</th><th class="num">VAT</th><th class="num">Corp. tax</th><th class="num">Zakat</th><th class="num"></th></tr></thead>
+      <tbody>${rows}</tbody></table></div>`;
+}
+async function setClientCountry(id){
+  try{await api(`/clients/${CUR}/country`,{method:'POST',body:JSON.stringify({country:id})});
+    CLIENTS=await api('/clients');setCur();renderSidebar();toast('Country updated');viewSettings();}catch(e){toast(e.message);}
+}
+async function saveRates(id){
+  const vat=$('vat_'+id).value,corp=$('corp_'+id).value,zak=$('zak_'+id).value;
+  const body={vatBps:Math.round(Number(vat)*100),corpTaxPct:Number(corp),zakatPct:zak===''?null:Number(zak)};
+  try{await api('/gcc/'+id,{method:'POST',body:JSON.stringify(body)});
+    const gg=await api('/gcc');GCCMAP={};gg.forEach(x=>GCCMAP[x.id]=x);setCur();toast(id+' rates saved');}catch(e){toast(e.message);}
+}
 async function viewDashboard(){
   const c=cur();setHead(c.name,navLabel(NAV[0]),'');
   const rep=await api(`/clients/${CUR}/reports`);const is=rep.incomeStatement,bs=rep.balanceSheet,tax=rep.taxPosition;
