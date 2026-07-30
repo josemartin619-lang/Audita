@@ -28,6 +28,8 @@ export interface JournalEntry {
   recordedAt: string;
   /** Optional link back to a source document (invoice number, etc.). */
   sourceDocument?: string;
+  /** Date printed on the source document, when it differs from the posting date. */
+  docDate?: string;
 }
 
 export interface DraftLine {
@@ -43,6 +45,7 @@ export interface DraftEntry {
   user: string;
   lines: DraftLine[];
   sourceDocument?: string;
+  docDate?: string;
 }
 
 export function totalDebit(lines: { debit: Money }[]): Money {
@@ -59,7 +62,10 @@ export function entryAmount(e: JournalEntry): Money {
 
 export class UnbalancedEntryError extends Error {
   constructor(public debit: Money, public credit: Money) {
-    super(`El asiento no cuadra: débitos=${debit} créditos=${credit}`);
+    super(
+      `Entry is out of balance: total debits ${debit} vs total credits ${credit}. ` +
+        'Every entry must have debits equal to credits.',
+    );
     this.name = 'UnbalancedEntryError';
   }
 }
@@ -72,22 +78,28 @@ export class UnbalancedEntryError extends Error {
  */
 export function normalizeLines(draft: DraftLine[]): JournalLine[] {
   if (draft.length < 2) {
-    throw new Error('Un asiento de partida doble requiere al menos 2 líneas.');
+    throw new Error('A double-entry needs at least 2 lines — one debit and one credit.');
   }
   const lines: JournalLine[] = draft.map((l) => {
     const debit = l.debit ?? ZERO;
     const credit = l.credit ?? ZERO;
     if (!accountExists(l.accountCode)) {
-      throw new Error(`Cuenta desconocida: ${l.accountCode}`);
+      throw new Error(`Unknown account code: ${l.accountCode}. Pick an account from the list.`);
     }
     if (debit < ZERO || credit < ZERO) {
-      throw new Error(`Débito y crédito no pueden ser negativos (${l.accountCode}).`);
+      throw new Error(
+        `Account ${l.accountCode}: debit and credit cannot be negative. ` +
+          'To decrease an account, put the amount on the opposite side.',
+      );
     }
     if (debit > ZERO && credit > ZERO) {
-      throw new Error(`Una línea no puede tener débito y crédito a la vez (${l.accountCode}).`);
+      throw new Error(
+        `Account ${l.accountCode}: a line cannot have both a debit and a credit. ` +
+          'Split it into two lines.',
+      );
     }
     if (debit === ZERO && credit === ZERO) {
-      throw new Error(`Una línea debe tener débito o crédito (${l.accountCode}).`);
+      throw new Error(`Account ${l.accountCode}: enter an amount in either the debit or the credit column.`);
     }
     return { accountCode: l.accountCode, debit, credit };
   });
@@ -95,7 +107,7 @@ export function normalizeLines(draft: DraftLine[]): JournalLine[] {
   const d = totalDebit(lines);
   const c = totalCredit(lines);
   if (d !== c) throw new UnbalancedEntryError(d, c);
-  if (abs(d) === ZERO) throw new Error('El asiento no puede ser por valor cero.');
+  if (abs(d) === ZERO) throw new Error('An entry cannot be for zero — enter the amounts.');
   return lines;
 }
 

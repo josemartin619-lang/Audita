@@ -18,6 +18,7 @@ export function serializeEntry(e: JournalEntry) {
     user: e.user,
     reversed: e.reversed,
     sourceDocument: e.sourceDocument ?? null,
+    docDate: e.docDate ?? null,
     amount: toPesosNumber(e.lines.reduce((s, l) => s + l.debit, 0n)),
     lines: e.lines.map((l) => ({
       accountCode: l.accountCode,

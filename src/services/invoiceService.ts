@@ -19,6 +19,7 @@ import { EInvoiceRequest } from '../einvoicing/types.js';
 import { Repository } from '../persistence/repository.js';
 import { invoiceSequenceGaps } from '../domain/controls/rules.js';
 import { ACCT } from '../domain/accounts.js';
+import { highestSeq } from './seq.js';
 
 const IVA_BPS = 1500;   // KSA standard VAT 15%
 
@@ -66,6 +67,16 @@ export class InvoiceService {
   /** Force the next consecutive (used to simulate a gap in the demo/tests). */
   skipNumbers(n: number): void {
     this.invSeq += n;
+  }
+
+  /**
+   * Recover the invoice consecutive from what is already stored. Without this a
+   * restart re-issues FE-0001, which both collides and trips the
+   * sequence-gap control. See services/seq.ts.
+   */
+  async resume(): Promise<void> {
+    const invoices = await this.repo.listInvoices();
+    this.invSeq = highestSeq(invoices.map((i) => i.number), 'FE-');
   }
 
   async issue(input: IssueInvoiceInput): Promise<IssuedInvoice> {

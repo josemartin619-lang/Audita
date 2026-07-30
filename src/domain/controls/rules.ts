@@ -133,7 +133,10 @@ const manualCashAdjustment: Rule = (e) => {
 /** 7. Related-party transaction — counterparty on the watchlist. */
 const relatedParty: Rule = (e, ctx) => {
   const watch = ctx.relatedParties ?? [];
-  const hit = watch.find((w) => e.source.toLowerCase().includes(w.toLowerCase()));
+  // `source` is typed as required, but entries persisted by older builds may not
+  // have one. A missing counterparty must not crash the control pass.
+  const src = (e.source ?? '').toLowerCase();
+  const hit = watch.find((w) => src.includes(w.toLowerCase()));
   if (hit) {
     return [{
       rule: 'Related-party transaction',

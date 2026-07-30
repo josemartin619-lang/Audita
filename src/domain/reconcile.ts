@@ -97,7 +97,10 @@ export function parseStatement(text: string, toMoney: (pesos: number) => Money):
     if (parts.length < 3) continue;
     const date = parts[0]!.trim();
     const amount = Number(parts[parts.length - 1]!.trim().replace(/[^0-9.\-]/g, ''));
-    const description = parts.slice(1, -1).join(',').trim();
+    // Real bank CSVs quote descriptions that contain commas; unwrap them so the
+    // description matches the ledger memo instead of carrying stray quotes.
+    const description = parts.slice(1, -1).join(',').trim()
+      .replace(/^"(.*)"$/s, '$1').replace(/""/g, '"').trim();
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(amount)) continue;
     out.push({ date, description, amount: toMoney(amount) });
   }

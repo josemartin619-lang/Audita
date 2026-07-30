@@ -76,9 +76,23 @@ export class FirmWorkspace {
     return cl;
   }
 
+  /**
+   * Rebuild every client's in-memory service state from its repository. Call
+   * this once after re-opening saved clients on startup — before serving any
+   * request. Skipping it means the first posting of the process fails with an
+   * id collision and the audit chain forks. See LedgerService.resume().
+   */
+  async resumeAll(locks?: Record<string, readonly string[]>): Promise<void> {
+    for (const c of this.clients.values()) {
+      await c.ledger.resume();
+      await c.invoices.resume();
+      for (const p of locks?.[c.meta.clientId] ?? []) c.ledger.lockPeriod(p);
+    }
+  }
+
   client(clientId: string): ClientLedger {
     const c = this.clients.get(clientId);
-    if (!c) throw new Error(`Cliente no encontrado: ${clientId}`);
+    if (!c) throw new Error(`Client not found: ${clientId}`);
     return c;
   }
 

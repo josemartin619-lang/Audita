@@ -61,7 +61,7 @@ export class MemoryRepository implements Repository {
 
   async saveEntry(e: JournalEntry): Promise<void> {
     if (this.entries.has(e.id)) {
-      throw new Error(`Asiento inmutable: ${e.id} ya existe y no puede modificarse.`);
+      throw new Error(`Entry ${e.id} is immutable — it already exists and cannot be modified.`);
     }
     this.entries.set(e.id, structuredClone(e));
     this.flush();
@@ -69,7 +69,7 @@ export class MemoryRepository implements Repository {
 
   async markReversed(id: string): Promise<void> {
     const e = this.entries.get(id);
-    if (!e) throw new Error(`Asiento no encontrado: ${id}`);
+    if (!e) throw new Error(`Entry not found: ${id}`);
     e.reversed = true;
     this.flush();
   }
@@ -92,7 +92,7 @@ export class MemoryRepository implements Repository {
   }
   async updateFindingStatus(id: string, status: FindingStatus, by: string, note?: string): Promise<void> {
     const f = this.findings.get(id);
-    if (!f) throw new Error(`Hallazgo no encontrado: ${id}`);
+    if (!f) throw new Error(`Finding not found: ${id}`);
     f.status = status;
     f.resolvedBy = by;
     if (note !== undefined) f.resolutionNote = note;

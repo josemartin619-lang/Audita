@@ -114,7 +114,7 @@ export function authMiddleware(users: UserStore) {
     const header = req.header('authorization') ?? '';
     const token = header.startsWith('Bearer ') ? header.slice(7) : '';
     const claims = token ? verifyToken(token) : null;
-    if (!claims) return res.status(401).json({ error: 'Sesión inválida o expirada. Inicie sesión.' });
+    if (!claims) return res.status(401).json({ error: 'Session invalid or expired — please sign in again.' });
     req.user = {
       id: String(claims.sub),
       email: String(claims.email),

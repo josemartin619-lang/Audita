@@ -12,8 +12,13 @@ export type OpenItemKind = 'receivable' | 'payable';
 export interface Contact {
   id: string;
   name: string;
+  /** Tax registration number (VAT / TRN / CR number depending on jurisdiction). */
   nit: string;
   kind: 'customer' | 'vendor' | 'both';
+  phone?: string;
+  email?: string;
+  /** Bank account / IBAN used to pay this vendor or receive from this customer. */
+  bank?: string;
 }
 
 export interface OpenItem {

@@ -75,7 +75,7 @@ describe('ledger core — invariants', () => {
       lines: [{ accountCode: '1010', debit: pesos(10), credit: 0n }, { accountCode: '3000', debit: 0n, credit: pesos(10) }],
     };
     await repo.saveEntry(e);
-    await expect(repo.saveEntry(e)).rejects.toThrow(/inmutable/);
+    await expect(repo.saveEntry(e)).rejects.toThrow(/immutable/);
   });
 
   it('reversal posts an opposite entry and keeps the original (append-only)', async () => {

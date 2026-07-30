@@ -172,7 +172,10 @@ describe('REST API', () => {
   it('exports the trial balance as CSV', async () => {
     const r = await request(app).get('/api/clients/andina/export/trial-balance.csv').set(KEY).expect(200);
     expect(r.headers['content-type']).toContain('text/csv');
-    expect(r.text.split('\n')[0]).toBe('code,account,debit,credit');
+    // A UTF-8 BOM is emitted on purpose so Excel opens Arabic account names
+    // correctly, and rows are CRLF-terminated for the same reason.
+    expect(r.text.startsWith('\uFEFF')).toBe(true);
+    expect(r.text.replace('\uFEFF', '').split('\r\n')[0]).toBe('code,account,debit,credit');
   });
 
   it('rejects an unbalanced recurring template, accepts a balanced one, and posts it', async () => {

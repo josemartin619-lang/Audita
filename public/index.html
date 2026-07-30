@@ -131,6 +131,87 @@
   .acttip .tt-empty{color:rgba(255,255,255,.5);font-style:italic;}
   .acttip .tt-go{font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--green);margin-top:8px;}
 
+  /* ---------- Journal line grid (Dynamics-style, labelled columns) ---------- */
+  .jgrid{width:100%;}
+  .jhead,.jrow{display:grid;grid-template-columns:minmax(190px,2.4fr) 1fr 1fr 34px;gap:8px;align-items:center;}
+  .jhead{padding:0 0 6px;}
+  .jhead span{font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--umber);}
+  .jhead span.r{text-align:right;}
+  .jrow{margin-bottom:7px;}
+  .jrow input,.jrow select{width:100%;padding:8px 9px;font-size:13px;border:1px solid var(--line);border-radius:7px;background:#fff;font-family:inherit;}
+  .jrow input.num{font-family:var(--mono);text-align:right;}
+  .jrow input:focus,.jrow select:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px rgba(18,133,90,.12);}
+  .jrow .del{background:none;border:1px solid var(--line);color:var(--umber);cursor:pointer;font-size:15px;line-height:1;border-radius:7px;height:32px;}
+  .jrow .del:hover{border-color:var(--rust);color:var(--rust);background:#fff;}
+  .jtot{display:grid;grid-template-columns:minmax(190px,2.4fr) 1fr 1fr 34px;gap:8px;border-top:1.5px solid var(--ink);padding-top:9px;margin-top:4px;font-family:var(--mono);font-size:12.5px;}
+  .jtot .lbl{text-transform:uppercase;letter-spacing:.1em;font-size:9.5px;color:var(--umber);align-self:center;}
+  .jtot .v{text-align:right;font-variant-numeric:tabular-nums;}
+  .jdiff{margin-top:9px;font-family:var(--mono);font-size:12px;}
+  .jdiff.ok{color:var(--green);} .jdiff.bad{color:var(--rust);}
+
+  /* ---------- Inline, persistent error banner (not a toast that vanishes) ---------- */
+  .alert{display:none;margin:0 20px 4px;padding:11px 14px;border-radius:10px;font-size:13px;line-height:1.45;}
+  .alert.on{display:block;}
+  .alert.bad{background:#fdf0ee;border:1px solid #eabbb4;color:#8f2a1e;}
+  .alert.good{background:#eef8f3;border:1px solid #bfe0d1;color:#0e6e49;}
+  .alert b{font-family:var(--disp);}
+  .hint{padding:10px 20px 0;color:var(--umber);font-size:12.5px;line-height:1.5;}
+  .hint code{font-family:var(--mono);font-size:11.5px;background:#eeeee8;padding:1px 5px;border-radius:4px;}
+
+  /* ---------- Tabs / report hub cards ---------- */
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 16px;}
+  .tabs button{font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;padding:8px 14px;border-radius:999px;
+    border:1px solid var(--line);background:var(--panel);color:var(--umber);cursor:pointer;}
+  .tabs button:hover{border-color:var(--ink);color:var(--ink);}
+  .tabs button.on{background:var(--ink);border-color:var(--ink);color:#fff;}
+  .rulelist{padding:4px 20px 16px;}
+  .rulelist h4{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--umber);margin:14px 0 6px;}
+  .rulelist p{margin:0 0 5px;color:var(--ink);font-size:13px;line-height:1.5;padding-left:14px;position:relative;}
+  .rulelist p::before{content:'—';position:absolute;left:0;color:var(--faint);}
+  .rulelist p.warn{color:#8f5b0e;}
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .scroll table{min-width:640px;}
+  .mtop{margin-top:14px;}
+
+  /* ---------- Mobile / small-laptop layout ----------
+     The app shipped with exactly one media query, which is why the sidebar ate
+     the screen on a phone and tables were cut off. Below 900px the sidebar
+     becomes a horizontal strip, forms go single-column and tables scroll. */
+  .sb-toggle{display:none;}
+  @media(max-width:900px){
+    #app.on,[dir="rtl"] #app.on{grid-template-columns:1fr;}
+    .sidebar{position:static;height:auto;flex-direction:column;padding:12px 12px 10px;}
+    [dir="rtl"] .sidebar{order:0;} [dir="rtl"] .workspace{order:1;}
+    .sb-brand{padding:0 4px 8px;font-size:19px;}
+    .sb-sec{display:none;}
+    .sb-client{margin:0 0 10px;}
+    #navMain{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;}
+    #navMain .nav{flex:0 0 auto;padding:8px 12px;font-size:12.5px;white-space:nowrap;}
+    .sb-foot{margin-top:10px;flex-direction:row;align-items:center;gap:10px;flex-wrap:wrap;}
+    .sb-user{flex:1;}
+    .topbar{padding:16px 16px 0;}
+    h1.page{font-size:23px;}
+    .content{padding:16px 16px 70px;}
+    .form{grid-template-columns:1fr;gap:12px;padding:16px;}
+    .kpis{grid-template-columns:repeat(2,1fr);gap:10px;}
+    .kpi .v{font-size:21px;}
+    table{display:block;overflow-x:auto;white-space:nowrap;}
+    th,td{padding:10px 13px;}
+    .jhead{display:none;}
+    .jrow,.jtot{grid-template-columns:1fr 1fr;gap:6px;}
+    .jrow select{grid-column:1/-1;}
+    .jrow .del{grid-column:1/-1;height:30px;}
+    .jtot .lbl{grid-column:1/-1;}
+    .panel{border-radius:11px;}
+    .cap{flex-wrap:wrap;}
+    .cap .note{margin-left:0;}
+  }
+  @media(max-width:560px){
+    .kpis{grid-template-columns:1fr;}
+    .ccard{padding:12px 8px;}
+    .topbar .row{width:100%;}
+  }
+
   /* ---------- RTL ---------- */
   [dir="rtl"] #app.on{grid-template-columns:1fr 236px;}
   [dir="rtl"] .sidebar{order:2;} [dir="rtl"] .workspace{order:1;}
@@ -142,11 +223,12 @@
 </style>
 </head>
 <body>
+<div id="storageWarn" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#7a2d12;color:#ffe9df;font:600 12px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;padding:8px 16px;text-align:center;letter-spacing:.2px;box-shadow:0 1px 0 rgba(0,0,0,.25)"></div>
 <div id="login">
   <div class="brand-lg">Audit<em>a</em></div>
   <div class="sub" data-t="tagline">Books that are born audited</div>
-  <input id="lg_email" type="text" placeholder="you@firm.com" autocomplete="username"/>
-  <input id="lg_pass" type="password" placeholder="password" autocomplete="current-password"/>
+  <input id="lg_email" type="text" placeholder="you@firm.com" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()"/>
+  <input id="lg_pass" type="password" placeholder="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
   <button class="btn" style="width:100%" onclick="doLogin()" data-t="signin">Sign in</button>
   <div class="err" id="lg_err"></div>
   <div class="sub" style="margin:18px 0 6px" data-t="demo">Or sign in as a demo user</div>
@@ -186,16 +268,21 @@ const NAV=[
   {id:'journal',en:'Journal',ar:'دفتر اليومية',ic:'▤'},
   {id:'invoices',en:'Invoices',ar:'الفواتير',ic:'⛁'},
   {id:'bills',en:'Bills',ar:'فواتير الشراء',ic:'⛃'},
-  {id:'contacts',en:'Contacts',ar:'جهات الاتصال',ic:'☰'},
+  {id:'vendors',en:'Vendors',ar:'الموردون',ic:'☰'},
   {id:'inventory',en:'Inventory',ar:'المخزون',ic:'▦'},
   {id:'banking',en:'Banking',ar:'البنوك',ic:'⑃'},
+  {id:'trialbalance',en:'Trial balance',ar:'ميزان المراجعة',ic:'⚖'},
   {id:'reports',en:'Reports',ar:'التقارير',ic:'◪'},
-  {id:'tax',en:'Tax / VAT',ar:'الضريبة',ic:'٪'},
-  {id:'compliance',en:'Compliance',ar:'الامتثال',ic:'⚖'},
+  {id:'taxes',en:'Taxes',ar:'الضرائب',ic:'٪'},
+  {id:'compliance',en:'Compliance',ar:'الامتثال',ic:'▣'},
   {id:'controls',en:'Controls',ar:'الرقابة',ic:'◈'},
   {id:'close',en:'Close',ar:'الإقفال',ic:'✓'},
   {id:'settings',en:'Settings',ar:'الإعدادات',ic:'⚙'},
 ];
+/* Page titles are looked up by id, not by position in NAV — reordering the
+   sidebar used to silently retitle every page. */
+const navById=id=>NAV.find(n=>n.id===id)||{en:id,ar:id};
+const title=id=>{const n=navById(id);return LANG==='ar'?n.ar:n.en;};
 const T={en:{tagline:'Books that are born audited',signin:'Sign in',demo:'Or sign in as a demo user',secWork:'Workspace',signout:'Sign out',clients:'Client'},
          ar:{tagline:'دفاتر تُولد مُدقَّقة',signin:'تسجيل الدخول',demo:'أو ادخل كمستخدم تجريبي',secWork:'مساحة العمل',signout:'خروج',clients:'العميل'}};
 const t=k=>(T[LANG][k]||T.en[k]||k);
@@ -246,8 +333,9 @@ async function route(){
   try{
     if(PAGE==='clients')return viewClients();
     if(!CUR){v.innerHTML='<div class="empty">No client selected</div>';return;}
-    await ({dashboard:viewDashboard,journal:viewJournal,invoices:viewInvoices,bills:viewBills,contacts:viewContacts,
-      inventory:viewInventory,banking:viewBanking,reports:viewReports,tax:viewTax,compliance:viewCompliance,controls:viewControls,close:viewClose,settings:viewSettings}[PAGE]||viewDashboard)();
+    await ({dashboard:viewDashboard,journal:viewJournal,invoices:viewInvoices,bills:viewBills,vendors:viewVendors,
+      inventory:viewInventory,banking:viewBanking,trialbalance:viewTrialBalance,reports:viewReports,taxes:viewTaxes,
+      compliance:viewCompliance,controls:viewControls,close:viewClose,settings:viewSettings}[PAGE]||viewDashboard)();
   }catch(e){v.innerHTML=`<div class="empty">${e.message}</div>`;}
 }
 const cur=()=>CLIENTS.find(c=>c.clientId===CUR)||{name:CUR,clientId:CUR};
@@ -342,7 +430,7 @@ async function saveRates(id){
     const gg=await api('/gcc');GCCMAP={};gg.forEach(x=>GCCMAP[x.id]=x);setCur();toast(id+' rates saved');}catch(e){toast(e.message);}
 }
 async function viewDashboard(){
-  const c=cur();setHead(c.name,navLabel(NAV[0]),'');
+  const c=cur();setHead(c.name,title('dashboard'),'');
   const rep=await api(`/clients/${CUR}/reports`);const is=rep.incomeStatement,bs=rep.balanceSheet,tax=rep.taxPosition;
   // Per-account natural balances from the trial balance, keyed by code.
   const tbmap={};(rep.trialBalance.rows||[]).forEach(r=>tbmap[r.code]=r);
@@ -360,9 +448,9 @@ async function viewDashboard(){
     cogs:{tab:'bills',items:neg(of(['cogs'])),total:-is.costo},
     expenses:{tab:'bills',items:neg(of(['expense'])),total:-is.gastos},
     profit:{tab:'reports',items:[{name:'Revenue',amount:is.ingresos},{name:'Cost of sales',amount:-is.costo},{name:'Expenses',amount:-is.gastos}],total:is.utilidad},
-    assets:{tab:'reports',items:of(['asset']),total:bs.activos},
-    liabilities:{tab:'reports',items:of(['liability']),total:bs.pasivos},
-    equity:{tab:'reports',items:eqItems,total:bs.patrimonio},
+    assets:{tab:'trialbalance',items:of(['asset']),total:bs.activos},
+    liabilities:{tab:'trialbalance',items:of(['liability']),total:bs.pasivos},
+    equity:{tab:'trialbalance',items:eqItems,total:bs.patrimonio},
   };
   const row=(k,label,val,tot)=>`<tr class="drill${tot?' tot':''}" data-drill="${k}" onmouseenter="tipShow(event,'${k}')" onmousemove="tipMove(event)" onmouseleave="tipHide()" onclick="tipGo('${k}')"><td>${label}</td><td class="num">${money(val)}</td></tr>`;
   $('view').innerHTML=`
@@ -384,7 +472,7 @@ async function viewDashboard(){
       </tbody></table></div>`;
 }
 let DRILL={};
-const TABLBL={invoices:'Invoices',bills:'Bills',reports:'Reports',tax:'Tax / VAT',banking:'Banking',journal:'Journal'};
+const TABLBL={invoices:'Invoices',bills:'Bills',reports:'Reports',trialbalance:'Trial balance',taxes:'Taxes',banking:'Banking',journal:'Journal',vendors:'Vendors'};
 function tipShow(e,k){
   const d=DRILL[k];if(!d)return;const el=$('acctTip');
   const rows=d.items.length?d.items.map(i=>`<div class="tt-r"><span class="nm">${i.name}</span><span class="am">${money(i.amount)}</span></div>`).join('')
@@ -403,48 +491,158 @@ function tipMove(e){
 function tipHide(){$('acctTip').classList.remove('on');}
 function tipGo(k){const d=DRILL[k];tipHide();if(d)go(d.tab);}
 
+/* ---------------------------------------------------------------
+   Shared helpers used by every rebuilt page
+   --------------------------------------------------------------- */
+let CONTACTS=[];                      // cache of this client's vendors/customers
+async function loadContacts(force){
+  if(CONTACTS.length&&!force)return CONTACTS;
+  try{CONTACTS=await api(`/clients/${CUR}/contacts`);}catch(e){CONTACTS=[];}
+  return CONTACTS;
+}
+/* A persistent banner, not a toast. Validation errors have to stay on screen
+   next to the form that produced them — a message that fades in 2 seconds is
+   exactly what makes errors feel "random". */
+function showErr(id,msg){const el=$(id);if(!el)return;el.className='alert bad on';el.innerHTML=msg;el.scrollIntoView({block:'nearest',behavior:'smooth'});}
+function showOk(id,msg){const el=$(id);if(!el)return;el.className='alert good on';el.innerHTML=msg;}
+function clearErr(id){const el=$(id);if(el)el.className='alert';}
+const esc=v=>String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const exportBtn=(file,label)=>`<button class="btn ghost sm" onclick="dl('/clients/${CUR}/export/${file}','${file.split('?')[0]}')">⤓ ${label}</button>`;
+const TODAY='2026-06-30';
+
 async function viewJournal(){
-  const c=cur();setHead(c.name,navLabel(NAV[1]),'<button class="btn sm" onclick="entryForm()">+ New entry</button>');
+  const c=cur();setHead(c.name,title('journal'),
+    `${exportBtn('journal.csv','Journal → Excel')}<button class="btn sm" onclick="entryForm()">+ New entry</button>`);
   const es=await api(`/clients/${CUR}/entries`);
   $('view').innerHTML=`<div class="panel"><div class="cap">Journal <span class="note">${es.length} entries</span></div>
-    <table><thead><tr><th>Ref</th><th>Date</th><th>Concept</th><th>Counterparty</th><th class="num">Amount</th></tr></thead>
-    <tbody>${es.length?es.slice().reverse().map(e=>`<tr><td class="mono" style="font-size:11px">${e.id}</td><td class="mono" style="font-size:12px">${e.date}</td><td>${e.memo}</td><td class="muted">${e.source}</td><td class="num">${money(e.amount)}</td></tr>`).join(''):'<tr><td colspan="5" class="empty">No entries yet</td></tr>'}</tbody></table></div>`;
+    <div class="scroll"><table><thead><tr><th>Ref</th><th>Posted</th><th>Doc. date</th><th>Doc. no.</th><th>Description</th><th>Vendor / customer</th><th class="num">Amount</th></tr></thead>
+    <tbody>${es.length?es.slice().reverse().map(e=>`<tr${e.reversed?' style="opacity:.5"':''}><td class="mono" style="font-size:11px">${e.id}</td><td class="mono" style="font-size:12px">${e.date}</td>
+      <td class="mono muted" style="font-size:12px">${e.docDate||'—'}</td><td class="mono" style="font-size:11px">${esc(e.sourceDocument||'—')}</td>
+      <td>${esc(e.memo)}</td><td class="muted">${esc(e.source)}</td><td class="num">${money(e.amount)}</td></tr>`).join(''):'<tr><td colspan="7" class="empty">No entries yet</td></tr>'}</tbody></table></div></div>`;
 }
+
+/* ---------------------------------------------------------------
+   Journal entry — rebuilt as a labelled line grid
+   ---------------------------------------------------------------
+   The accountant's complaints were all about this one screen: "can't add
+   credits", "can only add a line, not remove", "random errors", "counterparty
+   should be a vendor dropdown", "invoice date and journal date should be
+   separate". The credit column and the delete button existed but were
+   unlabelled and nearly invisible — so the fix is a grid with headers, running
+   column totals, a stated difference, and an error banner that stays put. */
 let ELINES=[];
-function entryForm(){
+async function entryForm(){
   ELINES=[{a:'',d:'',c:''},{a:'',d:'',c:''}];
+  await loadContacts();
+  const vendors=CONTACTS.filter(x=>x.kind==='vendor'||x.kind==='both');
+  const customers=CONTACTS.filter(x=>x.kind==='customer'||x.kind==='both');
   window._opts=ACCOUNTS.map(a=>`<option value="${a.code}">${a.code} · ${LANG==='ar'&&a.nameAr?a.nameAr:a.name}</option>`).join('');
-  $('view').innerHTML=`<div class="panel"><div class="cap">New journal entry</div>
+  const grp=(lbl,list)=>list.length?`<optgroup label="${lbl}">${list.map(v=>`<option value="${esc(v.name)}">${esc(v.name)}${v.nit?' · '+esc(v.nit):''}</option>`).join('')}</optgroup>`:'';
+  const noParties=!CONTACTS.length;
+  $('view').innerHTML=`<div class="panel"><div class="cap">New journal entry <span class="note">debits must equal credits</span></div>
+    <div id="e_alert" class="alert"></div>
+    <div class="hint">Post the document date as it appears on the invoice, and the posting date as the day it hits the ledger. They are often different at month end.</div>
     <div class="form">
-      <div class="field"><label>Date</label><input id="e_date" type="date" value="2026-06-30"></div>
-      <div class="field"><label>Counterparty</label><input id="e_src" placeholder="e.g. Danube Markets"></div>
-      <div class="field full"><label>Concept</label><input id="e_memo" placeholder="Description"></div>
-      <div class="full"><label style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--umber)">Lines — debits must equal credits</label>
-        <div id="elines" style="margin-top:8px"></div>
-        <button class="btn ghost sm" onclick="ELINES.push({a:'',d:'',c:''});drawLines()">+ Add line</button>
-        <span id="ebal" class="mono" style="margin-left:14px;font-size:12px"></span></div>
+      <div class="field"><label>Posting date — when it hits the ledger</label><input id="e_date" type="date" value="${TODAY}"></div>
+      <div class="field"><label>Document date — as printed on the invoice</label><input id="e_docdate" type="date" value="${TODAY}"></div>
+      <div class="field"><label>Vendor / customer</label>
+        ${noParties
+          ? `<div class="mono" style="font-size:12px;color:var(--rust);padding:9px 0 4px">No vendors on file yet.</div>
+             <button class="btn ghost sm" onclick="go('vendors')">Add a vendor first →</button>`
+          : `<select id="e_src"><option value="">Select…</option>${grp('Vendors',vendors)}${grp('Customers',customers)}</select>
+             <div style="margin-top:6px"><a href="#" onclick="go('vendors');return false;" class="mono" style="font-size:10px;letter-spacing:.08em;text-transform:uppercase">+ new vendor</a></div>`}
+      </div>
+      <div class="field"><label>Document no.</label><input id="e_doc" placeholder="e.g. INV-4471"></div>
+      <div class="field full"><label>Description</label><input id="e_memo" placeholder="What this entry is for"></div>
+      <div class="full">
+        <div class="jgrid">
+          <div class="jhead"><span>Account</span><span class="r">Debit</span><span class="r">Credit</span><span></span></div>
+          <div id="elines"></div>
+          <div class="jtot"><span class="lbl">Totals</span><span class="v" id="tot_d">0</span><span class="v" id="tot_c">0</span><span></span></div>
+        </div>
+        <div id="ebal" class="jdiff"></div>
+        <div class="row" style="margin-top:11px">
+          <button class="btn ghost sm" onclick="addLine()">+ Add line</button>
+          <button class="btn ghost sm" onclick="addLine(4)">+ 4 lines</button>
+          <button class="btn ghost sm" onclick="flipToCredit()">Move amounts to credit</button>
+        </div>
+      </div>
       <div class="full row"><button class="btn" onclick="postEntry()">Post entry</button><button class="btn ghost" onclick="go('journal')">Cancel</button></div>
     </div></div>`;
   drawLines();
 }
-function drawLines(){
-  $('elines').innerHTML=ELINES.map((l,i)=>`<div class="linerow">
-    <select onchange="ELINES[${i}].a=this.value"><option value="">Account…</option>${window._opts}</select>
-    <input type="number" placeholder="Debit" value="${l.d}" oninput="ELINES[${i}].d=this.value;bal()">
-    <input type="number" placeholder="Credit" value="${l.c}" oninput="ELINES[${i}].c=this.value;bal()">
-    <button class="x" onclick="ELINES.splice(${i},1);drawLines()">×</button></div>`).join('');
-  ELINES.forEach((l,i)=>{const s=$('elines').querySelectorAll('select')[i];if(s)s.value=l.a;});bal();
+function addLine(n){for(let i=0;i<(n||1);i++)ELINES.push({a:'',d:'',c:''});drawLines();}
+/* One-click answer to "can only add debits, should be credit": takes whatever
+   is sitting in the debit column on empty-credit lines and moves it across. */
+function flipToCredit(){
+  let moved=0;
+  ELINES.forEach(l=>{if(l.d&&!l.c){l.c=l.d;l.d='';moved++;}});
+  drawLines();
+  if(moved)showOk('e_alert',`Moved ${moved} amount${moved>1?'s':''} from the debit column to the credit column.`);
 }
-function bal(){const d=ELINES.reduce((s,l)=>s+(Number(l.d)||0),0),c=ELINES.reduce((s,l)=>s+(Number(l.c)||0),0);
-  const el=$('ebal');if(!el)return;el.textContent=d===c&&d>0?'✓ balanced':`out by ${money(Math.abs(d-c))}`;el.style.color=d===c&&d>0?'var(--green)':'var(--rust)';}
+function drawLines(){
+  $('elines').innerHTML=ELINES.map((l,i)=>`<div class="jrow">
+    <select onchange="ELINES[${i}].a=this.value"><option value="">Choose an account…</option>${window._opts}</select>
+    <input class="num" type="number" step="0.01" inputmode="decimal" placeholder="Debit" value="${l.d}" oninput="setAmt(${i},'d',this.value)">
+    <input class="num" type="number" step="0.01" inputmode="decimal" placeholder="Credit" value="${l.c}" oninput="setAmt(${i},'c',this.value)">
+    <button class="del" title="Remove this line" onclick="removeLine(${i})">×</button></div>`).join('');
+  ELINES.forEach((l,i)=>{const sel=$('elines').querySelectorAll('select')[i];if(sel)sel.value=l.a;});
+  bal();
+}
+/* A line is a debit OR a credit, never both — the ledger rejects a line that
+   carries both, so the form clears the other side instead of letting the user
+   build an entry the server will refuse. */
+function setAmt(i,side,val){
+  ELINES[i][side]=val;
+  if(val&&Number(val)!==0){
+    const other=side==='d'?'c':'d';
+    if(ELINES[i][other]){
+      ELINES[i][other]='';
+      const inputs=$('elines').querySelectorAll('.jrow')[i].querySelectorAll('input');
+      inputs[other==='d'?0:1].value='';
+    }
+  }
+  bal();
+}
+function removeLine(i){
+  if(ELINES.length<=2){ELINES[i]={a:'',d:'',c:''};drawLines();
+    return showErr('e_alert','A double entry needs at least two lines, so this one was cleared instead of deleted.');}
+  ELINES.splice(i,1);drawLines();clearErr('e_alert');
+}
+function bal(){
+  const d=ELINES.reduce((s,l)=>s+(Number(l.d)||0),0), c=ELINES.reduce((s,l)=>s+(Number(l.c)||0),0);
+  if($('tot_d'))$('tot_d').textContent=money(d);
+  if($('tot_c'))$('tot_c').textContent=money(c);
+  const el=$('ebal');if(!el)return;
+  const diff=d-c;
+  if(d===0&&c===0){el.className='jdiff';el.textContent='Enter the debit and the credit side.';return;}
+  if(diff===0){el.className='jdiff ok';el.textContent='✓ Balanced — debits equal credits.';return;}
+  el.className='jdiff bad';
+  el.textContent=diff>0
+    ? `Out of balance by ${money(diff)} — you need ${money(diff)} more on the CREDIT side.`
+    : `Out of balance by ${money(-diff)} — you need ${money(-diff)} more on the DEBIT side.`;
+}
 async function postEntry(){
-  const lines=ELINES.filter(l=>l.a&&(l.d||l.c)).map(l=>({accountCode:l.a,debit:Number(l.d)||undefined,credit:Number(l.c)||undefined}));
-  try{await api(`/clients/${CUR}/entries`,{method:'POST',body:JSON.stringify({date:$('e_date').value,memo:$('e_memo').value,source:$('e_src').value,lines})});
-    toast('Entry posted');go('journal');}catch(e){toast(e.message);}
+  clearErr('e_alert');
+  const used=ELINES.filter(l=>l.a&&(Number(l.d)||Number(l.c)));
+  const named=ELINES.filter(l=>!l.a&&(Number(l.d)||Number(l.c)));
+  if(named.length)return showErr('e_alert',`${named.length} line${named.length>1?'s have':' has'} an amount but no account. Pick an account or clear the amount.`);
+  if(used.length<2)return showErr('e_alert','A double entry needs at least two lines — one debit and one credit.');
+  const d=used.reduce((s,l)=>s+(Number(l.d)||0),0), c=used.reduce((s,l)=>s+(Number(l.c)||0),0);
+  if(d!==c)return showErr('e_alert',`<b>Not balanced.</b> Debits total ${money(d)} and credits total ${money(c)} — a difference of ${money(Math.abs(d-c))}. Adjust a line before posting.`);
+  if(!$('e_memo').value.trim())return showErr('e_alert','Add a description so the entry can be identified later.');
+  const lines=used.map(l=>({accountCode:l.a,debit:Number(l.d)||undefined,credit:Number(l.c)||undefined}));
+  const src=$('e_src')?$('e_src').value:'';
+  try{
+    await api(`/clients/${CUR}/entries`,{method:'POST',body:JSON.stringify({
+      date:$('e_date').value, docDate:$('e_docdate').value||undefined,
+      memo:$('e_memo').value, source:src, sourceDocument:$('e_doc').value||undefined, lines})});
+    toast('Entry posted');go('journal');
+  }catch(e){showErr('e_alert','<b>The ledger refused this entry.</b><br>'+esc(e.message));}
 }
 
 async function viewInvoices(){
-  const c=cur();setHead(c.name,navLabel(NAV[2]),'<button class="btn sm" onclick="invForm()">+ Issue invoice</button>');
+  const c=cur();setHead(c.name,title('invoices'),'<button class="btn sm" onclick="invForm()">+ Issue invoice</button>');
   const es=(await api(`/clients/${CUR}/entries`)).filter(e=>/invoice|factura|fe-/i.test(e.memo));
   $('view').innerHTML=`<div class="panel"><div class="cap">Sales invoices <span class="note">ZATCA · 15% VAT</span></div>
     <table><thead><tr><th>Ref</th><th>Date</th><th>Concept</th><th>Customer</th><th class="num">Total</th></tr></thead>
@@ -466,52 +664,171 @@ async function postInvoice(){
     toast('Invoice '+r.number+' issued');go('invoices');}catch(e){toast(e.message);}
 }
 
+/* ---------------------------------------------------------------
+   Bills — payables plus recurring payments (phone, rent, electricity)
+   ---------------------------------------------------------------
+   "Bills is a good idea, should be used for recurring payments" — so a bill
+   template can be defined once and posted per period. Posting is refused
+   twice for the same month, because a double-posted phone bill overstates the
+   expense and nobody notices until the close. */
+let BILLTAB='open';
 async function viewBills(){
-  const c=cur();setHead(c.name,navLabel(NAV[3]),'<button class="btn sm" onclick="billForm()">+ New bill</button>');
-  const ap=await api(`/clients/${CUR}/open-items?kind=payable`);
-  $('view').innerHTML=`<div class="panel"><div class="cap">Payables <span class="note">${ap.length} open</span></div>
-    <table><thead><tr><th>Vendor</th><th>Doc</th><th>Due</th><th class="num">Outstanding</th></tr></thead>
-    <tbody>${ap.length?ap.map(i=>`<tr><td>${i.contactName}</td><td class="mono" style="font-size:11px">${i.docNumber}</td><td class="mono" style="font-size:12px">${i.dueDate}</td><td class="num">${money(i.outstanding)}</td></tr>`).join(''):'<tr><td colspan="4" class="empty">Nothing outstanding</td></tr>'}</tbody></table></div>`;
+  const c=cur();setHead(c.name,title('bills'),
+    `${exportBtn('open-items.csv','Export')}<button class="btn sm" onclick="billForm()">+ New bill</button>`);
+  const [ap,rec]=await Promise.all([
+    api(`/clients/${CUR}/open-items?kind=payable`),
+    api(`/clients/${CUR}/recurring-bills`).catch(()=>[]),
+  ]);
+  const tabs=`<div class="tabs">
+    <button class="${BILLTAB==='open'?'on':''}" onclick="BILLTAB='open';viewBills()">Open payables (${ap.length})</button>
+    <button class="${BILLTAB==='rec'?'on':''}" onclick="BILLTAB='rec';viewBills()">Recurring payments (${rec.length})</button></div>`;
+  if(BILLTAB==='rec'){
+    $('view').innerHTML=tabs+`<div class="panel"><div class="cap">Recurring payments <span class="note">post one month at a time</span></div>
+      <div id="r_alert" class="alert"></div>
+      <div class="hint">Phone, rent, electricity — anything that arrives every month for roughly the same amount. Posting books the expense, the input VAT and the payable exactly like a manual bill, so the journal entry is identical.</div>
+      <div class="scroll"><table><thead><tr><th>Template</th><th>Vendor</th><th>Frequency</th><th class="num">Net amount</th><th>Account</th><th>Already posted</th><th class="num"></th></tr></thead>
+      <tbody>${rec.length?rec.map(r=>{
+        const acct=ACCOUNTS.find(a=>a.code===r.expenseAccount);
+        return `<tr><td><b style="font-family:var(--disp)">${esc(r.name)}</b><div class="mono muted" style="font-size:10px">day ${r.dayOfMonth} · net ${r.dueDays}d</div></td>
+        <td>${esc(r.vendorName)}</td><td class="mono" style="font-size:11.5px">${r.frequency}</td><td class="num">${money(r.base)}</td>
+        <td class="mono" style="font-size:11px">${r.expenseAccount} · ${esc(acct?acct.name:'')}</td>
+        <td class="mono muted" style="font-size:11px">${r.posted.length?r.posted.slice(-4).join(', '):'never'}</td>
+        <td class="num" style="white-space:nowrap">
+          <input class="tin" id="rp_${r.id}" value="2026-06" style="width:74px" title="Period YYYY-MM">
+          <button class="btn sm" onclick="postRecurring('${r.id}')">Post</button>
+          <button class="btn ghost sm" onclick="delRecurring('${r.id}','${esc(r.name)}')">×</button></td></tr>`;}).join('')
+        :'<tr><td colspan="7" class="empty">No recurring payments yet</td></tr>'}</tbody></table></div>
+      <div class="row" style="padding:14px 20px"><button class="btn ghost sm" onclick="recurringForm()">+ New recurring payment</button></div></div>`;
+    return;
+  }
+  $('view').innerHTML=tabs+`<div class="panel"><div class="cap">Open payables <span class="note">${ap.length} outstanding</span></div>
+    <div class="scroll"><table><thead><tr><th>Vendor</th><th>Document</th><th>Date</th><th>Due</th><th class="num">Original</th><th class="num">Paid</th><th class="num">Outstanding</th></tr></thead>
+    <tbody>${ap.length?ap.map(i=>`<tr><td>${esc(i.contactName)}</td><td class="mono" style="font-size:11px">${esc(i.docNumber)}</td>
+      <td class="mono" style="font-size:12px">${i.date}</td><td class="mono" style="font-size:12px">${i.dueDate}</td>
+      <td class="num">${money(i.original)}</td><td class="num muted">${money(i.paid)}</td><td class="num"><b>${money(i.outstanding)}</b></td></tr>`).join('')
+      :'<tr><td colspan="7" class="empty">Nothing outstanding</td></tr>'}</tbody></table></div></div>`;
 }
-function billForm(){
-  const opts=ACCOUNTS.filter(a=>['expense','cogs','asset'].includes(a.type)).map(a=>`<option value="${a.code}">${a.code} · ${a.name}</option>`).join('');
-  $('view').innerHTML=`<div class="panel"><div class="cap">New vendor bill</div><div class="form">
-    <div class="field"><label>Vendor</label><input id="b_v" placeholder="Vendor name"></div>
-    <div class="field"><label>Date</label><input id="b_date" type="date" value="2026-06-30"></div>
-    <div class="field"><label>Base amount (SAR)</label><input id="b_base" type="number"></div>
-    <div class="field"><label>Expense account</label><select id="b_acct">${opts}</select></div>
-    <div class="full row"><button class="btn" onclick="postBill()">Create bill</button><button class="btn ghost" onclick="go('bills')">Cancel</button></div>
+const TREATOPTS=[['standard','Standard-rated — VAT at the local rate'],['zero_rated','Zero-rated — 0%, input VAT still recoverable'],
+  ['exempt','Exempt — no VAT, input VAT NOT recoverable'],['out_of_scope','Out of scope'],['reverse_charge','Reverse charge — we account for the VAT']];
+async function billForm(){
+  await loadContacts();
+  const vendors=CONTACTS.filter(x=>x.kind==='vendor'||x.kind==='both');
+  const opts=ACCOUNTS.filter(a=>['expense','cogs','asset'].includes(a.type)).map(a=>`<option value="${a.code}"${a.code==='6000'?' selected':''}>${a.code} · ${esc(a.name)}</option>`).join('');
+  $('view').innerHTML=`<div class="panel"><div class="cap">New vendor bill</div>
+    <div id="b_alert" class="alert"></div>
+    <div class="form">
+    <div class="field"><label>Vendor</label>${vendors.length
+      ? `<select id="b_v">${vendors.map(v=>`<option value="${esc(v.name)}" data-nit="${esc(v.nit)}">${esc(v.name)}</option>`).join('')}</select>`
+      : `<div class="mono" style="font-size:12px;color:var(--rust);padding:8px 0 4px">No vendors on file.</div><button class="btn ghost sm" onclick="go('vendors')">Add a vendor first →</button>`}</div>
+    <div class="field"><label>Invoice date</label><input id="b_date" type="date" value="${TODAY}"></div>
+    <div class="field"><label>Net amount, before VAT</label><input id="b_base" type="number" step="0.01" placeholder="0.00"></div>
+    <div class="field"><label>Expense / asset account</label><select id="b_acct">${opts}</select></div>
+    <div class="field"><label>VAT treatment</label><select id="b_treat">${TREATOPTS.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></div>
+    <div class="field"><label>Payment terms (days)</label><input id="b_due" type="number" value="30"></div>
+    <div class="field full"><label>Description — leave blank for an automatic one</label><input id="b_memo" placeholder="Purchase invoice …"></div>
+    <div class="full row"><button class="btn" onclick="postVendorBill()">Create bill & post entry</button><button class="btn ghost" onclick="go('bills')">Cancel</button></div>
   </div></div>`;
 }
-async function postBill(){
-  try{await api(`/clients/${CUR}/bills`,{method:'POST',body:JSON.stringify({vendorName:$('b_v').value,date:$('b_date').value,base:Number($('b_base').value),expenseAccount:$('b_acct').value})});
-    toast('Bill created');go('bills');}catch(e){toast(e.message);}
+async function postVendorBill(){
+  clearErr('b_alert');
+  if(!$('b_v'))return showErr('b_alert','Add a vendor before creating a bill.');
+  const base=Number($('b_base').value);
+  if(!(base>0))return showErr('b_alert','Enter a net amount greater than zero.');
+  try{const r=await api(`/clients/${CUR}/bills`,{method:'POST',body:JSON.stringify({
+      vendorName:$('b_v').value,date:$('b_date').value,base,expenseAccount:$('b_acct').value,
+      vatTreatment:$('b_treat').value,dueDays:Number($('b_due').value)||30,memo:$('b_memo').value||undefined})});
+    toast(`${r.bill.number} posted · VAT ${money(r.bill.vat)}`);BILLTAB='open';go('bills');
+  }catch(e){showErr('b_alert',esc(e.message));}
+}
+async function recurringForm(){
+  await loadContacts();
+  const vendors=CONTACTS.filter(x=>x.kind==='vendor'||x.kind==='both');
+  const opts=ACCOUNTS.filter(a=>['expense','cogs'].includes(a.type)).map(a=>`<option value="${a.code}"${a.code==='6000'?' selected':''}>${a.code} · ${esc(a.name)}</option>`).join('');
+  $('view').innerHTML=`<div class="panel"><div class="cap">New recurring payment</div>
+    <div id="rf_alert" class="alert"></div>
+    <div class="hint">This creates a template, not an entry. Nothing is posted until you press Post for a specific month.</div>
+    <div class="form">
+    <div class="field"><label>Template name</label><input id="rf_name" placeholder="e.g. STC mobile & internet"></div>
+    <div class="field"><label>Vendor</label>${vendors.length
+      ? `<select id="rf_v">${vendors.map(v=>`<option value="${esc(v.name)}">${esc(v.name)}</option>`).join('')}</select>`
+      : `<input id="rf_v" placeholder="Vendor name">`}</div>
+    <div class="field"><label>Net amount per period</label><input id="rf_base" type="number" step="0.01" placeholder="0.00"></div>
+    <div class="field"><label>Expense account</label><select id="rf_acct">${opts}</select></div>
+    <div class="field"><label>Frequency</label><select id="rf_freq"><option value="monthly">Monthly</option><option value="quarterly">Quarterly</option><option value="annual">Annual</option></select></div>
+    <div class="field"><label>Day of month (1–28)</label><input id="rf_day" type="number" value="1" min="1" max="28"></div>
+    <div class="field"><label>VAT treatment</label><select id="rf_treat">${TREATOPTS.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></div>
+    <div class="field"><label>Payment terms (days)</label><input id="rf_due" type="number" value="30"></div>
+    <div class="full row"><button class="btn" onclick="saveRecurring()">Save template</button><button class="btn ghost" onclick="BILLTAB='rec';go('bills')">Cancel</button></div>
+  </div></div>`;
+}
+async function saveRecurring(){
+  clearErr('rf_alert');
+  if(!$('rf_name').value.trim())return showErr('rf_alert','Give the template a name you will recognise on the list.');
+  if(!(Number($('rf_base').value)>0))return showErr('rf_alert','Enter the usual net amount, greater than zero.');
+  try{await api(`/clients/${CUR}/recurring-bills`,{method:'POST',body:JSON.stringify({
+      name:$('rf_name').value.trim(),vendorName:$('rf_v').value,base:Number($('rf_base').value),
+      expenseAccount:$('rf_acct').value,frequency:$('rf_freq').value,dayOfMonth:Number($('rf_day').value)||1,
+      vatTreatment:$('rf_treat').value,dueDays:Number($('rf_due').value)||30})});
+    toast('Template saved');BILLTAB='rec';go('bills');}catch(e){showErr('rf_alert',esc(e.message));}
+}
+async function postRecurring(id){
+  clearErr('r_alert');
+  const period=$('rp_'+id).value.trim();
+  if(!/^\d{4}-\d{2}$/.test(period))return showErr('r_alert','Enter the period as YYYY-MM, for example 2026-06.');
+  try{const r=await api(`/clients/${CUR}/recurring-bills/${id}/post`,{method:'POST',body:JSON.stringify({period})});
+    toast(`${r.bill.number} posted for ${period}`);viewBills();}catch(e){showErr('r_alert',esc(e.message));}
+}
+async function delRecurring(id,name){
+  try{await api(`/clients/${CUR}/recurring-bills/${id}`,{method:'DELETE'});toast(name+' removed');viewBills();}
+  catch(e){showErr('r_alert',esc(e.message));}
 }
 
-async function viewContacts(){
-  const c=cur();setHead(c.name,navLabel(NAV[4]),'<button class="btn sm" onclick="contactForm()">+ Add contact</button>');
-  const list=await api(`/clients/${CUR}/contacts`);
-  $('view').innerHTML=`<div class="panel"><div class="cap">Customers & vendors <span class="note">${list.length}</span></div>
-    <table><thead><tr><th>Name</th><th>Tax ID</th><th>Type</th></tr></thead>
-    <tbody>${list.length?list.map(x=>`<tr><td><b style="font-family:var(--disp)">${x.name}</b></td><td class="mono" style="font-size:12px">${x.nit||'—'}</td><td><span class="pill lo">${x.kind}</span></td></tr>`).join(''):'<tr><td colspan="3" class="empty">No contacts yet — add your first</td></tr>'}</tbody></table></div>`;
+/* ---------------------------------------------------------------
+   Vendors (was "Contacts") — with the fields you actually need to pay someone
+   --------------------------------------------------------------- */
+async function viewVendors(){
+  const c=cur();setHead(c.name,title('vendors'),
+    `${exportBtn('vendors.csv','Export')}<button class="btn sm" onclick="vendorForm()">+ Add vendor</button>`);
+  const list=await loadContacts(true);
+  const cell=v=>v?esc(v):'<span class="muted">—</span>';
+  $('view').innerHTML=`<div class="panel"><div class="cap">Vendors & customers <span class="note">${list.length} on file</span></div>
+    <div class="hint">A vendor has to exist here before it can be picked on a journal entry or a bill. Bank details are what the payment run uses.</div>
+    <div class="scroll"><table><thead><tr><th>Name</th><th>Tax registration</th><th>Type</th><th>Phone</th><th>Email</th><th>Bank account / IBAN</th></tr></thead>
+    <tbody>${list.length?list.map(x=>`<tr>
+      <td><b style="font-family:var(--disp)">${esc(x.name)}</b></td>
+      <td class="mono" style="font-size:12px">${cell(x.nit)}</td>
+      <td><span class="pill lo">${x.kind}</span></td>
+      <td class="mono" style="font-size:12px">${cell(x.phone)}</td>
+      <td style="font-size:12.5px">${cell(x.email)}</td>
+      <td class="mono" style="font-size:11.5px">${cell(x.bank)}</td></tr>`).join('')
+      :'<tr><td colspan="6" class="empty">No vendors yet — add your first</td></tr>'}</tbody></table></div></div>`;
 }
-function contactForm(){
-  $('view').innerHTML=`<div class="panel"><div class="cap">Add contact</div><div class="form">
+function vendorForm(){
+  $('view').innerHTML=`<div class="panel"><div class="cap">Add vendor or customer</div>
+    <div id="v_alert" class="alert"></div>
+    <div class="form">
     <div class="field"><label>Name</label><input id="c_name" placeholder="Company or person"></div>
-    <div class="field"><label>Tax ID / VAT</label><input id="c_nit" placeholder="Optional"></div>
-    <div class="field"><label>Type</label><select id="c_kind"><option value="customer">Customer</option><option value="vendor">Vendor</option><option value="both">Both</option></select></div>
-    <div class="field"></div>
-    <div class="full row"><button class="btn" onclick="saveContact()">Save contact</button><button class="btn ghost" onclick="go('contacts')">Cancel</button></div>
+    <div class="field"><label>Tax registration / VAT no.</label><input id="c_nit" placeholder="3xxxxxxxxxxxxxx"></div>
+    <div class="field"><label>Type</label><select id="c_kind"><option value="vendor">Vendor — we pay them</option><option value="customer">Customer — they pay us</option><option value="both">Both</option></select></div>
+    <div class="field"><label>Phone</label><input id="c_phone" placeholder="+966 ..."></div>
+    <div class="field"><label>Email</label><input id="c_email" type="email" placeholder="ap@vendor.com"></div>
+    <div class="field"><label>Bank account / IBAN</label><input id="c_bank" placeholder="SA00 0000 0000 0000 0000 0000"></div>
+    <div class="full row"><button class="btn" onclick="saveVendor()">Save</button><button class="btn ghost" onclick="go('vendors')">Cancel</button></div>
   </div></div>`;
 }
-async function saveContact(){
-  if(!$('c_name').value)return toast('Name required');
-  try{await api(`/clients/${CUR}/contacts`,{method:'POST',body:JSON.stringify({name:$('c_name').value,nit:$('c_nit').value,kind:$('c_kind').value})});
-    toast('Contact saved');go('contacts');}catch(e){toast(e.message);}
+async function saveVendor(){
+  clearErr('v_alert');
+  if(!$('c_name').value.trim())return showErr('v_alert','A name is required.');
+  const em=$('c_email').value.trim();
+  if(em&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em))return showErr('v_alert','That email address does not look valid.');
+  try{await api(`/clients/${CUR}/contacts`,{method:'POST',body:JSON.stringify({
+      name:$('c_name').value.trim(),nit:$('c_nit').value.trim(),kind:$('c_kind').value,
+      phone:$('c_phone').value.trim(),email:em,bank:$('c_bank').value.trim()})});
+    CONTACTS=[];toast('Vendor saved');go('vendors');}catch(e){showErr('v_alert',esc(e.message));}
 }
 
 async function viewInventory(){
-  const c=cur();setHead(c.name,navLabel(NAV[5]),'<button class="btn sm" onclick="productForm()">+ Add product</button>');
+  const c=cur();setHead(c.name,title('inventory'),'<button class="btn sm" onclick="productForm()">+ Add product</button>');
   const list=await api(`/clients/${CUR}/products`);
   $('view').innerHTML=`<div class="panel"><div class="cap">Products <span class="note">${list.length} items</span></div>
     <table><thead><tr><th>SKU</th><th>Name</th><th class="num">Price</th><th class="num">Cost</th><th class="num">Stock</th><th></th></tr></thead>
@@ -537,48 +854,324 @@ async function saveProduct(){
 }
 async function adjStock(pid,delta){try{await api(`/clients/${CUR}/products/${pid}/stock`,{method:'POST',body:JSON.stringify({delta})});viewInventory();}catch(e){toast(e.message);}}
 
+/* ---- Bank reconciliation — the point is the three lists, not a count ---- */
 async function viewBanking(){
-  const c=cur();setHead(c.name,navLabel(NAV[6]),'');
-  $('view').innerHTML=`<div class="panel"><div class="cap">Bank reconciliation</div><div class="form">
-    <div class="field full"><label>Paste statement — one row per line: date, description, amount (+ deposit, − withdrawal)</label>
-      <textarea id="rc" rows="6">2026-06-01,Capital deposit,60000000
-2026-06-13,Manual cash,-2000000</textarea></div>
-    <div class="full"><button class="btn" onclick="runRecon()">Reconcile</button> <span id="rcOut" class="mono" style="margin-left:14px"></span></div>
-  </div></div>`;
+  const c=cur();setHead(c.name,title('banking'),
+    `<button class="btn ghost sm" onclick="dl('/clients/${CUR}/export/bank-statement-sample.csv','bank-statement-sample.csv')">&#10515; Sample CSV</button>
+     <button class="btn sm" onclick="loadSample()">Build statement from ledger</button>`);
+  $('view').innerHTML=`<div class="panel"><div class="cap">Bank statement <span class="note">step 1 &mdash; get the bank's rows in</span></div>
+    <div id="b_alert" class="alert"></div>
+    <div class="hint">One row per line: <code>date, description, amount</code>. Deposits positive, withdrawals negative. Descriptions containing commas may be quoted &mdash; the parser unwraps them. Dates are <code>YYYY-MM-DD</code>. If you have no statement to hand, <b>Build statement from ledger</b> writes one out of every cash and bank movement already posted, so you can see what a full match looks like.</div>
+    <div class="form">
+      <div class="field full"><label>Upload the bank's CSV</label>
+        <input type="file" id="rcFile" accept=".csv,text/csv,text/plain" onchange="readCsvFile()"></div>
+      <div class="field full"><label>&hellip; or paste it here</label>
+        <textarea id="rc" rows="8" spellcheck="false"></textarea></div>
+      <div class="full"><button class="btn" onclick="runRecon()">Reconcile</button>
+        <button class="btn ghost" onclick="$('rc').value='';$('rcRes').innerHTML='';clearErr('b_alert')">Clear</button>
+        <span id="rcOut" class="mono muted" style="margin-left:14px;font-size:11.5px"></span></div>
+    </div></div>
+    <div id="rcRes"></div>`;
+}
+function readCsvFile(){
+  const f=$('rcFile').files&&$('rcFile').files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onerror=()=>showErr('b_alert','That file could not be read.');
+  rd.onload=()=>{
+    const rows=String(rd.result||'').replace(/^﻿/,'').split(/\r?\n/).filter(l=>l.trim());
+    // A header row has no digits in its last column — drop it rather than
+    // reporting it as an unmatched deposit of zero.
+    if(rows.length&&!/\d/.test((rows[0].split(',').pop()||'')))rows.shift();
+    $('rc').value=rows.join('\n');
+    showOk('b_alert',`Loaded <b>${rows.length}</b> line${rows.length===1?'':'s'} from ${esc(f.name)}. Press <b>Reconcile</b>.`);
+  };
+  rd.readAsText(f);
+}
+async function loadSample(){
+  try{
+    const r=await api(`/clients/${CUR}/bank-statement-sample`);
+    if(!r.length)return showErr('b_alert','Nothing has hit cash or bank yet, so there is no statement to build. Post an entry that touches account 1000 or 1010 first.');
+    $('rc').value=r.map(l=>`${l.date},${l.description},${l.amount}`).join('\n');
+    showOk('b_alert',`Built a <b>${r.length}</b>-line statement from every cash and bank movement in the ledger. Press <b>Reconcile</b> &mdash; all of it should match.`);
+  }catch(e){showErr('b_alert',esc(e.message));}
 }
 async function runRecon(){
-  try{const r=await api(`/clients/${CUR}/reconcile`,{method:'POST',body:JSON.stringify({csv:$('rc').value})});
-    $('rcOut').innerHTML=`Matched <b style="color:var(--green)">${r.matchedCount}</b>/${r.statementCount} · unmatched ${r.unmatchedStatement.length}`;
-  }catch(e){toast(e.message);}
+  const txt=($('rc').value||'').trim();
+  if(!txt)return showErr('b_alert','Paste a statement, upload a CSV, or press <b>Build statement from ledger</b> first.');
+  try{
+    const r=await api(`/clients/${CUR}/reconcile`,{method:'POST',body:JSON.stringify({csv:txt})});
+    clearErr('b_alert');
+    const pct=r.statementCount?Math.round(r.matchedCount/r.statementCount*100):0;
+    $('rcOut').innerHTML=`${r.matchedCount} of ${r.statementCount} statement lines matched (${pct}%)`;
+    const money2=n=>money(n);
+    const sTbl=(rows,cols,body)=>`<div class="scroll"><table><thead><tr>${cols}</tr></thead><tbody>${body||`<tr><td colspan="6" class="muted" style="padding:18px 0">Nothing here.</td></tr>`}</tbody></table></div>`;
+    $('rcRes').innerHTML=`
+      <div class="panel"><div class="cap">Matched <span class="note">${r.matches.length} line${r.matches.length===1?'':'s'}</span></div>
+        <div class="hint">Same date, same amount, and a description the ledger memo recognises. Nothing to do with these.</div>
+        ${sTbl(null,`<th>Date</th><th>Statement description</th><th class="num">Amount</th><th>Entry</th><th>Ledger memo</th>`,
+          r.matches.map(m=>`<tr><td class="mono" style="font-size:11.5px">${esc(m.date)}</td><td>${esc(m.description)}</td>
+            <td class="num">${money2(m.amount)}</td><td class="mono" style="font-size:11px">${esc(m.entryId)}</td><td class="muted">${esc(m.entryMemo)}</td></tr>`).join(''))}</div>
+      <div class="panel"><div class="cap" style="color:var(--rust)">On the statement, not in the ledger <span class="note">${r.unmatchedStatement.length}</span></div>
+        <div class="hint">The bank moved money we have not booked. Each of these needs a journal entry &mdash; or the amount, date or memo is wrong on the entry we did book.</div>
+        ${sTbl(null,`<th>Date</th><th>Description</th><th class="num">Amount</th><th class="num"></th>`,
+          r.unmatchedStatement.map(u=>`<tr><td class="mono" style="font-size:11.5px">${esc(u.date)}</td><td>${esc(u.description)}</td>
+            <td class="num">${money2(u.amount)}</td><td class="num"><button class="btn ghost sm" onclick="go('journal')">Book it &rarr;</button></td></tr>`).join(''))}</div>
+      <div class="panel"><div class="cap" style="color:var(--ochre)">In the ledger, not on the statement <span class="note">${r.unmatchedLedger.length}</span></div>
+        <div class="hint">We booked cash movement the bank has not shown. Normal for a cheque in transit or a deposit at month end; suspicious for anything older than that.</div>
+        ${sTbl(null,`<th>Date</th><th>Entry</th><th>Memo</th><th class="num">Cash movement</th>`,
+          r.unmatchedLedger.map(u=>`<tr><td class="mono" style="font-size:11.5px">${esc(u.date)}</td><td class="mono" style="font-size:11px">${esc(u.entryId)}</td>
+            <td>${esc(u.memo)}</td><td class="num">${money2(u.delta)}</td></tr>`).join(''))}</div>`;
+  }catch(e){showErr('b_alert','<b>Reconciliation failed.</b><br>'+esc(e.message));}
+}
+async function dl(path,name){try{const r=await fetch('/api'+path,{headers:{authorization:'Bearer '+TOKEN}});if(!r.ok)throw new Error('HTTP '+r.status);const b=await r.blob();const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}catch(e){toast('Export failed');}}
+
+/* ---- Trial balance — its own page, not a panel buried inside Reports ---- */
+async function viewTrialBalance(){
+  const c=cur();setHead(c.name,title('trialbalance'),
+    `${exportBtn('trial-balance.csv','Trial balance &rarr; Excel')}${exportBtn('general-ledger.csv','General ledger &rarr; Excel')}`);
+  const tb=(await api(`/clients/${CUR}/reports`)).trialBalance;
+  const diff=Math.abs(tb.totalDebit-tb.totalCredit);
+  $('view').innerHTML=`
+    ${tb.balanced
+      ? `<div class="alert good on" style="margin:0 0 16px">Debits equal credits. Total on each side: <b>${money(tb.totalDebit)}</b>.</div>`
+      : `<div class="alert bad on" style="margin:0 0 16px"><b>Out of balance by ${money(diff)}.</b> No statement drawn off this ledger can be relied on until it closes.</div>`}
+    <div class="panel"><div class="cap">Trial balance <span class="note">${tb.rows.length} accounts with movement &middot; as at ${TODAY}</span></div>
+      <div class="hint">Click any account to open its ledger &mdash; every entry that moved it, with a running balance.</div>
+      <div class="scroll"><table><thead><tr><th>Code</th><th>Account</th><th class="num">Debit</th><th class="num">Credit</th></tr></thead>
+      <tbody>${tb.rows.map(r=>`<tr style="cursor:pointer" onclick="GLACC='${r.code}';REPTAB='gl';go('reports')">
+        <td class="mono" style="font-size:11px">${r.code}</td><td>${esc(r.name)}</td>
+        <td class="num">${r.debit?money(r.debit):''}</td><td class="num">${r.credit?money(r.credit):''}</td></tr>`).join('')}
+      <tr class="tot"><td></td><td>Total</td><td class="num">${money(tb.totalDebit)}</td><td class="num">${money(tb.totalCredit)}</td></tr></tbody></table></div></div>`;
 }
 
+/* ---- Reports hub ---- */
+let REPTAB='income', GLACC='';
+const REPTABS=[['income','Income statement'],['balance','Balance sheet'],['cash','Cash flow'],['ar','AR aging'],['ap','AP aging'],['gl','General ledger']];
 async function viewReports(){
-  const c=cur();setHead(c.name,navLabel(NAV[7]),`<button class="btn ghost sm" onclick="dl('/clients/${CUR}/export/trial-balance.csv','trial-balance.csv')">TB CSV</button>
-    <button class="btn ghost sm" onclick="dl('/clients/${CUR}/export/journal.csv','journal.csv')">Journal CSV</button>
-    <button class="btn sm" onclick="dl('/clients/${CUR}/statements.pdf?lang='+LANG,'statements.pdf')">Statements PDF</button>`);
-  const rep=await api(`/clients/${CUR}/reports`);
-  $('view').innerHTML=`<div class="panel"><div class="cap">Trial balance <span class="note">${rep.trialBalance.balanced?'balanced':'OUT OF BALANCE'}</span></div>
-    <table><thead><tr><th>Code</th><th>Account</th><th class="num">Debit</th><th class="num">Credit</th></tr></thead>
-    <tbody>${rep.trialBalance.rows.map(r=>`<tr><td class="mono" style="font-size:11px">${r.code}</td><td>${r.name}</td><td class="num">${r.debit?money(r.debit):''}</td><td class="num">${r.credit?money(r.credit):''}</td></tr>`).join('')}
-    <tr class="tot"><td></td><td>Total</td><td class="num">${money(rep.trialBalance.totalDebit)}</td><td class="num">${money(rep.trialBalance.totalCredit)}</td></tr></tbody></table></div>`;
+  const c=cur();setHead(c.name,title('reports'),
+    `${exportBtn('journal.csv','Journal &rarr; Excel')}<button class="btn sm" onclick="dl('/clients/${CUR}/statements.pdf?lang='+LANG,'statements.pdf')">Statements PDF</button>`);
+  const tabs=`<div class="tabs">${REPTABS.map(([id,lbl])=>
+    `<button class="${REPTAB===id?'on':''}" onclick="REPTAB='${id}';viewReports()">${lbl}</button>`).join('')}</div>`;
+  $('view').innerHTML=tabs+`<div class="panel"><div class="cap">Loading&hellip;</div></div>`;
+  const box=h=>{$('view').innerHTML=tabs+h;};
+  try{
+    if(REPTAB==='gl')return box(await glHtml());
+    if(REPTAB==='ar'||REPTAB==='ap')return box(await agingHtml(REPTAB==='ap'?'payable':'receivable'));
+    const rep=await api(`/clients/${CUR}/reports`);
+    if(REPTAB==='income')return box(incomeHtml(rep));
+    if(REPTAB==='balance')return box(balanceHtml(rep));
+    return box(cashHtml(rep));
+  }catch(e){box(`<div class="alert bad on">${esc(e.message)}</div>`);}
 }
-async function dl(path,name){try{const r=await fetch('/api'+path,{headers:{authorization:'Bearer '+TOKEN}});const b=await r.blob();const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}catch(e){toast('Export failed');}}
+const finrow=(label,val,cls)=>`<tr class="${cls||''}"><td>${label}</td><td class="num">${money(val)}</td></tr>`;
+function incomeHtml(rep){
+  const is=rep.incomeStatement, gross=is.ingresos-is.costo;
+  const pct=n=>is.ingresos?((n/is.ingresos)*100).toFixed(1)+'%':'—';
+  return `<div class="panel"><div class="cap">Income statement <span class="note">period to ${TODAY}</span>
+    <span style="float:right">${exportBtn('income-statement.csv','&rarr; Excel')}</span></div>
+    <table class="fin"><tbody>
+      ${finrow('Revenue',is.ingresos)}
+      ${finrow('Cost of sales',is.costo)}
+      ${finrow('<b>Gross profit</b>',gross,'tot')}
+      ${finrow('Operating expenses',is.gastos)}
+      ${finrow('<b>Profit for the period</b>',is.utilidad,'tot')}
+    </tbody></table>
+    <div class="hint">Gross margin <b>${pct(gross)}</b> &middot; net margin <b>${pct(is.utilidad)}</b>. Both are computed off revenue for the same period, so a client with no revenue yet shows a dash rather than a division by zero.</div></div>`;
+}
+function balanceHtml(rep){
+  const bs=rep.balanceSheet;
+  const grp=t=>ACCOUNTS.filter(a=>a.type===t).map(a=>{
+    const r=(rep.trialBalance.rows||[]).find(x=>x.code===a.code);
+    if(!r)return null;
+    const nat=a.normal==='D'?r.debit-r.credit:r.credit-r.debit;
+    return nat?{code:a.code,name:a.name,amount:nat}:null;
+  }).filter(Boolean);
+  const sec=(ttl,rows)=>rows.length?`<tr class="tot"><td colspan="2">${ttl}</td></tr>`+
+    rows.map(r=>`<tr><td><span class="mono muted" style="font-size:10.5px">${r.code}</span> ${esc(r.name)}</td><td class="num">${money(r.amount)}</td></tr>`).join(''):'';
+  return `<div class="panel"><div class="cap">Balance sheet <span class="note">as at ${TODAY}</span>
+    <span style="float:right">${exportBtn('balance-sheet.csv','&rarr; Excel')}</span></div>
+    ${bs.cuadra
+      ? `<div class="hint">Assets = liabilities + equity. <b>${money(bs.activos)}</b> on each side.</div>`
+      : `<div class="alert bad on"><b>The balance sheet does not balance.</b> Assets ${money(bs.activos)} against liabilities plus equity ${money(bs.pasivos+bs.patrimonio)}.</div>`}
+    <table class="fin"><tbody>
+      ${sec('Assets',grp('asset'))}
+      ${finrow('<b>Total assets</b>',bs.activos,'tot')}
+      ${sec('Liabilities',grp('liability'))}
+      ${finrow('<b>Total liabilities</b>',bs.pasivos,'tot')}
+      ${sec('Equity',grp('equity'))}
+      ${finrow('<b>Total equity</b>',bs.patrimonio,'tot')}
+    </tbody></table>
+    <div class="hint">Equity here includes the profit for the period; it is not a posted retained-earnings balance until the year is closed.</div></div>`;
+}
+function cashHtml(rep){
+  const cf=rep.cashFlow;
+  return `<div class="panel"><div class="cap">Cash flow <span class="note">indirect, period to ${TODAY}</span>
+    <span style="float:right">${exportBtn('cash-flow.csv','&rarr; Excel')}</span></div>
+    <table class="fin"><tbody>
+      ${finrow('Opening cash and bank',cf.openingCash)}
+      ${finrow('Operating',cf.operating)}
+      ${finrow('Investing',cf.investing)}
+      ${finrow('Financing',cf.financing)}
+      ${finrow('<b>Net change</b>',cf.netChange,'tot')}
+      ${finrow('<b>Closing cash and bank</b>',cf.closingCash,'tot')}
+    </tbody></table>
+    ${cf.reconciles?`<div class="hint">Closing cash ties to the cash and bank accounts in the trial balance.</div>`
+      :`<div class="alert bad on">Closing cash does not tie to the cash and bank accounts in the ledger &mdash; the classification of at least one entry is wrong.</div>`}</div>`;
+}
+async function agingHtml(kind){
+  const a=await api(`/clients/${CUR}/aging?kind=${kind}&asOf=${TODAY}`);
+  const b=a.buckets;
+  const overdue=b.d1_30+b.d31_60+b.d61_90+b.d90plus;
+  const label=kind==='payable'?'Payables aging':'Receivables aging';
+  return `<div class="panel"><div class="cap">${label} <span class="note">as at ${a.asOf}</span>
+    <span style="float:right">${exportBtn(`aging.csv?kind=${kind}&asOf=${TODAY}`,'&rarr; Excel')}</span></div>
+    <div class="kpis" style="padding:0 20px 4px">
+      <div class="kpi"><div class="kl">Not yet due</div><div class="kv">${money(b.current)}</div></div>
+      <div class="kpi"><div class="kl">1&ndash;30 days</div><div class="kv">${money(b.d1_30)}</div></div>
+      <div class="kpi"><div class="kl">31&ndash;60 days</div><div class="kv">${money(b.d31_60)}</div></div>
+      <div class="kpi"><div class="kl">61&ndash;90 days</div><div class="kv">${money(b.d61_90)}</div></div>
+      <div class="kpi"><div class="kl">Over 90 days</div><div class="kv" style="color:var(--rust)">${money(b.d90plus)}</div></div>
+    </div>
+    <div class="hint">Total outstanding <b>${money(a.total)}</b>, of which <b>${money(overdue)}</b> is past due.</div>
+    <div class="scroll"><table><thead><tr><th>Counterparty</th><th>Document</th><th>Date</th><th>Due</th><th class="num">Outstanding</th><th class="num">Days late</th><th>Bucket</th></tr></thead>
+    <tbody>${a.rows.length?a.rows.map(r=>`<tr><td>${esc(r.contactName)}</td><td class="mono" style="font-size:11.5px">${esc(r.docNumber)}</td>
+      <td class="mono" style="font-size:11.5px">${esc(r.date)}</td><td class="mono" style="font-size:11.5px">${esc(r.dueDate)}</td>
+      <td class="num">${money(r.outstanding)}</td>
+      <td class="num ${r.daysOverdue>0?'':'muted'}" ${r.daysOverdue>90?'style="color:var(--rust)"':''}>${r.daysOverdue>0?r.daysOverdue:'—'}</td>
+      <td class="mono" style="font-size:11px">${esc(r.bucket)}</td></tr>`).join('')
+      :`<tr><td colspan="7" class="muted" style="padding:18px 0">Nothing outstanding.</td></tr>`}</tbody></table></div></div>`;
+}
+async function glHtml(){
+  const gl=await api(`/clients/${CUR}/general-ledger`);
+  if(!gl.length)return `<div class="panel"><div class="cap">General ledger</div><div class="hint">No entries posted yet.</div></div>`;
+  if(!GLACC||!gl.some(g=>g.code===GLACC))GLACC=gl[0].code;
+  const acc=gl.find(g=>g.code===GLACC);
+  return `<div class="panel"><div class="cap">General ledger
+    <span style="float:right">${exportBtn('general-ledger.csv','All accounts &rarr; Excel')}</span></div>
+    <div class="form"><div class="field full"><label>Account</label>
+      <select onchange="GLACC=this.value;viewReports()">${gl.map(g=>
+        `<option value="${g.code}" ${g.code===GLACC?'selected':''}>${g.code} — ${esc(g.name)} (${g.rows.length} line${g.rows.length===1?'':'s'})</option>`).join('')}</select></div></div>
+    <div class="hint">Balance runs on the account's natural side (${acc.normal==='D'?'debit':'credit'}), so a positive closing balance of <b>${money(acc.closing)}</b> means what an accountant expects it to mean.</div>
+    <div class="scroll"><table><thead><tr><th>Date</th><th>Entry</th><th>Doc. no.</th><th>Description</th><th>Counterparty</th><th class="num">Debit</th><th class="num">Credit</th><th class="num">Balance</th></tr></thead>
+    <tbody>${acc.rows.map(r=>`<tr ${r.reversed?'style="opacity:.45"':''}><td class="mono" style="font-size:11.5px">${esc(r.date)}</td>
+      <td class="mono" style="font-size:11px">${esc(r.entryId)}</td><td class="mono" style="font-size:11.5px">${esc(r.docNumber||'')}</td>
+      <td>${esc(r.memo)}</td><td class="muted">${esc(r.counterparty)}</td>
+      <td class="num">${r.debit?money(r.debit):''}</td><td class="num">${r.credit?money(r.credit):''}</td>
+      <td class="num mono" style="font-size:11.5px">${money(r.balance)}</td></tr>`).join('')}
+    <tr class="tot"><td colspan="7">Closing balance</td><td class="num">${money(acc.closing)}</td></tr></tbody></table></div></div>`;
+}
 
-async function viewTax(){
-  const c=cur();setHead(c.name,navLabel(NAV[8]),'');
-  const tax=(await api(`/clients/${CUR}/reports`)).taxPosition;
-  $('view').innerHTML=`<div class="panel"><div class="cap">Tax position <span class="note">${ccOf(c.country).eInvoicing.regime}</span></div><table class="fin"><tbody>
-    <tr><td>Output VAT (on sales)</td><td class="num">${money(tax.ivaGenerado)}</td></tr>
-    <tr><td>Input VAT (on purchases)</td><td class="num">${money(tax.ivaDescontable)}</td></tr>
-    <tr class="tot"><td>VAT payable</td><td class="num">${money(tax.ivaAPagar)}</td></tr>
-    <tr><td>Credit balance</td><td class="num">${money(tax.saldoAFavor)}</td></tr>
-    <tr><td>Withholdings in our favor</td><td class="num">${money(tax.retencionesAFavor)}</td></tr>
-    <tr><td>Withholdings we owe</td><td class="num">${money(tax.retencionesPorPagar)}</td></tr>
-  </tbody></table></div>`;
+/* ---- Taxes (was "VAT") — the return, the schedule behind it, and the rules ---- */
+let TAXTAB='return', TAXFROM='2026-01-01', TAXTO='2026-06-30';
+async function viewTaxes(){
+  const c=cur();setHead(c.name,title('taxes'),
+    `${exportBtn(`vat-report.csv?from=${TAXFROM}&to=${TAXTO}`,'VAT report &rarr; Excel')}`);
+  const tabs=`<div class="tabs">
+    <button class="${TAXTAB==='return'?'on':''}" onclick="TAXTAB='return';viewTaxes()">VAT return</button>
+    <button class="${TAXTAB==='sched'?'on':''}" onclick="TAXTAB='sched';viewTaxes()">Transaction schedule</button>
+    <button class="${TAXTAB==='rules'?'on':''}" onclick="TAXTAB='rules';viewTaxes()">Rules &amp; treatments</button>
+    <button class="${TAXTAB==='wht'?'on':''}" onclick="TAXTAB='wht';viewTaxes()">Withholding</button></div>`;
+  $('view').innerHTML=tabs+`<div class="panel"><div class="cap">Loading&hellip;</div></div>`;
+  try{
+    if(TAXTAB==='rules'){
+      const t=await api(`/clients/${CUR}/tax-rules`);
+      return $('view').innerHTML=tabs+rulesHtml(t);
+    }
+    if(TAXTAB==='wht'){
+      const tax=(await api(`/clients/${CUR}/reports`)).taxPosition;
+      return $('view').innerHTML=tabs+`<div class="panel"><div class="cap">Withholding tax</div>
+        <table class="fin"><tbody>
+          ${finrow('Withheld from us by customers (asset)',tax.retencionesAFavor)}
+          ${finrow('Withheld by us from suppliers (liability)',tax.retencionesPorPagar)}
+        </tbody></table>
+        <div class="hint">These are the balances on accounts 1160 and 2110. Withholding is a separate obligation from VAT with its own filing &mdash; in Saudi Arabia, monthly, and due whether or not the related invoice has been paid.</div></div>`;
+    }
+    const r=await api(`/clients/${CUR}/vat-report?from=${TAXFROM}&to=${TAXTO}`);
+    $('view').innerHTML=tabs+(TAXTAB==='sched'?schedHtml(r):returnHtml(r));
+  }catch(e){$('view').innerHTML=tabs+`<div class="alert bad on">${esc(e.message)}</div>`;}
+}
+const periodBar=`<div class="form" style="padding-bottom:6px">
+  <div class="field"><label>From</label><input id="tx_from" type="date" value="${'$FROM$'}"></div>
+  <div class="field"><label>To</label><input id="tx_to" type="date" value="${'$TO$'}"></div>
+  <div class="field" style="align-self:end"><button class="btn" onclick="TAXFROM=$('tx_from').value;TAXTO=$('tx_to').value;viewTaxes()">Apply period</button></div></div>`;
+const periodHtml=()=>periodBar.replace('$FROM$',TAXFROM).replace('$TO$',TAXTO);
+const pct=bps=>(bps/100).toFixed(bps%100?2:0)+'%';
+function returnHtml(r){
+  const t=r.totals, payable=t.netVat>=0;
+  return `<div class="panel"><div class="cap">VAT return worksheet <span class="note">${r.country.name} &middot; standard rate ${pct(r.country.vatBps)}</span></div>
+    ${periodHtml()}
+    <table class="fin"><tbody>
+      <tr class="tot"><td colspan="2">Output &mdash; sales</td></tr>
+      ${finrow('Standard-rated sales (net)',t.standardSalesBase)}
+      ${finrow('Zero-rated and exempt sales (net)',t.zeroOrExemptSalesBase)}
+      ${finrow('<b>Output VAT</b>',t.outputVat,'tot')}
+      <tr class="tot"><td colspan="2">Input &mdash; purchases</td></tr>
+      ${finrow('Purchases and expenses (net)',t.purchaseBase)}
+      ${finrow('<b>Input VAT</b>',t.inputVat,'tot')}
+      ${finrow(payable?'<b>Net VAT payable to '+esc(r.rules.authority.split('—')[0].trim())+'</b>':'<b>Net VAT refundable / credit carried forward</b>',payable?t.netVat:-t.netVat,'tot')}
+    </tbody></table>
+    <div class="hint">${r.rules.filing}. Registration threshold: ${esc(r.rules.registrationThreshold)}.</div></div>
+  <div class="panel"><div class="cap">Rate bands <span class="note">what rate was actually applied</span></div>
+    <div class="hint">Rates are <b>implied</b> &mdash; VAT divided by net base on each entry, not the rate someone typed. A band you did not expect is the fastest way to find a mis-posted invoice.</div>
+    <div class="scroll"><table><thead><tr><th>Side</th><th class="num">Rate</th><th class="num">Entries</th><th class="num">Net base</th><th class="num">VAT</th></tr></thead>
+    <tbody>${r.bands.length?r.bands.map(b=>`<tr><td>${b.side==='sale'?'Sales':'Purchases'}</td>
+      <td class="num mono">${pct(b.rateBps)}</td><td class="num">${b.count}</td><td class="num">${money(b.base)}</td><td class="num">${money(b.vat)}</td></tr>`).join('')
+      :`<tr><td colspan="5" class="muted" style="padding:18px 0">Nothing in this period.</td></tr>`}</tbody></table></div></div>
+  ${r.unexplained.length?`<div class="panel"><div class="cap" style="color:var(--rust)">VAT with no identifiable base <span class="note">${r.unexplained.length}</span></div>
+    <div class="hint">These entries move a VAT account but nothing that looks like a taxable base, so no rate can be checked. They are still counted in the totals above &mdash; a VAT return that quietly dropped them would be wrong. Review each one.</div>
+    <div class="scroll"><table><thead><tr><th>Date</th><th>Entry</th><th>Memo</th><th>Side</th><th class="num">VAT</th></tr></thead>
+    <tbody>${r.unexplained.map(u=>`<tr><td class="mono" style="font-size:11.5px">${esc(u.date)}</td><td class="mono" style="font-size:11px">${esc(u.entryId)}</td>
+      <td>${esc(u.memo)}</td><td>${u.side}</td><td class="num">${money(u.vat)}</td></tr>`).join('')}</tbody></table></div></div>`:''}`;
+}
+function schedHtml(r){
+  const tbl=(ttl,rows,note)=>`<div class="panel"><div class="cap">${ttl} <span class="note">${rows.length} line${rows.length===1?'':'s'}</span></div>
+    <div class="hint">${note}</div>
+    <div class="scroll"><table><thead><tr><th>Posted</th><th>Doc. date</th><th>Doc. no.</th><th>Counterparty</th><th>Description</th><th class="num">Net</th><th class="num">VAT</th><th class="num">Rate</th><th>Treatment</th></tr></thead>
+    <tbody>${rows.length?rows.map(l=>`<tr ${l.reversed?'style="opacity:.45"':''}>
+      <td class="mono" style="font-size:11.5px">${esc(l.date)}</td><td class="mono" style="font-size:11.5px">${esc(l.docDate||'')}</td>
+      <td class="mono" style="font-size:11.5px">${esc(l.docNumber||'')}</td><td>${esc(l.counterparty)}</td><td class="muted">${esc(l.memo)}</td>
+      <td class="num">${money(l.base)}</td><td class="num">${money(l.vat)}</td>
+      <td class="num mono">${l.rateBps===null?'—':pct(l.rateBps)}</td>
+      <td class="mono" style="font-size:10.5px">${l.treatment==='standard'?'standard':'zero-rated / exempt'}</td></tr>`).join('')
+      :`<tr><td colspan="9" class="muted" style="padding:18px 0">Nothing in this period.</td></tr>`}</tbody></table></div></div>`;
+  return `<div class="panel"><div class="cap">Period</div>${periodHtml()}
+    <div class="hint">Every line below is derived from the ledger, not from the invoice table &mdash; so a manual journal entry that touched a VAT account appears here too. Export both schedules with the button in the header.</div></div>
+    ${tbl('Sales',r.sales,'All sales with VAT and all sales without it. A sale showing revenue but no output VAT is reported as zero-rated or exempt &mdash; which of the two it is depends on the supply, and only the preparer can say.')}
+    ${tbl('Purchases',r.purchases,'Expenses, cost of sales and capitalised purchases that carried recoverable input VAT.')}`;
+}
+function rulesHtml(t){
+  const R=t.rules, c=t.country;
+  const list=(ttl,arr,cls)=>arr&&arr.length?`<h4>${ttl}</h4>`+arr.map(x=>`<p class="${cls||''}">${esc(x)}</p>`).join(''):'';
+  return `<div class="panel"><div class="cap">${c.flag} ${esc(c.name)} &mdash; VAT rules <span class="note">${R.inForce?'VAT in force':'no VAT regime'}</span></div>
+    <div class="hint"><b>This is a preparer's reference, not tax advice.</b> Every heading below is a well-established category from the authority's own guidance, but the wording is summarised. Check the position against the source before you file: <a href="${esc(R.authorityUrl)}" target="_blank" rel="noopener">${esc(R.authority)}</a>.</div>
+    <table class="fin"><tbody>
+      <tr><td>Standard rate</td><td class="num mono">${pct(R.standardBps)}</td></tr>
+      <tr><td>Corporate income tax</td><td class="num mono">${c.corpTaxPct==null?'—':c.corpTaxPct+'%'}</td></tr>
+      <tr><td>Zakat</td><td class="num mono">${c.zakatPct==null?'—':c.zakatPct+'%'}</td></tr>
+      <tr><td>Mandatory registration</td><td class="num">${esc(R.registrationThreshold)}</td></tr>
+      <tr><td>Voluntary registration</td><td class="num">${esc(R.voluntaryThreshold||'—')}</td></tr>
+      <tr><td>Filing frequency</td><td class="num">${esc(R.filing)}</td></tr>
+      <tr><td>E-invoicing regime</td><td class="num">${esc(c.eInvoicing.regime)}</td></tr>
+    </tbody></table>
+    <div class="rulelist">
+      ${list('Zero-rated — 0%, input VAT still recoverable',R.zeroRated)}
+      ${list('Exempt — no VAT, and input VAT NOT recoverable',R.exempt)}
+      ${list('Out of scope',R.outOfScope)}
+      ${list('Reverse charge — the buyer self-accounts',R.reverseCharge)}
+      ${list('Exceptions that catch preparers out',R.exceptions,'warn')}
+    </div></div>
+  <div class="panel"><div class="cap">Treatment catalogue <span class="note">what to pick when you post</span></div>
+    <div class="hint">These are the treatment codes the bill and invoice forms offer. The difference between exempt and zero-rated is the one that costs money: both charge no VAT on the sale, but only zero-rating lets you keep the input VAT.</div>
+    <div class="scroll"><table><thead><tr><th>Code</th><th>Name</th><th class="num">Rate</th><th>Input VAT</th><th>Reporting</th></tr></thead>
+    <tbody>${(t.treatments||[]).map(x=>`<tr><td class="mono" style="font-size:11px">${esc(x.code)}</td><td><b style="font-family:var(--disp)">${esc(x.name)}</b>
+      <div class="muted" style="font-size:12px;line-height:1.45">${esc(x.explain||'')}</div></td>
+      <td class="num mono">${x.rateBps==null?'local rate':pct(x.rateBps)}</td>
+      <td>${x.inputRecoverable?'recoverable':'<span style="color:var(--rust)">not recoverable</span>'}</td>
+      <td class="muted" style="font-size:12px">${x.reportable?'on the return':'not on the return'}${x.buyerAccounts?' · buyer accounts for the VAT':''}</td></tr>`).join('')}</tbody></table></div></div>`;
 }
 
 async function viewControls(){
-  const c=cur();setHead(c.name,navLabel(NAV[9]),'');
+  const c=cur();setHead(c.name,title('controls'),'');
   const f=await api(`/clients/${CUR}/findings`);
   $('view').innerHTML=`<div class="panel"><div class="cap">Continuous controls <span class="note">${f.length} findings</span></div>
     <table><thead><tr><th>Severity</th><th>Rule</th><th>Description</th><th>Status</th></tr></thead>
@@ -586,7 +1179,7 @@ async function viewControls(){
 }
 
 async function viewClose(){
-  const c=cur();setHead(c.name,navLabel(NAV[10]),'');
+  const c=cur();setHead(c.name,title('close'),'');
   const [close,ck]=await Promise.all([api(`/clients/${CUR}/close?period=2026-06`),api(`/clients/${CUR}/checklist?period=2026-06`)]);
   $('view').innerHTML=`<div class="panel"><div class="cap">Period close — 2026-06 <span class="note" style="color:${close.readyToClose?'var(--green)':'var(--rust)'}">${close.readyToClose?'ready to close':'blocked'}</span></div>
     <div style="padding:8px 20px 12px">${close.blockers&&close.blockers.length?close.blockers.map(b=>`<div class="mono" style="color:var(--rust);font-size:12px;padding:3px 0">• ${b}</div>`).join(''):'<div class="mono" style="color:var(--green);font-size:12px">All checks pass.</div>'}</div>
@@ -597,7 +1190,48 @@ function renderQuick(){
   const demos=[['ana@audita.co','Partner'],['carlos@audita.co','Accountant'],['sofia@audita.co','Staff']];
   $('quick').innerHTML=demos.map(([e,r])=>`<button onclick="$('lg_email').value='${e}';$('lg_pass').value='audita';doLogin()"><span>${e}</span><span class="r">${r}</span></button>`).join('');
 }
-(async function(){renderQuick();
+/* Say out loud when this instance cannot keep data. An accountant must never
+   discover after the fact that the ledger they posted into was a scratchpad.
+   /health is public, so this works on the login screen too. */
+function showStorageWarn(text,red){
+  var el=$('storageWarn');
+  if(!el)return;
+  if(red)el.style.background='#8c1111';
+  el.textContent=text;
+  el.style.display='block';
+  document.body.style.paddingTop='34px';
+}
+/**
+ * Three outcomes matter here, and the broken one is the reason this exists:
+ *  - /health answers durable:true   -> say nothing.
+ *  - /health answers durable:false  -> demo banner, data will not survive.
+ *  - /health does not answer at all -> the server could not start (almost always
+ *    a configured-but-unreachable DATABASE_URL, or a missing JWT secret). The
+ *    static page still loads from the CDN, so without this branch the user gets
+ *    a normal-looking app whose every action fails. Say it out loud.
+ */
+async function checkStorage(){
+  var r;
+  try{ r=await fetch('/health'); }
+  catch(e){
+    showStorageWarn('SERVER UNREACHABLE — the app cannot talk to its backend, so nothing here works. Reload, and if this persists the deployment is down.',true);
+    return;
+  }
+  var h={};
+  try{ h=await r.json(); }catch(e){}
+  if(!r.ok||h.ok===false){
+    showStorageWarn('SERVER NOT STARTED — '+(h.detail||h.error||('HTTP '+r.status))+'. Nothing you do will be saved. This is a deployment configuration problem, not your data.',true);
+    return;
+  }
+  if(h.durable===false){
+    if(h.storage==='unavailable'){
+      showStorageWarn('STORAGE UNREACHABLE — a database is configured but cannot be reached, so nothing you enter will be saved. Do not use this instance until it is fixed.',true);
+    }else{
+      showStorageWarn('DEMO MODE — data is not saved. Anything you post here disappears when this instance restarts. Set DATABASE_URL to enable durable storage.',false);
+    }
+  }
+}
+(async function(){renderQuick();checkStorage();
   if(TOKEN){try{await boot();return;}catch(e){}}
   $('login').classList.add('on');
 })();

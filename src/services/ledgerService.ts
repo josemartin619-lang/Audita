@@ -22,6 +22,7 @@ import { AuditTrail } from '../domain/auditTrail.js';
 import { Finding, FindingStatus } from '../domain/findings.js';
 import { runPerEntryRules, RuleHit } from '../domain/controls/rules.js';
 import { Repository } from '../persistence/repository.js';
+import { highestSeq } from './seq.js';
 
 export interface LedgerOptions {
   user: string;
@@ -58,6 +59,29 @@ export class LedgerService {
     return this.trail;
   }
 
+  /**
+   * Rebuild in-memory state from the repository. MUST be called after
+   * constructing a service over books that already contain data — i.e. on every
+   * restart and every serverless cold start. Without it the id counters start at
+   * zero and the first posting collides with an existing entry, and the audit
+   * trail starts a second chain from GENESIS alongside the stored one.
+   *
+   * Idempotent, and a no-op on empty books.
+   */
+  async resume(): Promise<void> {
+    const [entries, findings, audit] = await Promise.all([
+      this.repo.listEntries(),
+      this.repo.listFindings(),
+      this.repo.listAudit(),
+    ]);
+    this.entrySeq = highestSeq(entries.map((e) => e.id), 'AS-');
+    this.findSeq = highestSeq(findings.map((f) => f.id), 'H-');
+    // Continue the stored chain instead of starting a new one: the next event's
+    // prevHash becomes the last stored hash, so verify() stays valid across
+    // restarts.
+    this.trail.hydrate(audit);
+  }
+
   private nextEntryId(): string {
     this.entrySeq += 1;
     return `AS-${String(this.entrySeq).padStart(4, '0')}`;
@@ -71,7 +95,7 @@ export class LedgerService {
   async post(draft: DraftEntry): Promise<PostResult> {
     const period = draft.date.slice(0, 7);
     if (this.locked.has(period)) {
-      throw new Error(`Periodo ${period} cerrado: no se pueden registrar asientos en un periodo bloqueado.`);
+      throw new Error(`Period ${period} is closed — entries cannot be posted to a locked period.`);
     }
     const lines = normalizeLines(draft.lines); // throws UnbalancedEntryError
     const ts = this.clock();
@@ -85,6 +109,7 @@ export class LedgerService {
       reversed: false,
       recordedAt: ts,
       sourceDocument: draft.sourceDocument,
+      docDate: draft.docDate,
     };
     await this.repo.saveEntry(entry);
     const ev = this.trail.append({
@@ -102,7 +127,26 @@ export class LedgerService {
     });
     await this.repo.appendAudit(ev);
 
-    const findings = await this.runControls(entry, ts);
+    // The entry is now persisted and in the hash chain. Controls are ADVISORY:
+    // if a rule throws, the honest report is "posted, but the control pass
+    // failed", not a 4xx telling the user nothing happened while the entry sits
+    // immutably in the ledger.
+    let findings: Finding[];
+    try {
+      findings = await this.runControls(entry, ts);
+    } catch (e) {
+      console.error(`[ledger] control pass failed for ${entry.id}:`, e);
+      findings = [{
+        id: this.nextFindingId(),
+        rule: 'Control pass failed',
+        severity: 'high',
+        status: 'open',
+        entryId: entry.id,
+        message: `Entry ${entry.id} was posted, but the automated control checks `
+          + `could not be completed (${(e as Error).message}). Review this entry manually.`,
+        raisedAt: ts,
+      }];
+    }
     return { entry, findings };
   }
 
@@ -182,8 +226,8 @@ export class LedgerService {
   async reverse(id: string, reason: string): Promise<PostResult> {
     const all = await this.repo.listEntries();
     const original = all.find((e) => e.id === id);
-    if (!original) throw new Error(`Asiento no encontrado: ${id}`);
-    if (original.reversed) throw new Error(`El asiento ${id} ya fue reversado.`);
+    if (!original) throw new Error(`Entry not found: ${id}`);
+    if (original.reversed) throw new Error(`Entry ${id} has already been reversed.`);
     const ts = this.clock();
     await this.repo.markReversed(id);
     const revEv = this.trail.append({
